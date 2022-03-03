@@ -1,0 +1,25 @@
+version: "3.1"
+services:
+  php:
+    build:
+      context: ./
+      dockerfile: php.Dockerfile
+    container_name: auction-app-user
+    volumes:
+      - ./:/var/www/html
+
+  webserver:
+    image: nginx:1.17.10
+    container_name: auction-webserver-user
+    links:
+      - php:fpm
+    environment:
+      - FPM_HOST=fpm
+      - FPM_PORT=9000
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./:/var/www/html
+      - ./docker/nginx_conf:/etc/nginx/conf.d/
+    ports:
+      - "8082:80"
