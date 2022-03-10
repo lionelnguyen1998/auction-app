@@ -2,9 +2,8 @@
 
 namespace App\Http\Services;
 
-interface AuctionAdminServiceInterface
+interface AuctionServiceInterface
 {
-    public function getListAuctions();
     public function getDetailAuctions($datas);
     public function getSellingUser($datas);
     public function getMaxPrice($datas);
@@ -12,6 +11,5 @@ interface AuctionAdminServiceInterface
     public function getComments($datas);
     public function getInfor($datas);
     public function getCategoryValueName($datas);
-    public function getListAuctionsWait();
     public function getGeneralInfo();
 }

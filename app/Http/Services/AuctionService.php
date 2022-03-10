@@ -13,26 +13,8 @@ use App\Models\AuctionStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-class AuctionAdminService implements AuctionAdminServiceInterface
+class AuctionService implements AuctionServiceInterface
 {
-    public function getListAuctions()
-    {
-        // $auctionId = Auction::get()
-        //     ->pluck('auction_id')
-        //     ->toArray();
-        // $updateStatus = Auction::updateStatus($auctionId);
-        // //dd($status);
-        // //dd($status);
-
-        $auctions = Auction::with('category', 'auctionStatus')
-            //->whereIn('auction_id', $auctionId)
-            ->get()
-            ->toArray();
-            //dd($auctions);
-
-        return $auctions;
-    }
-
     public function getDetailAuctions($auctionId)
     {
         $auctions = Auction::with('category', 'auctionStatus', 'items', 'comments')
@@ -94,6 +76,7 @@ class AuctionAdminService implements AuctionAdminServiceInterface
         return $itemInfor;
     }
 
+    // value of category
     public function getCategoryValueName($auctionId)
     {
         $categoryId = Auction::findOrFail($auctionId)->category_id;
@@ -104,18 +87,6 @@ class AuctionAdminService implements AuctionAdminServiceInterface
             ->toArray();
 
         return $categoryValue;
-    }
-
-    //list auctions chưa được duyệt
-    public function getListAuctionsWait()
-    {
-        $auctions = DB::table('auctions')
-            ->join('auctions_status', 'auctions.auction_id', '=', 'auctions_status.auction_id')
-            ->whereIn('auctions_status.status', [4, 5])
-            ->whereNull('auctions.deleted_at')
-            ->get()
-            ->toArray();
-        return $auctions;
     }
 
     //general auction

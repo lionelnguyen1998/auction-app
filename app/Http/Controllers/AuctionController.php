@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Services\AuctionAdminService;
-use App\Http\Services\CategoryAdminService;
+use App\Http\Services\AuctionService;
+use App\Http\Services\CategoryService;
 use App\Models\Auction;
 use App\Models\AuctionStatus;
 
-class AuctionUserController extends Controller
+class AuctionController extends Controller
 {
     protected $auctionService, $categoryService;
 
-    public function __construct(AuctionAdminService $auctionService, CategoryAdminService $categoryService)
+    public function __construct(AuctionService $auctionService, CategoryService $categoryService)
     {
         $this->auctionService = $auctionService;
         $this->categoryService = $categoryService;

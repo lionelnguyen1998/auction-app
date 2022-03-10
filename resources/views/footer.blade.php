@@ -299,7 +299,7 @@
             type: 'POST',
             dataType: 'JSON',
             data: form,
-            url: 'upload1/services1',
+            url: "{{ route('uploadFiles') }}",
             success: function (results) {
                 if (results.error === false) {
                         $('#image_show_user').html('<a href="' + results.url + '" target="_blank">' +

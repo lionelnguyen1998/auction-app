@@ -2,7 +2,7 @@
 
 namespace App\Http\Services;
 
-interface ItemAdminServiceInterface
+interface ItemServiceInterface
 {
     public function getCountItems($datas);
     public function getListItems($datas);

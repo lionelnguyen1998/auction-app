@@ -6,7 +6,7 @@ use App\Models\Item;
 use App\Models\Image;
 use Illuminate\Support\Facades\Validator;
 
-class ItemAdminService implements ItemAdminServiceInterface
+class ItemService implements ItemServiceInterface
 {
     public function getCountItems($categoryId) 
     {

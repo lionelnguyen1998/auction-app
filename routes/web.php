@@ -1,12 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserLoginController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BidController;
-use App\Http\Controllers\AuctionUserController;
-use App\Http\Controllers\UploadUserController;
+use App\Http\Controllers\AuctionController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,10 +23,10 @@ use App\Http\Controllers\ChatController;
 
 //client
 //login
-Route::get('login', [UserLoginController::class, 'index'])->name('loginUser');
-Route::get('logout', [UserLoginController::class, 'logout'])->name('logoutUser');
-Route::get('register', [UserLoginController::class, 'register'])->name('registerUser');
-Route::post('login/store', [UserLoginController::class, 'store'])->name('storeUserAccount');
+Route::get('login', [UserController::class, 'index'])->name('loginUser');
+Route::get('logout', [UserController::class, 'logout'])->name('logoutUser');
+Route::get('register', [UserController::class, 'register'])->name('registerUser');
+Route::post('login/store', [UserController::class, 'store'])->name('storeUserAccount');
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 //product 
@@ -48,9 +50,9 @@ Route::middleware(['auth'])->group(function () {
 
     //Auctions
     Route::prefix('auctions')->group(function () {
-        Route::get('create', [AuctionUserController::class, 'create'])->name('createAuction');
-        Route::post('store', [AuctionUserController::class, 'store'])->name('insertAuction');
-        Route::get('deny', [AuctionUserController::class, 'deny'])->name('auctionDeny');
+        Route::get('create', [AuctionController::class, 'create'])->name('createAuction');
+        Route::post('store', [AuctionController::class, 'store'])->name('insertAuction');
+        Route::get('deny', [AuctionController::class, 'deny'])->name('auctionDeny');
     });
 
     //item
@@ -60,10 +62,10 @@ Route::middleware(['auth'])->group(function () {
     });
 
     //Upload
-    Route::post('upload1/services1', [UploadUserController::class, 'store'])->name('uploadUserFiles');
+    Route::post('upload/services', [UploadController::class, 'store'])->name('uploadFiles');
 
     //sendEmail when accept bid
-    Route::get('acceptBid/{bidId}', [AuctionUserController::class, 'acceptBid'])->name('acceptBid');
+    Route::get('acceptBid/{bidId}', [AuctionController::class, 'acceptBid'])->name('acceptBid');
 
     //chat when negotiate
     Route::get('chat', [ChatController::class, 'chat'])->name('chat');  

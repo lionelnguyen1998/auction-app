@@ -17,7 +17,9 @@ class UploadService implements UploadServiceInterface
                     'public/' . $pathFull, $name
                 );
 
-                return '/storage/' . $pathFull . '/' . $name;
+                $url = 'http://localhost:8080';
+
+                return $url . '/storage/' . $pathFull . '/' . $name;
             } catch (\Exception $error) {
                 return false;
             }

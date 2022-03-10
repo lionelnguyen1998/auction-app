@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Services\AuctionAdminService;
-use App\Http\Services\ItemAdminService;
+use App\Http\Services\AuctionService;
+use App\Http\Services\ItemService;
 use App\Models\Item;
 use Illuminate\Http\Request;
 
@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     protected $auctionService, $itemService;
 
-    public function __construct(AuctionAdminService $auctionService, ItemAdminService $itemService)
+    public function __construct(AuctionService $auctionService, ItemService $itemService)
     {
         $this->auctionService = $auctionService;
         $this->itemService = $itemService;

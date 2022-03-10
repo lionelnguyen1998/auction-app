@@ -15,12 +15,6 @@ class BidController extends Controller
         $this->bidService = $bidService;
     }
 
-    public function destroy($bidId)
-    {
-        $bid = Bid::where('bid_id', $bidId)->delete();
-        return redirect()->back();
-    }
-
     public function create(Request $request)
     {
         // $price = $request->price;

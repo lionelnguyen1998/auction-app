@@ -8,7 +8,7 @@ use App\Http\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
-class UserLoginController extends Controller
+class UserController extends Controller
 {
     protected $userService;
     public function __construct(UserService $userService)
@@ -61,6 +61,6 @@ class UserLoginController extends Controller
     public function logout(Request $request)
     {
         $request->session()->flush();
-        return redirect()->route('loginUser');
+        return redirect()->route('login');
     }
 }

@@ -3,7 +3,7 @@
 <div class="login">
   <h2 class="active"> <b>ログイン</b> </h2>
 
-  @include('admin.alert')
+  @include('alert')
   <form action="{{ route('storeUserAccount') }}" method="POST">
    
     
