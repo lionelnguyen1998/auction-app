@@ -22,9 +22,9 @@ class BidService implements BidServiceInterface
         if ($request['price'] <= $maxBid) {
             $rules['price'] = 'max:0';
         }
-//dd($rules);
+
         $messages = [
-            'max' => 'Ban phai tra gia cao hon gia cao nhat hien tai',
+            'max' => '値段が今より高くなければなりません。',
             'number' => '番号を入力してください',
         ];
 
@@ -39,9 +39,6 @@ class BidService implements BidServiceInterface
         DB::beginTransaction();
 
         $bids = Session::get('bids');
-
-        // if (is_null($bids))
-        //     return false;
 
         $bidCreate = Bid::create([
                 'price' => $request->price,
