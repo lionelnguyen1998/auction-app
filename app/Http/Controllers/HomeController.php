@@ -20,7 +20,7 @@ class HomeController extends Controller
         $updateStatus = Auction::updateStatus($auctionId);
     
         return view('home', [
-            'title' => 'Auctions',
+            'title' => 'オークション',
             'slider' => $slider,
         ]);
     }

@@ -67,24 +67,19 @@ class ItemService implements ItemServiceInterface
     {
         $rules = [
             'brand_id' => "required",
-            'series' => "max:10",
+            'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
             'name_en' => "max:255",
-            'starting_price' => 'required|integer|max:4294967295'
+            'starting_price' => 'required|max:255'
         ];
 
         $messages = [
             'required' => '必須項目が未入力です。',
             'max' => ':max文字以下入力してください。 ',
-            'starting_price.max' => 'SO qua lon',
-            'integer' => 'hay nhap so'
+            'unique' => '既に使用されています。'
         ];
 
-        $attributes = [
-            
-        ];
-
-        $validated = Validator::make($request, $rules, $messages, $attributes);
+        $validated = Validator::make($request, $rules, $messages);
 
         return $validated;
     }

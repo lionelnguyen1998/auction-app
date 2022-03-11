@@ -43,7 +43,7 @@ class ItemController extends Controller
                 ->withErrors($validated)
                 ->withInput();
         }
-        //dd($request->all());
+      
         $item = Item::create([
             'category_id' => $request['category_id'],
             'selling_user_id' => $request['selling_user_id'],
@@ -75,6 +75,6 @@ class ItemController extends Controller
                 ]);
             }
         }
-        dd('abc');
+        return redirect()->route('home');
     }
 }

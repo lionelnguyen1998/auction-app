@@ -20,7 +20,7 @@ class ProductController extends Controller
     public function index($typeId)
     {
         return view('categories.list', [
-            'title' => 'Danh sach phien dau gia thuoc Dien tu',
+            'title' => '電子に関するオークション一覧',
             'auctionByCategory' => $this->auctionService->getAuctionByCategory($typeId)
         ]);
     }
@@ -45,7 +45,7 @@ class ProductController extends Controller
             ->pluck('item_id');
             
         return view('categories.detail', [
-            'title' => 'Chi tiet phien dau gia',
+            'title' => '細かいオークション',
             'auction' => $this->auctionService->getDetailAuctions($auctionId),
             'maxPrice' => $this->auctionService->getMaxPrice($auctionId),
             'bids' => $this->auctionService->getBids($auctionId),

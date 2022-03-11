@@ -144,15 +144,15 @@ class AuctionService implements AuctionServiceInterface
             'date' => 'データのフォーマットが正しくありません',
             'after_or_equal' => '始まる時間が明日か行かなければなりません',
             'after' => '始まる時間よりです。',
-            'unique' => 'duy nhat'
+            'unique' => '既に使用されています。'
         ];
 
         $attributes = [
             'category_id' => 'カテゴリー',
-            'title_ni' => 'title',
-            'title_en' => 'title_en',
-            'start_date' => 'start_date',
-            'end_date' => 'end_date'
+            'title_ni' => 'オークション名',
+            'title_en' => 'オークション名　（英語）',
+            'start_date' => '始まる時間',
+            'end_date' => '終わる時間'
         ];
 
         $validated = Validator::make($request, $rules, $messages, $attributes);
