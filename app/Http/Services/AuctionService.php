@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Validator;
 
 class AuctionService implements AuctionServiceInterface
 {
+    const LIMIT = 16;
+
     public function getDetailAuctions($auctionId)
     {
         $auctions = Auction::with('category', 'auctionStatus', 'items', 'comments')
@@ -127,6 +129,16 @@ class AuctionService implements AuctionServiceInterface
         return $auction;
     }
 
+    //get list auctions
+    public function getListAuction()
+    {
+        $auction = Auction::with('category', 'items', 'auctionStatus')
+            ->get()
+            ->toArray();
+
+        return $auction;
+    }
+
     //validate create auction 
     public function auctionValidation($request)
     {
@@ -170,5 +182,27 @@ class AuctionService implements AuctionServiceInterface
             ->toArray();
         
         return $auction;
+    }
+
+    public function get($page = null)
+    {
+        return Auction::orderByDesc('auction_id')
+            ->when($page != null, function ($query) use ($page) {
+                $query->offset($page * self::LIMIT);
+            })
+            ->limit(self::LIMIT)
+            ->get();
+    }
+
+    public function getListAuctions()
+    {
+        $userId = auth()->user()->user_id;
+
+        $list = Auction::with('category', 'items', 'auctionStatus')
+            ->where('selling_user_id', $userId)
+            ->get()
+            ->toArray();
+
+        return $list;
     }
 }

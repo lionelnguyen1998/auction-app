@@ -34,7 +34,7 @@
                 
                 <!-- Logo desktop -->		
                 <a href="#" class="logo">
-                    <img src="images/icons/logo-01.png" alt="IMG-LOGO">
+                    <img src="{{ $logo }}" alt="IMG-LOGO">
                 </a>
 
                 <!-- Menu desktop -->
@@ -80,9 +80,10 @@
                         <i class="fa fa-user" data-toggle="dropdown" aria-hidden="true"></i>
                         <div class="dropdown-menu" role="menu">
                             @if (auth()->user())
-                                <a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! {{ auth()->user()->nick_name }}</a>
+                                <a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! {{ auth()->user()->name }}</a>
                                 
                                 <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('editUser', ['userId' => auth()->user()->user_id]) }}">編集</a>
                                 <a class="dropdown-item" href="{{ route('logoutUser') }}">ログアウト</a>
                             @else 
                                 <a class="dropdown-item" href="{{ route('registerUser') }}">登録</a>
@@ -90,15 +91,19 @@
                             @endif
                         </div>	
                     </div>
+                    @if (auth()->user())
+                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+                            <i class="zmdi zmdi-notifications-active"></i>
+                        </div>
 
-                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
-                        <i class="zmdi zmdi-notifications-active"></i>
-                    </div>
-
-                    <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
-                        <i class="zmdi zmdi-favorite-outline"></i>
-                    </a>
-                  
+                        <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                            <i class="zmdi zmdi-favorite-outline"></i>
+                        </a>
+                    
+                        <a href="{{ route('listAuctions') }}" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                            <i class="zmdi zmdi-spellcheck"></i>
+                        </a>
+                    @endif
                 </div>
 
             </nav>

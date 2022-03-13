@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Slider;
 use App\Http\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -19,8 +20,22 @@ class UserController extends Controller
     public function index()
     {
         return view('users.login', [
-            'title' => 'Login',
+            'title' => 'ログイン',
         ]);
+    }
+
+    public function register()
+    {
+        return view('users.register', [
+            'title' => '登録',
+        ]);
+    }
+
+    public function insertUser(Request $request)
+    {
+        $this->userService->insertUser($request->all());
+        
+        return redirect()->route('loginUser');
     }
 
     public function store(Request $request)
@@ -58,9 +73,25 @@ class UserController extends Controller
         return redirect()->back();
     }
 
+    public function edit($userId)
+    {
+        return view('users.edit', [
+            'title' => 'アカウント編集',
+            'user' => User::findOrFail($userId),
+            'logo' => Slider::logo(),
+        ]);
+    }
+
+    public function update(Request $request) 
+    {
+        $this->userService->updateUser($request->all());
+
+        return redirect()->route('home')->with('message', '編集しました');
+    }
+
     public function logout(Request $request)
     {
         $request->session()->flush();
-        return redirect()->route('login');
+        return redirect()->route('loginUser');
     }
 }

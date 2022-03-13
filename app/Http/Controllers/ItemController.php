@@ -9,6 +9,7 @@ use App\Models\Item;
 use App\Models\ItemValue;
 use App\Models\Image;
 use App\Models\Brand;
+use App\Models\Slider;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -24,18 +25,18 @@ class ItemController extends Controller
     public function create($auctionId, $categoryId)
     {
         return view('items.create', [
-            'title' => 'Tao item',
+            'title' => 'アイテム追加',
             'auctionId' => $auctionId,
             'categoryId' => $categoryId,
             'categoryValueName' => $this->auctionService->getCategoryValueName($auctionId),
-            'brand' => Brand::all()
+            'brand' => Brand::all(),
+            'logo' => Slider::logo(),
         ]);
     }
 
     //insert item
     public function store(Request $request)
     {
-       
         $validated = $this->itemService->itemValidation($request->all());
 
         if ($validated->fails()) {
@@ -43,38 +44,10 @@ class ItemController extends Controller
                 ->withErrors($validated)
                 ->withInput();
         }
-      
-        $item = Item::create([
-            'category_id' => $request['category_id'],
-            'selling_user_id' => $request['selling_user_id'],
-            'auction_id' => $request['auction_id'],
-            'brand_id' => $request['brand_id'],
-            'series' => $request['series'],
-            'name' => $request['name'],
-            'name_en' => $request['name_en'],
-            'starting_price' => $request['starting_price'],
-            'description' => $request['description']
-        ]);
 
-        Image::create([
-            'item_id' => $item->item_id,
-            'image' => $request['thumbuser'],
-        ]);
+        $this->itemService->registerItem($request->all());
 
-        $itemRequest = $request->except('selling_user_id', 
-            'auction_id', 'category_id', 'brand_id', 'series', 'name', 'name_en', 
-            'starting_price', 'description', 'thumbuser', '_token');
-
-        foreach ($itemRequest as $key => $value)
-        { 
-            if ($value != null) {
-                $itemValues = ItemValue::create([
-                    'item_id' => $item->item_id,
-                    'category_value_id' => $key,
-                    'value' => $value,
-                ]);
-            }
-        }
         return redirect()->route('home');
+      
     }
 }

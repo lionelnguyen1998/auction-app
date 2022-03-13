@@ -8,21 +8,6 @@
 	@include('headerPage')
 	@include('cart2')
 
-	<!-- breadcrumb -->
-	<div class="container">
-		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
-				ホーム
-				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-			</a>
-
-			<span class="stext-109 cl4">
-				オークション追加
-			</span>
-		</div>
-	</div>
-		
-
 	<!-- Shoping Cart -->
 	<form class="bg0 p-t-75 p-b-85" action="{{ route('insertAuction') }}" method="POST">
         <input type="hidden" name="selling_user_id" value="{{ auth()->user()->user_id }}"/>
@@ -31,9 +16,9 @@
 				<div class="col-12">
 					<div class="m-l-25 m-r--38 m-lr-0-xl">
                         <div class="col-10">
-						<h4 class="mtext-109 cl2 p-b-30">
+						<h2 class="mtext-109 cl2 p-b-30">
 							<b>オークション追加</b>
-						</h4>
+						</h2>
 							<div class="form-group">
 								<label for="category_id"><b>カテゴリー  </b><i class="fa fa-asterisk" aria-hidden="true" style="color: red"></i></label>
 								<div class="rs1-select2 rs2-select2 bor10 bg0 m-b-12 m-t-9">

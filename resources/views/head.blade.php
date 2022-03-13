@@ -33,6 +33,9 @@
 <link rel="stylesheet" type="text/css" href="/template/css/util.css">
 <link rel="stylesheet" type="text/css" href="/template/css/main.css">
 
+<!-- Toastr -->
+<link rel="stylesheet" href="/template/admin/plugins/toastr/toastr.min.css">
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.css">
 <!--===============================================================================================-->

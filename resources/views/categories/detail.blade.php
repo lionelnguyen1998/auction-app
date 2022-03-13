@@ -5,31 +5,15 @@
 <body class="animsition">
 	@include('headerPage')
 	@include('cart2')
-
-	<!-- breadcrumb -->
-	<div class="container">
-		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
-				Home
-				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-			</a>
-
-			<a href="product.html" class="stext-109 cl8 hov-cl1 trans-04">
-				auctions1
-				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-			</a>
-
-			<span class="stext-109 cl4">
-				detail
-			</span>
-		</div>
-	</div>
 		
-
 	<!-- Product Detail -->
 	<section class="sec-product-detail bg0 p-t-65 p-b-60">
 		<div class="container">
+			<h2 class="mtext-109 cl2 p-b-30">
+				<b>細かいオークション</b>
+			</h2>
 			<div class="row">
+				
 				<div class="col-md-6 col-lg-7 p-b-30">
 					<div class="p-l-25 p-r-30 p-lr-0-lg">
 						<div class="wrap-slick3 flex-sb flex-w">
@@ -37,7 +21,7 @@
 							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 
 							<div class="slick3 gallery-lb">
-								@if (is_null($images))
+								@if (isset($images))
 									@foreach ($images as $key => $imageItem)
 										<div class="item-slick3" data-thumb="{{ $imageItem }}">
 											<div class="wrap-pic-w pos-relative">
@@ -87,8 +71,10 @@
                                         <p class="btn btn-success" disabled>{{ $status[$index] }}</p>
                                     @elseif ($index == 2)
                                         <p class="btn btn-warning" disabled>{{ $status[$index] }}</p>
-                                    @else
+                                    @elseif ($index == 3)
                                         <p class="btn btn-danger" disabled>{{ $status[$index] }}</p>
+									@else
+                                        <p class="btn btn-info" disabled>{{ $status[$index] }}</p>
                                     @endif
                                 </li>
                             </ul>
@@ -111,6 +97,7 @@
 							<a class="nav-link" data-toggle="tab" href="#information" role="tab">技術の情報</a>
 						</li>
 
+						@if ($index != 4)
                         <li class="nav-item p-b-10">
 							<a class="nav-link" data-toggle="tab" href="#bid" role="tab">BID</a>
 						</li>
@@ -118,6 +105,7 @@
 						<li class="nav-item p-b-10">
 							<a class="nav-link" data-toggle="tab" href="#comments" role="tab">コメント</a>
 						</li>
+						@endif
 					</ul>
 
 					<!-- Tab panes -->
@@ -205,7 +193,7 @@
                                                 <div class="size-207">
                                                     <div class="flex-w flex-sb-m p-b-17">
                                                         <span class="mtext-107 cl2 p-r-20">
-                                                            {{ $bid['users']['nick_name'] }}
+                                                            {{ $bid['users']['name'] }}
                                                         </span>
                                                         <span class="description">{{ date("d-m-Y H:i", strtotime($bid['updated_at'])) }}</span>
                                                     </div>
@@ -268,7 +256,7 @@
                                                     <div class="size-207">
                                                         <div class="flex-w flex-sb-m p-b-17">
                                                             <span class="mtext-107 cl2 p-r-20">
-                                                                {{ $comment['users']['nick_name'] }}
+                                                                {{ $comment['users']['name'] }}
                                                             </span>
                                                             <span class="description">{{ date("d-m-Y H:i", strtotime($comment['updated_at'])) }}</span>
                                                         </div>

@@ -5,17 +5,29 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Services\AuctionService;
 use App\Http\Services\CategoryService;
+use App\Http\Services\ItemService;
 use App\Models\Auction;
+use App\Models\Slider;
 use App\Models\AuctionStatus;
 
 class AuctionController extends Controller
 {
-    protected $auctionService, $categoryService;
+    protected $auctionService, $categoryService, $itemService;
 
-    public function __construct(AuctionService $auctionService, CategoryService $categoryService)
+    public function __construct(AuctionService $auctionService, CategoryService $categoryService, ItemService $itemService)
     {
         $this->auctionService = $auctionService;
         $this->categoryService = $categoryService;
+        $this->itemService = $itemService;
+    }
+
+    public function list()
+    {
+        return view('auctions.list', [
+            'title' => 'オークション一覧', 
+            'auctions' => $this->auctionService->getListAuctions(),
+            'logo' => Slider::logo(),
+        ]);
     }
     
     //create auction
@@ -23,7 +35,8 @@ class AuctionController extends Controller
     {
         return view('auctions.create', [
             'title' => 'オークション追加',
-            'category' => $this->categoryService->getCategoryList()
+            'category' => $this->categoryService->getCategoryList(),
+            'logo' => Slider::logo(),
         ]);
     }
 
@@ -66,8 +79,9 @@ class AuctionController extends Controller
     {
         dump($this->auctionService->deny());
         return view('auctions.report', [
-            'title' => 'Thong bao',
-            'auction' => $this->auctionService->deny()
+            'title' => 'お知らせ',
+            'auction' => $this->auctionService->deny(),
+            'logo' => Slider::logo(),
         ]);
     }
 }

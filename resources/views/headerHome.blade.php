@@ -35,14 +35,14 @@
 					
 					<!-- Logo desktop -->		
 					<a href="#" class="logo">
-						<img src="template/images/logoAuction.jpg" alt="IMG-LOGO">
+						<img src="{{ $logo }}" alt="IMG-LOGO">
 					</a>
 
 					<!-- Menu desktop -->
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li class="active-menu">
-								<a href="index.html"><b>ホームページ</b></a>
+								<a href="{{ route('home') }}"><b>ホームページ</b></a>
 							</li>
 
 							<li >
@@ -64,6 +64,12 @@
 							<li>
 								<a href="{{ route('productOfCategory', ['typeId' => 5]) }}"><b>{{ config('const.categories.5') }}</b></a>
 							</li>
+							<li>
+								<a href="{{ route('productOfCategory', ['typeId' => 5]) }}"><b>情報</b></a>
+							</li>
+							<li>
+								<a href="{{ route('contact') }}"><b>お間に合わせ</b></a>
+							</li>
 						</ul>
 					</div>	
 
@@ -77,9 +83,10 @@
 							<i class="fa fa-user" data-toggle="dropdown" aria-hidden="true"></i>
 							<div class="dropdown-menu" role="menu">
 								@if (auth()->user())
-									<a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! {{ auth()->user()->nick_name }}</a>
+									<a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! {{ auth()->user()->name }}</a>
 									
 									<div class="dropdown-divider"></div>
+									<a class="dropdown-item" href="{{ route('editUser', ['userId' => auth()->user()->user_id]) }}">編集</a>
 									<a class="dropdown-item" href="{{ route('logoutUser') }}">ログアウト</a>
 								@else 
 									<a class="dropdown-item" href="{{ route('registerUser') }}">登録</a>
@@ -88,17 +95,19 @@
 							</div>	
 						</div>
 
-						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
-							<i class="zmdi zmdi-shopping-cart"></i>
-						</div>
+						@if (auth()->user())
+							<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+								<i class="zmdi zmdi-notifications-active"></i>
+							</div>
 
-						<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
-							<i class="zmdi zmdi-favorite-outline"></i>
-						</a>
-
-						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
-							<i class="fa fa-bell" data-toggle="dropdown" aria-hidden="true"></i>
-						</div>
+							<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+								<i class="zmdi zmdi-favorite-outline"></i>
+							</a>
+						
+							<a href="{{ route('listAuctions') }}" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+								<i class="zmdi zmdi-spellcheck"></i>
+							</a>
+						@endif
 					</div>
 				</nav>
 			</div>	

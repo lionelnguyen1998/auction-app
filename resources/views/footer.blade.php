@@ -287,9 +287,38 @@
 <!--===============================================================================================-->
 <script src="/template/js/main.js"></script>
 <script src="/template/js/public.js"></script>
+
+<!-- Toastr -->
+<script src="/template/admin/plugins/toastr/toastr.min.js"></script>
+
 <script>
     /*Upload File User */
-    $('#uploaduser').change(function () {
+    @for ($i = 1; $i <= 5; $i ++)
+        $('#uploaduser-{{$i}}').change(function () {
+            const form = new FormData();
+            form.append('file', $(this)[0].files[0]);
+
+            $.ajax({
+                processData: false,
+                contentType: false,
+                type: 'POST',
+                dataType: 'JSON',
+                data: form,
+                url: "{{ route('uploadFiles') }}",
+                success: function (results) {
+                    if (results.error === false) {
+                            $('#image_show_user-{{$i}}').html('<a href="' + results.url + '" target="_blank">' +
+                                '<img src="' + results.url + '" width="100px"></a>')
+                            $('#thumbuser-{{$i}}').val(results.url);
+                    } else {
+                        alert('Upload File Lỗi');
+                    }
+                }
+            });
+        });
+    @endfor
+
+    $('#uploadAvatar').change(function () {
         const form = new FormData();
         form.append('file', $(this)[0].files[0]);
 
@@ -302,16 +331,56 @@
             url: "{{ route('uploadFiles') }}",
             success: function (results) {
                 if (results.error === false) {
-                        $('#image_show_user').html('<a href="' + results.url + '" target="_blank">' +
+                        $('#image_show_avatar').html('<a href="' + results.url + '" target="_blank">' +
                             '<img src="' + results.url + '" width="100px"></a>')
-                        $('#thumbuser').val(results.url);
-                    
+                        $('#avatar').val(results.url);
                 } else {
                     alert('Upload File Lỗi');
                 }
             }
         });
     });
+
+    // BS-Stepper Init
+    document.addEventListener('DOMContentLoaded', function () {
+            window.stepper = new Stepper(document.querySelector('.bs-stepper'))
+        })
+        @if(Session::has('message'))
+            toastr.options =
+            {
+                "closeButton" : true,
+                "progressBar" : true
+            }
+            toastr.success("{{ session('message') }}");
+        @endif
+
+        @if(Session::has('error'))
+            toastr.options =
+            {
+                "closeButton" : true,
+                "progressBar" : true
+            }
+            toastr.error("{{ session('error') }}");
+        @endif
+
+        @if(Session::has('info'))
+            toastr.options =
+            {
+                "closeButton" : true,
+                "progressBar" : true
+            }
+            toastr.info("{{ session('info') }}");
+        @endif
+
+        @if(Session::has('warning'))
+            toastr.options =
+            {
+                "closeButton" : true,
+                "progressBar" : true
+            }
+            toastr.warning("{{ session('warning') }}");
+        @endif
+
 </script>
 </body>
 </html>

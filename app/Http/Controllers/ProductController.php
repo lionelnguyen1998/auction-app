@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Services\AuctionService;
 use App\Http\Services\ItemService;
 use App\Models\Item;
+use App\Models\Slider;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -19,9 +20,15 @@ class ProductController extends Controller
 
     public function index($typeId)
     {
+        $all = config('const.categories');
+        $name = $all[$typeId];
+
         return view('categories.list', [
-            'title' => '電子に関するオークション一覧',
-            'auctionByCategory' => $this->auctionService->getAuctionByCategory($typeId)
+            'title' => $name,
+            'auctionByCategory' => $this->auctionService->getAuctionByCategory($typeId),
+            'slider' => Slider::where('type', $typeId)->get()->toArray(),
+            'type' => $name,
+            'logo' => Slider::logo(),
         ]);
     }
 
@@ -30,11 +37,12 @@ class ProductController extends Controller
         $itemId = Item::where('auction_id', $auctionId)
             ->get()
             ->pluck('item_id');
-            
+
         return view('categories.listItemOfAuctions', [
-            'title' => 'Danh sach item thuoc auction',
+            'title' => 'アイテムの情報',
             'items' => $this->itemService->getListItemOfAuction($auctionId),
-            'images' => $this->itemService->getImageLists($itemId)
+            'images' => $this->itemService->getImageLists($itemId),
+            'logo' => Slider::logo(),
         ]);
     }
 
@@ -43,7 +51,7 @@ class ProductController extends Controller
         $itemId = Item::where('auction_id', $auctionId)
             ->get()
             ->pluck('item_id');
-            
+      
         return view('categories.detail', [
             'title' => '細かいオークション',
             'auction' => $this->auctionService->getDetailAuctions($auctionId),
@@ -53,7 +61,8 @@ class ProductController extends Controller
             'comments' => $this->auctionService->getComments($auctionId),
             'infors' => $this->auctionService->getInfor($auctionId),
             'categoryValueName' => $this->auctionService->getCategoryValueName($auctionId),
-            'images' => $this->itemService->getImageLists($itemId)
+            'images' => $this->itemService->getImageLists($itemId),
+            'logo' => Slider::logo(),
         ]);
     }
 }
