@@ -8,6 +8,7 @@ use App\Http\Services\CategoryService;
 use App\Http\Services\ItemService;
 use App\Models\Auction;
 use App\Models\Slider;
+use App\Models\User;
 use App\Models\AuctionStatus;
 
 class AuctionController extends Controller
@@ -21,11 +22,12 @@ class AuctionController extends Controller
         $this->itemService = $itemService;
     }
 
-    public function list()
+    public function list($userId)
     {
         return view('auctions.list', [
             'title' => 'オークション一覧', 
-            'auctions' => $this->auctionService->getListAuctions(),
+            'auctions' => $this->auctionService->getListAuctions($userId),
+            'inforUser' => User::findOrFail($userId),
             'logo' => Slider::logo(),
         ]);
     }

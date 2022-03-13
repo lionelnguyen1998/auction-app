@@ -1,4 +1,12 @@
 <!-- Header -->
+<style>
+    .avatar {
+        vertical-align: middle;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+</style>
 <header class="header-v4">
     <!-- Header desktop -->
     <div class="container-menu-desktop">
@@ -33,7 +41,7 @@
             <nav class="limiter-menu-desktop container">
                 
                 <!-- Logo desktop -->		
-                <a href="#" class="logo">
+                <a href="{{ route('home') }}" class="logo">
                     <img src="{{ $logo }}" alt="IMG-LOGO">
                 </a>
 
@@ -77,7 +85,15 @@
                     </div>
 
                     <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
-                        <i class="fa fa-user" data-toggle="dropdown" aria-hidden="true"></i>
+                        @if (auth()->user())
+                            <div data-toggle="dropdown" aria-hidden="true">
+                                <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="avatar">
+                            </div> 
+                        @else
+                            <div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11" data-toggle="dropdown" aria-hidden="true">
+                                <i class="zmdi zmdi-account"></i>
+                            </div>
+                        @endif                  
                         <div class="dropdown-menu" role="menu">
                             @if (auth()->user())
                                 <a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! {{ auth()->user()->name }}</a>
@@ -100,7 +116,7 @@
                             <i class="zmdi zmdi-favorite-outline"></i>
                         </a>
                     
-                        <a href="{{ route('listAuctions') }}" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <a href="{{ route('listAuctions', ['userId' => auth()->user()->user_id]) }}" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
                             <i class="zmdi zmdi-spellcheck"></i>
                         </a>
                     @endif

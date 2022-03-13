@@ -17,29 +17,7 @@ class BidController extends Controller
 
     public function create(Request $request)
     {
-        // $price = $request->price;
-        // $phone = $request->phone;
-        // $auctionId = $request->auction_id;
-        // $userId = $request->user_id;
-        // $itemId = $request->item_id;
-
-        // $validated = $this->bidService->bidValidation($request->all());
-
-        // if ($validated->fails()) {
-        //     return redirect(url()->previous())
-        //         ->withErrors($validated)
-        //         ->withInput();
-        // }
-
-        // Bid::create([
-        //     'price' => $price,
-        //     'phone' => $phone,
-        //     'auction_id' => $auctionId,
-        //     'user_id' => $userId,
-        //     'item_id' => $itemId
-        // ]);
-
-        $this->bidService->create($request);
+        $this->bidService->create($request->all());
         return redirect()->back();
     }
 }

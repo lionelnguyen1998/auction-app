@@ -1,6 +1,11 @@
 @include('head')
 <style>
-   
+   	.mtext-107 {
+		font-family: Poppins-Regular;
+		font-size: 16px;
+		line-height: 1.625;
+		margin-top: 21px;
+	}
 </style>
 <body class="animsition">
 	@include('headerPage')
@@ -41,8 +46,22 @@
 					
 				<div class="col-md-6 col-lg-5 p-b-30">
 					<div class="p-r-50 p-t-5 p-lr-0-lg">
+						<div class="flex-w">
+							<div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
+								<a href="{{ route('listAuctions', ['userId' => $userSelling[0]['selling_user_id']]) }}">
+									<img src="{{ $userSelling[0]['users']['avatar'] }}" alt="AVATAR">
+								</a>
+							</div>
+							<div class="size-207">
+								<div class="flex-w flex-sb-m p-b-17">
+									<span class="mtext-107 cl2 p-r-20">
+										<b>{{ $userSelling[0]['users']['name'] }}</b>
+									</span>
+								</div>
+							</div>
+						</div>
 						<h4 class="mtext-105 cl2 js-name-detail p-b-14">
-							{{ $auction[0]["items"][0]["name"] }}
+							Tên sản phẩm: {{ $auction[0]["items"][0]["name"] }}
 						</h4>
                         <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Like">
                             <i class="zmdi zmdi-favorite" style="font-size:large"></i>

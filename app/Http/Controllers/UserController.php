@@ -94,4 +94,19 @@ class UserController extends Controller
         $request->session()->flush();
         return redirect()->route('loginUser');
     }
+
+    public function contact()
+    {
+        return view('contact', [
+            'title' => 'お間に合わせる',
+            'logo' => Slider::logo(),
+        ]);
+    }
+
+    public function contactUs(Request $request)
+    {
+        $this->userService->sendEmail($request->all());
+
+        return redirect()->route('contact')->with('message', 'メールを送りました。');
+    }
 }

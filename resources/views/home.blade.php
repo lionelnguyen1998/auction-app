@@ -1,4 +1,10 @@
 @include('head')
+<style>
+	.block2-pic img {
+        height: 200px;
+        /* width: auto; */
+    }
+</style>
 <body class="animsition">
 	@include('headerHome')
 	

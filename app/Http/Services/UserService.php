@@ -5,6 +5,9 @@ namespace App\Http\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendMail;
+use App\Models\Contact;
 
 class UserService implements UserServiceInterface
 {
@@ -134,5 +137,48 @@ class UserService implements UserServiceInterface
         $validated = Validator::make($request, $rules, $messages, $attribute);
 
         return $validated;
+    }
+
+    //sendEmail
+    public function contactValidation($request) 
+    {
+        $rules = [
+            'phone' => 'required|max:60',
+            'name' => 'required|max:255',
+            'email' => 'required|max:255|email'
+        ];
+
+        $messages = [
+            'required' => $this->messageRequired,
+            'max' => sprintf($this->messageErrorMax, ':max'),
+            'email' => $this->messageErrorFormatEmail,
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
+
+    }
+
+    public function sendEmail($request)
+    {
+        $validated = $this->contactValidation($request);
+
+        if ($validated->fails()) {
+            return redirect(url()->previous())
+                ->withErrors($validated)
+                ->withInput();
+        }
+
+        $newContact = Contact::create([
+            'email' => $request['email'],
+            'phone' => $request['phone'],
+            'name' => $request['name'],
+            'content' => $request['content']
+        ]);
+
+        $adminMail = config('mail.mailers.smtp.username');
+
+        Mail::to($adminMail)->send(new SendMail($newContact));
     }
 }

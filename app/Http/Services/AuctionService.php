@@ -194,10 +194,8 @@ class AuctionService implements AuctionServiceInterface
             ->get();
     }
 
-    public function getListAuctions()
+    public function getListAuctions($userId)
     {
-        $userId = auth()->user()->user_id;
-
         $list = Auction::with('category', 'items', 'auctionStatus')
             ->where('selling_user_id', $userId)
             ->get()

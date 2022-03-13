@@ -13,7 +13,7 @@
 		<!-- Title page -->
 		<section class="bg-img1 txt-center p-lr-15 p-tb-92" style="background-image: url('{{ $slider[0]['image'] }}');">
 			<h2 class="mtext-109 cl2 p-b-30 ltext-105 cl0 txt-center">
-				<b style="color:#717FE0">{{ $type }}</b>
+				<b style="color:#717FE0"></b>
 			</h2>
 		</section>
 	@endif	

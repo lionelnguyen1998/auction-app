@@ -48,11 +48,4 @@ class HomeController extends Controller
         return response()->json(['html' => '' ]);
     }
 
-    public function contact()
-    {
-        return view('contact', [
-            'title' => 'お間に合わせる',
-            'logo' => Slider::logo(),
-        ]);
-    }
 }

@@ -32,7 +32,6 @@ Route::get('edit/{userId}', [UserController::class, 'edit'])->name('editUser');
 Route::post('update', [UserController::class, 'update'])->name('updateUser');
 Route::post('login/store', [UserController::class, 'store'])->name('storeUserAccount');
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/services/load-auction', [HomeController::class, 'loadAuction'])->name('loadAuction');
 
 //Upload
@@ -43,6 +42,12 @@ Route::prefix('categories')->group(function () {
     Route::get('product/{typeId}', [ProductController::class, 'index'])->name('productOfCategory');
     Route::get('product/detail/{auctionId}', [ProductController::class, 'detail'])->name('detailAuctions');
     // Route::get('product/list/{auctionId}', [ProductController::class, 'list'])->name('listItemOfAuctions');
+});
+
+//contact
+Route::prefix('contacts')->group(function () {
+    Route::get('/', [UserController::class, 'contact'])->name('contact');
+    Route::post('/create', [UserController::class, 'contactUs'])->name('contactUs');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -59,7 +64,7 @@ Route::middleware(['auth'])->group(function () {
 
     //Auctions
     Route::prefix('auctions')->group(function () {
-        Route::get('list', [AuctionController::class, 'list'])->name('listAuctions');
+        Route::get('list/{userId}', [AuctionController::class, 'list'])->name('listAuctions');
         Route::get('create', [AuctionController::class, 'create'])->name('createAuction');
         Route::post('store', [AuctionController::class, 'store'])->name('insertAuction');
         //report deny auction
