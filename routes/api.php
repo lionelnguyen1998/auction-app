@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuctionController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,12 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::group(['namespace' => 'Api'], function(){
+    Route::post('register', [UserController::class, 'register'])->name('registerUser');
     //client
     //login
     Route::get('login', [UserController::class, 'index'])->name('loginUser');
     Route::get('logout', [UserController::class, 'logout'])->name('logoutUser');
-    Route::get('register', [UserController::class, 'register'])->name('registerUser');
-    Route::post('store', [UserController::class, 'insertUser'])->name('insertUser');
+    
     Route::get('edit/{userId}', [UserController::class, 'edit'])->name('editUser');
     Route::post('update', [UserController::class, 'update'])->name('updateUser');
     Route::post('login/store', [UserController::class, 'store'])->name('storeUserAccount');

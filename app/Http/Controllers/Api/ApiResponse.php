@@ -51,4 +51,9 @@ class ApiResponse
     {
         return $this->respond($code, $data);
     }
+
+    public function errorValidation(Validator $validator) 
+    {
+        return $this->respond(400, null, $validator->errors());
+    }
 }
