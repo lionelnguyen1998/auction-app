@@ -85,7 +85,7 @@ class UserService implements UserServiceInterface
             'role' => 2
         ]);
 
-        return redirect()->route('login');
+        return redirect()->route('loginUser');
     }
 
     public function updateUser($request)
