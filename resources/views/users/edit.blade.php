@@ -1,15 +1,11 @@
-@include('head')
-<style>
-	label {
-    	margin-top: 10px;
-	}
-</style>
-<body class="animsition">
-	
-	@include('headerPage')
-	
-	@include('cart2')
+@extends('main')
+@section('content')
 
+	<style>
+		label {
+			margin-top: 10px;
+		}
+	</style>
     <form class="bg0 p-t-75 p-b-85" action="{{ route('updateUser') }}" method="POST">
         <input type="hidden" name="user_id" value="{{ auth()->user()->user_id }}"/>
 		<div class="container">
@@ -96,4 +92,4 @@
 		@csrf
 	</form>
  
-@include('footer')
+@endsection

@@ -10,6 +10,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\FavoriteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('store', [AuctionController::class, 'store'])->name('insertAuction');
         //report deny auction
         Route::get('deny', [AuctionController::class, 'deny'])->name('auctionDeny');
+        //delete auction
+        Route::get('/delete/{auctionId}', [AuctionController::class, 'delete'])->name('auctionDelete');
     });
 
     //item
@@ -76,6 +79,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('create/{auctionId}/{categoryId}', [ItemController::class, 'create'])->name('createItem');
         Route::post('store', [ItemController::class, 'store'])->name('insertItem');
     });
+
+    //like
+    Route::post('like/{auctionId}', [FavoriteController::class, 'like'])->name('likeAuction');
 
     //sendEmail when accept bid
     Route::get('acceptBid/{bidId}', [AuctionController::class, 'acceptBid'])->name('acceptBid');

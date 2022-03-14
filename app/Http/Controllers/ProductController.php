@@ -51,7 +51,7 @@ class ProductController extends Controller
         $itemId = Item::where('auction_id', $auctionId)
             ->get()
             ->pluck('item_id');
-      
+  
         return view('categories.detail', [
             'title' => '細かいオークション',
             'auction' => $this->auctionService->getDetailAuctions($auctionId),

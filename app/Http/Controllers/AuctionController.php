@@ -9,6 +9,10 @@ use App\Http\Services\ItemService;
 use App\Models\Auction;
 use App\Models\Slider;
 use App\Models\User;
+use App\Models\Bid;
+use App\Models\Item;
+use App\Models\ItemValue;
+use App\Models\Comment;
 use App\Models\AuctionStatus;
 
 class AuctionController extends Controller
@@ -85,5 +89,22 @@ class AuctionController extends Controller
             'auction' => $this->auctionService->deny(),
             'logo' => Slider::logo(),
         ]);
+    }
+
+    //delete auction
+    public function delete($auctionId)
+    {
+        $itemId = Item::where('auction_id', '=', $auctionId)
+            ->get()
+            ->pluck('item_id')
+            ->toArray();
+
+        ItemValue::where('item_id', '=', $itemId[0])->delete();
+        Item::where('item_id', '=', $itemId[0])->delete();
+        Bid::where('auction_id', '=', $auctionId)->delete();
+        Comment::where('auction_id', '=', $auctionId)->delete();
+        Auction::find($auctionId)->delete();
+
+        return redirect()->route('listAuctions', ['userId' => auth()->user()->user_id])->with('message', 'オークションを削除しました！');
     }
 }

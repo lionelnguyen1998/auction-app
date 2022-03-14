@@ -1,13 +1,12 @@
-@include('head')
-<style>
-    .block2-pic img {
-        height: 200px;
-        /* width: auto; */
-    }
-</style>
-<body class="animsition">
-	@include('headerPage')
-	@include('cart2')
+@extends('main')
+@section('content')
+
+	<style>
+		.block2-pic img {
+			height: 200px;
+			/* width: auto; */
+		}
+	</style>
 	
 	@if (isset($slider[0]['image']))
 		<!-- Title page -->
@@ -278,13 +277,7 @@
                                     </a>
 
                                     <span class="stext-105 cl3">
-                                        @if ($index == 1)
-                                            <p class="btn btn-success">{{ $status[$index] }}</p>
-                                        @elseif ($index == 2)
-                                            <p class="btn btn-warning">{{ $status[$index] }}</p>
-                                        @else
-                                            <p class="btn btn-danger">{{ $status[$index] }}</p>
-                                        @endif
+                                        <p class="btn btn-success">{{ $status[$index] }}</p>
                                     </span>
                                 </div>
 
@@ -314,13 +307,7 @@
                                     </a>
 
                                     <span class="stext-105 cl3">
-                                        @if ($index == 1)
-                                            <p class="btn btn-success">{{ $status[$index] }}</p>
-                                        @elseif ($index == 2)
-                                            <p class="btn btn-warning">{{ $status[$index] }}</p>
-                                        @else
-                                            <p class="btn btn-danger">{{ $status[$index] }}</p>
-                                        @endif
+                                        <p class="btn btn-warning">{{ $status[$index] }}</p>
                                     </span>
                                 </div>
 
@@ -350,13 +337,7 @@
                                     </a>
 
                                     <span class="stext-105 cl3">
-                                        @if ($index == 1)
-                                            <p class="btn btn-success">{{ $status[$index] }}</p>
-                                        @elseif ($index == 2)
-                                            <p class="btn btn-warning">{{ $status[$index] }}</p>
-                                        @else
-                                            <p class="btn btn-danger">{{ $status[$index] }}</p>
-                                        @endif
+                                        <p class="btn btn-danger">{{ $status[$index] }}</p>
                                     </span>
                                 </div>
 
@@ -381,4 +362,4 @@
 			</div>
 		</div>
 	</div>
-@include('footer')
+@endsection

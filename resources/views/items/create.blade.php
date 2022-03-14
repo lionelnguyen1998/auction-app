@@ -1,16 +1,12 @@
-@include('head')
-<style>
-	label {
-    	margin-top: 10px;
-	}
-</style>
-<body class="animsition">
-	
-	@include('headerPage')
-	
-	@include('cart2')
+@extends('main')
+@section('content')
 
-		
+	<style>
+		label {
+			margin-top: 10px;
+		}
+	</style>
+	
 	<form class="bg0 p-t-75 p-b-85" action="{{ route('insertItem') }}" method="POST">
         <input type="hidden" name="selling_user_id" value="{{ auth()->user()->user_id }}"/>
         <input type="hidden" name="auction_id" value="{{ $auctionId }}"/>
@@ -132,4 +128,4 @@
 		@csrf
 	</form>
  
-@include('footer')
+@endsection

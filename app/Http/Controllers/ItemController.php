@@ -47,7 +47,6 @@ class ItemController extends Controller
 
         $this->itemService->registerItem($request->all());
 
-        return redirect()->route('home');
-      
+        return redirect()->route('listAuctions', ['userId' => auth()->user()->user_id])->with('message', 'オークションを追加しました。');
     }
 }

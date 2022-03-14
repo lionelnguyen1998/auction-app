@@ -72,14 +72,14 @@ class ItemService implements ItemServiceInterface
             'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
             'name_en' => "max:255",
-            'starting_price' => 'required|integer|max:255'
+            'starting_price' => 'required|numeric'
         ];
 
         $messages = [
             'required' => '必須項目が未入力です。',
             'max' => ':max文字以下入力してください。 ',
             'unique' => '既に使用されています。',
-            'integer' => '番号を入力してください。'
+            'numeric' => '番号を入力してください。'
         ];
 
         $validated = Validator::make($request, $rules, $messages);

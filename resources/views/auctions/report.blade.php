@@ -1,7 +1,5 @@
-@include('head')
-<body class="animsition">
-	@include('headerPage')
-	@include('cart2')
+@extends('main')
+@section('content')
     
     <!-- breadcrumb -->
 	<div class="container">
@@ -158,5 +156,5 @@
 		</div>
 	</div>
 
-@include('footer')
+@endsection
 	

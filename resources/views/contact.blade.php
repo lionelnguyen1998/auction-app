@@ -1,8 +1,5 @@
-@include('head')
-<body class="animsition">
-	@include('headerPage')
-	@include('cart2')
-    
+@extends('main')
+@section('content')
 	<!--Contact-->
     <section class="bg0 p-t-104 p-b-116">
 		<div class="container">
@@ -103,5 +100,4 @@
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14898.763660245146!2d105.83685507841687!3d21.00502340917457!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ad5569f4fbf1%3A0x5bf30cadcd91e2c3!2zQ-G7lW5nIFRy4bqnbiDEkOG6oWkgTmdoxKlhIC0gxJDhuqFpIEjhu41jIELDoWNoIEtob2EgSMOgIE7hu5lp!5e0!3m2!1svi!2s!4v1645605534507!5m2!1svi!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
         </div>
 	</div>
-
-@include('footer')
+@endsection

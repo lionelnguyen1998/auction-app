@@ -1,16 +1,17 @@
-@include('head')
-<style>
-   	.mtext-107 {
-		font-family: Poppins-Regular;
-		font-size: 16px;
-		line-height: 1.625;
-		margin-top: 21px;
-	}
-</style>
-<body class="animsition">
-	@include('headerPage')
-	@include('cart2')
-		
+@extends('main')
+@section('content')
+
+	<style>
+		.mtext-107 {
+			font-family: Poppins-Regular;
+			font-size: 16px;
+			line-height: 1.625;
+			margin-top: 21px;
+		}
+		.modal.show .modal-dialog {
+			margin-top: 100px !important;
+		}
+	</style>	
 	<!-- Product Detail -->
 	<section class="sec-product-detail bg0 p-t-65 p-b-60">
 		<div class="container">
@@ -61,7 +62,7 @@
 							</div>
 						</div>
 						<h4 class="mtext-105 cl2 js-name-detail p-b-14">
-							Tên sản phẩm: {{ $auction[0]["items"][0]["name"] }}
+							アイテム: {{ $auction[0]["items"][0]["name"] }}
 						</h4>
                         <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Like">
                             <i class="zmdi zmdi-favorite" style="font-size:large"></i>
@@ -95,7 +96,38 @@
 									@else
                                         <p class="btn btn-info" disabled>{{ $status[$index] }}</p>
                                     @endif
+
+									@if (auth()->user()->user_id == $auction[0]['selling_user_id'] && $index == 3)
+										<a data-toggle="modal" data-target="#modal_auction" href="">
+											<p class="btn btn-danger float-right">削除</p>
+										</a>
+									@endif
                                 </li>
+								 <!-- /.modal -->
+								
+								<div class="modal fade" id="modal_auction">
+									<div class="modal-dialog">
+										<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" style="color:red">本当に削除しますか？</h4>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true"></span>&times;</span>
+											</button>
+										</div>
+										<form action="{{ route('auctionDelete', ['auctionId' => $auction[0]['auction_id']]) }}" method="GET">
+											<!-- /.card-body -->
+											<div class="modal-footer justify-content-between">
+											<button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+											<button type="submit" class="btn btn-danger">確認</button>
+											</div>
+											@csrf
+										</form>
+										</div>
+										<!-- /.modal-content -->
+									</div>
+								<!-- /.modal-dialog -->
+								</div>
+							
                             </ul>
 						</div>
 
@@ -108,60 +140,28 @@
 				<div class="tab01">
 					<!-- Nav tabs -->
 					<ul class="nav nav-tabs" role="tablist">
-						<li class="nav-item p-b-10">
-							<a class="nav-link active" data-toggle="tab" href="#description" role="tab">内容</a>
-						</li>
+						@if ($index != 4)
+							<li class="nav-item p-b-10">
+								<a class="nav-link active" data-toggle="tab" href="#bid" role="tab">BID</a>
+							</li>
 
+							<li class="nav-item p-b-10">
+								<a class="nav-link" data-toggle="tab" href="#comments" role="tab">コメント</a>
+							</li>
+						@endif
 						<li class="nav-item p-b-10">
 							<a class="nav-link" data-toggle="tab" href="#information" role="tab">技術の情報</a>
 						</li>
-
-						@if ($index != 4)
-                        <li class="nav-item p-b-10">
-							<a class="nav-link" data-toggle="tab" href="#bid" role="tab">BID</a>
-						</li>
-
 						<li class="nav-item p-b-10">
-							<a class="nav-link" data-toggle="tab" href="#comments" role="tab">コメント</a>
+							<a class="nav-link" data-toggle="tab" href="#description" role="tab">内容</a>
 						</li>
-						@endif
+
 					</ul>
 
 					<!-- Tab panes -->
 					<div class="tab-content p-t-43">
-						<!-- - -->
-						<div class="tab-pane fade show active" id="description" role="tabpanel">
-							<div class="how-pos2 p-lr-15-md">
-								<p class="stext-102 cl6">
-									{{ $auction[0]["items"][0]["description"]}}
-								</p>
-							</div>
-						</div>
-
-						<!-- - -->
-						<div class="tab-pane fade" id="information" role="tabpanel">
-							<div class="row">
-								<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
-									<ul class="p-lr-28 p-lr-15-sm">
-                                        @foreach ($infors as $key => $infor)
-                                            <li class="flex-w flex-t p-b-7">
-                                                <span class="stext-102 cl3 size-205">
-                                                    {{ $categoryValueName[$key] }}
-                                                </span>
-
-                                                <span class="stext-102 cl6 size-206">
-                                                    {{ $infor }}
-                                                </span>
-                                            </li>
-                                            <hr>
-                                        @endforeach
-									</ul>
-								</div>
-							</div>
-						</div>
-
-                        <!-- - -->
-						<div class="tab-pane fade" id="bid" role="tabpanel">
+						<!-- BID- -->
+						<div class="tab-pane fade show active" id="bid" role="tabpanel">
 							<div class="row">
 								<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
 									<div class="p-b-30 m-lr-15-sm">
@@ -174,9 +174,6 @@
                                             	<input type="hidden" name="user_id" value="{{ auth()->user()->user_id }}"/>
 											@endif
                                             <input type="hidden" name="item_id" value="{{ $auction[0]['items'][0]['item_id'] }}"/>
-                                            <h5 class="mtext-108 cl2 p-b-7">
-												Nhap thong tin tra gia
-											</h5>
 											<div class="row p-b-25">
 												<div class="col-sm-6 p-b-5 required">
 													<label class="stext-102 cl3" for="price">BID (番号だけ入力してください)</label>
@@ -222,9 +219,9 @@
                                                     </p>
                                                 </div>
                                                 <p style="margin-top:10px">
-												@if ($index == 3 && $key == 0)
-													<a class="btn btn-warning" style="margin-right:10px; color:white" href="{{ route('chat') }}">Thuong luong</a>
-													<a class="btn btn-success" style="color:white" href="{{ route('acceptBid', ['bidId' => $bid['bid_id']] ) }}">Chap nhan</a>
+												@if ($index == 3 && $key == 0 && (auth()->user()->user_id == $auction[0]['selling_user_id']))
+													<a class="btn btn-warning" style="margin-right:10px; color:white" href="{{ route('chat') }}">協議する</a>
+													<a class="btn btn-success" style="color:white" href="{{ route('acceptBid', ['bidId' => $bid['bid_id']] ) }}">アクセプタンス</a>
 												@endif
                                                 </p>
                                             </div>
@@ -235,7 +232,7 @@
 							</div>
 						</div>
 
-						<!-- - -->
+						<!-- Comment -->
 						<div class="tab-pane fade" id="comments" role="tabpanel">
                             <div class="row">
                                     <div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
@@ -294,6 +291,37 @@
                                             @endforeach
                                         </div>
                                     </div>
+							</div>
+						</div>
+
+						<!-- info -->
+						<div class="tab-pane fade" id="information" role="tabpanel">
+							<div class="row">
+								<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
+									<ul class="p-lr-28 p-lr-15-sm">
+                                        @foreach ($infors as $key => $infor)
+                                            <li class="flex-w flex-t p-b-7">
+                                                <span class="stext-102 cl3 size-205">
+                                                    {{ $categoryValueName[$key] }}
+                                                </span>
+
+                                                <span class="stext-102 cl6 size-206">
+                                                    {{ $infor }}
+                                                </span>
+                                            </li>
+                                            <hr>
+                                        @endforeach
+									</ul>
+								</div>
+							</div>
+						</div>
+
+						<!-- Description- -->
+						<div class="tab-pane fade" id="description" role="tabpanel">
+							<div class="how-pos2 p-lr-15-md">
+								<p class="stext-102 cl6">
+									{{ $auction[0]["items"][0]["description"]}}
+								</p>
 							</div>
 						</div>
 
@@ -585,4 +613,5 @@
 			</div>
 		</div>
 	</section>
-@include('footer')
+
+@endsection

@@ -1,14 +1,12 @@
-@include('head')
-<style>
-	.block2-pic img {
-        height: 200px;
-        /* width: auto; */
-    }
-</style>
-<body class="animsition">
-	@include('headerHome')
-	
-	@include('cart2')
+@extends('main')
+@section('content')
+
+	<style>
+		.block2-pic img {
+			height: 200px;
+			/* width: auto; */
+		}
+	</style>
 
 	@include('slider')
 
@@ -17,7 +15,7 @@
 		<div class="container">
 			<div class="p-b-10">
 				<h3 class="ltext-103 cl5">
-					Auctions Overview
+					オークション一覧
 				</h3>
 			</div>
 
@@ -148,22 +146,11 @@
 										</a>
 
 										<span class="stext-105 cl3">
-											@if ($index == 1)
-												<p class="btn btn-success">{{ $status[$index] }}</p>
-											@elseif ($index == 2)
-												<p class="btn btn-warning">{{ $status[$index] }}</p>
-											@else
-												<p class="btn btn-danger">{{ $status[$index] }}</p>
-											@endif
+											<p class="btn btn-success">{{ $status[$index] }}</p>
 										</span>
 									</div>
 
-									<div class="block2-txt-child2 flex-r p-t-3">
-										<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-											<img class="icon-heart1 dis-block trans-04" src="/template/images/icons/icon-heart-01.png" alt="ICON">
-											<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/template/images/icons/icon-heart-02.png" alt="ICON">
-										</a>
-									</div>
+									@include('like')
 								</div>
 							</div>
 						</div>
@@ -184,22 +171,11 @@
 										</a>
 
 										<span class="stext-105 cl3">
-											@if ($index == 1)
-												<p class="btn btn-success">{{ $status[$index] }}</p>
-											@elseif ($index == 2)
-												<p class="btn btn-warning">{{ $status[$index] }}</p>
-											@else
-												<p class="btn btn-danger">{{ $status[$index] }}</p>
-											@endif
+											<p class="btn btn-warning">{{ $status[$index] }}</p>
 										</span>
 									</div>
 
-									<div class="block2-txt-child2 flex-r p-t-3">
-										<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-											<img class="icon-heart1 dis-block trans-04" src="/template/images/icons/icon-heart-01.png" alt="ICON">
-											<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/template/images/icons/icon-heart-02.png" alt="ICON">
-										</a>
-									</div>
+									@include('like')
 								</div>
 							</div>
 						</div>
@@ -220,22 +196,10 @@
 										</a>
 
 										<span class="stext-105 cl3">
-											@if ($index == 1)
-												<p class="btn btn-success">{{ $status[$index] }}</p>
-											@elseif ($index == 2)
-												<p class="btn btn-warning">{{ $status[$index] }}</p>
-											@else
-												<p class="btn btn-danger">{{ $status[$index] }}</p>
-											@endif
+											<p class="btn btn-danger">{{ $status[$index] }}</p>
 										</span>
 									</div>
-
-									<div class="block2-txt-child2 flex-r p-t-3">
-										<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-											<img class="icon-heart1 dis-block trans-04" src="/template/images/icons/icon-heart-01.png" alt="ICON">
-											<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/template/images/icons/icon-heart-02.png" alt="ICON">
-										</a>
-									</div>
+									@include('like')
 								</div>
 							</div>
 						</div>
@@ -257,4 +221,4 @@
 			<i class="zmdi zmdi-chevron-up"></i>
 		</span>
 	</div>
-@include('footer')
+@endsection

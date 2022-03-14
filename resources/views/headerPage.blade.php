@@ -7,6 +7,7 @@
         border-radius: 50%;
     }
 </style>
+
 <header class="header-v4">
     <!-- Header desktop -->
     <div class="container-menu-desktop">
@@ -52,29 +53,42 @@
                             <a href="{{ route('home') }}"><b>ホームページ</b></a>
                         </li>
 
-                        <li >
-                            <a href="{{ route('productOfCategory', ['typeId' => 1]) }}"><b>{{ config('const.categories.1') }}</b></a>
-                        </li>
-
-                        <li class="label1" data-label1="hot">
-                            <a href="{{ route('productOfCategory', ['typeId' => 2]) }}"><b>{{ config('const.categories.2') }}</b></a>
-                        </li>
-
                         <li>
-                            <a href="{{ route('productOfCategory', ['typeId' => 3]) }}"><b>{{ config('const.categories.3') }}</b></a>
-                        </li>
+                            <b>オークション</b>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{{ route('productOfCategory', ['typeId' => 1]) }}"><b>{{ config('const.categories.1') }}</b></a>
+                                </li>
 
-                        <li>
-                            <a href="{{ route('productOfCategory', ['typeId' => 4]) }}"><b>{{ config('const.categories.4') }}</b></a>
-                        </li>
+                                <li>
+                                    <a href="{{ route('productOfCategory', ['typeId' => 2]) }}"><b>{{ config('const.categories.2') }}</b></a>
+                                </li>
 
-                        <li>
-                            <a href="{{ route('productOfCategory', ['typeId' => 5]) }}"><b>{{ config('const.categories.5') }}</b></a>
+                                <li>
+                                    <a href="{{ route('productOfCategory', ['typeId' => 3]) }}"><b>{{ config('const.categories.3') }}</b></a>
+                                </li>
+
+                                <li>
+                                    <a href="{{ route('productOfCategory', ['typeId' => 4]) }}"><b>{{ config('const.categories.4') }}</b></a>
+                                </li>
+
+                                <li>
+                                    <a href="{{ route('productOfCategory', ['typeId' => 5]) }}"><b>{{ config('const.categories.5') }}</b></a>
+                                </li>
+                            </ul>
                         </li>
 
                         <li>
                             <a href="{{ route('createAuction') }}"><b>販売</b></a>
                         </li>
+
+                        <li>
+                            <a href="{{ route('productOfCategory', ['typeId' => 5]) }}"><b>情報</b></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('contact') }}"><b>お間に合わせ</b></a>
+                        </li>
+
                     </ul>
                 </div>	
 
