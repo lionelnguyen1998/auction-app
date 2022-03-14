@@ -62,4 +62,5 @@ class Item extends Model
     {
         return $this->hasMany(Image::class, 'item_id', 'item_id');
     }
+
 }

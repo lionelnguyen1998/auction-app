@@ -5,17 +5,35 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Services\AuctionService;
 use App\Http\Services\CategoryService;
+use App\Http\Services\ItemService;
 use App\Models\Auction;
+use App\Models\Slider;
+use App\Models\User;
+use App\Models\Bid;
+use App\Models\Item;
+use App\Models\ItemValue;
+use App\Models\Comment;
 use App\Models\AuctionStatus;
 
 class AuctionController extends Controller
 {
-    protected $auctionService, $categoryService;
+    protected $auctionService, $categoryService, $itemService;
 
-    public function __construct(AuctionService $auctionService, CategoryService $categoryService)
+    public function __construct(AuctionService $auctionService, CategoryService $categoryService, ItemService $itemService)
     {
         $this->auctionService = $auctionService;
         $this->categoryService = $categoryService;
+        $this->itemService = $itemService;
+    }
+
+    public function list($userId)
+    {
+        return view('auctions.list', [
+            'title' => 'オークション一覧', 
+            'auctions' => $this->auctionService->getListAuctions($userId),
+            'inforUser' => User::findOrFail($userId),
+            'logo' => Slider::logo(),
+        ]);
     }
     
     //create auction
@@ -23,7 +41,8 @@ class AuctionController extends Controller
     {
         return view('auctions.create', [
             'title' => 'オークション追加',
-            'category' => $this->categoryService->getCategoryList()
+            'category' => $this->categoryService->getCategoryList(),
+            'logo' => Slider::logo(),
         ]);
     }
 
@@ -66,8 +85,26 @@ class AuctionController extends Controller
     {
         dump($this->auctionService->deny());
         return view('auctions.report', [
-            'title' => 'Thong bao',
-            'auction' => $this->auctionService->deny()
+            'title' => 'お知らせ',
+            'auction' => $this->auctionService->deny(),
+            'logo' => Slider::logo(),
         ]);
+    }
+
+    //delete auction
+    public function delete($auctionId)
+    {
+        $itemId = Item::where('auction_id', '=', $auctionId)
+            ->get()
+            ->pluck('item_id')
+            ->toArray();
+
+        ItemValue::where('item_id', '=', $itemId[0])->delete();
+        Item::where('item_id', '=', $itemId[0])->delete();
+        Bid::where('auction_id', '=', $auctionId)->delete();
+        Comment::where('auction_id', '=', $auctionId)->delete();
+        Auction::find($auctionId)->delete();
+
+        return redirect()->route('listAuctions', ['userId' => auth()->user()->user_id])->with('message', 'オークションを削除しました！');
     }
 }

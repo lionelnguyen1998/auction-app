@@ -22,4 +22,13 @@ class Slider extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function logo()
+    {
+        $logo = Slider::where('type', '=', 9)
+            ->get()
+            ->toArray();
+        
+        return $logo[0]['image'];
+    }
 }

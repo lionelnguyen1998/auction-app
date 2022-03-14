@@ -4,13 +4,13 @@
     @include('head')
 </head>
 
-<body > <!--class="animsition" -->
+<body class="animsition">
 
 <!-- Header -->
-@include('header')
+@include('headerPage')
 
-<!-- Cart -->
-@include('cart')
+<!-- Report -->
+@include('report')
 
 @yield('content')
 
