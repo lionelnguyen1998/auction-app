@@ -85,14 +85,7 @@ class UserService implements UserServiceInterface
             'role' => 2
         ]);
 
-        return [true, [
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'address' => $user->address,
-            'avatar' => $user->avatar,
-            'role' => $user->role,
-        ]];
+        return redirect()->route('login');
     }
 
     public function updateUser($request)
@@ -188,5 +181,24 @@ class UserService implements UserServiceInterface
         $adminMail = config('mail.mailers.smtp.username');
 
         Mail::to($adminMail)->send(new SendMail($newContact));
+    }
+
+
+    //API
+    public function register($request) 
+    {
+        $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
+
+        $user = User::create([
+            'name' => $request['name'],
+            'password' => Hash::make($request['password']),
+            'email' => $request['email'], 
+            'phone' => $request['phone'],
+            'address' => $request['address'] ?? null,
+            'avatar' => $request['avatar'] ?? $avatarDefault,
+            'role' => 2
+        ]);
+
+        return $user;
     }
 }
