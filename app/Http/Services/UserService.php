@@ -75,7 +75,7 @@ class UserService implements UserServiceInterface
 
         $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
 
-        return User::create([
+        $user = User::create([
             'name' => $request['name'],
             'password' => Hash::make($request['password']),
             'email' => $request['email'], 
@@ -85,6 +85,14 @@ class UserService implements UserServiceInterface
             'role' => 2
         ]);
 
+        return [true, [
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'avatar' => $user->avatar,
+            'role' => $user->role,
+        ]];
     }
 
     public function updateUser($request)

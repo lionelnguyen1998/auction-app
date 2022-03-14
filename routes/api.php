@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuctionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::prefix('api')->group(['namespace' => 'Api', function(){
+Route::group(['namespace' => 'Api'], function(){
     //client
     //login
     Route::get('login', [UserController::class, 'index'])->name('loginUser');
@@ -47,6 +48,12 @@ Route::prefix('api')->group(['namespace' => 'Api', function(){
         Route::get('/', [UserController::class, 'contact'])->name('contact');
         Route::post('/create', [UserController::class, 'contactUs'])->name('contactUs');
     });
+
+    //Auction
+    Route::prefix('auctions')->group(function () {
+        Route::get('/', [AuctionController::class, 'index'])->name('listAuctionHome');
+    });
+
     Route::middleware(['auth'])->group(function () {
 
         //bid
@@ -86,4 +93,4 @@ Route::prefix('api')->group(['namespace' => 'Api', function(){
         Route::get('chat', [ChatController::class, 'chat'])->name('chat');  
     
     });
-}]);
+});
