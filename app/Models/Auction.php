@@ -49,7 +49,7 @@ class Auction extends Model
 
     public function items()
     {
-        return $this->hasMany(Item::class, 'auction_id', 'auction_id');
+        return $this->hasOne(Item::class, 'auction_id', 'auction_id');
     }
 
     public function bids()
@@ -93,5 +93,10 @@ class Auction extends Model
     public function auctionDeny()
     {
         return $this->hasOne(AuctionDeny::class, 'auction_id', 'auction_id');
+    }
+
+    public function userSelling()
+    {
+        return $this->belongsTo(User::class, 'selling_user_id', 'user_id');
     }
 }

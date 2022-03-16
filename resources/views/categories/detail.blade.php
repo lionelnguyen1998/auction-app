@@ -97,10 +97,12 @@
                                         <p class="btn btn-info" disabled>{{ $status[$index] }}</p>
                                     @endif
 
-									@if (auth()->user()->user_id == $auction[0]['selling_user_id'] && $index == 3)
-										<a data-toggle="modal" data-target="#modal_auction" href="">
-											<p class="btn btn-danger float-right">削除</p>
-										</a>
+									@if (isset(auth()->user->user_id))
+										@if (auth()->user()->user_id == $auction[0]['selling_user_id'] && $index == 3)
+											<a data-toggle="modal" data-target="#modal_auction" href="">
+												<p class="btn btn-danger float-right">削除</p>
+											</a>
+										@endif
 									@endif
                                 </li>
 								 <!-- /.modal -->

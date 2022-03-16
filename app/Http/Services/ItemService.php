@@ -122,4 +122,17 @@ class ItemService implements ItemServiceInterface
             }
         }
     }
+
+    //api
+    public function getInfor($itemId)
+    {
+        $categoryId = Item::findOrFail($itemId[0])->category_id;
+        $itemInfor = ItemValue::with(['categoryValues' => function ($query) use ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }])
+            ->where('item_id', $itemId)
+            ->get();
+
+        return $itemInfor;
+    }
 }

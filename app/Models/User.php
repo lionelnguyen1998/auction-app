@@ -62,21 +62,4 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    // public function scopeByEmail($query, $email)
-    // {
-    //     return $query->where('email', $email);
-    // }
-
-    // //Login by email 
-    // public function loginByEmail($request)
-    // {
-    //     $user = self::byEmail($request['email'])->first();
-
-    //     if (!empty($user) && Hash::check($request['password'], $user->password)) {
-    //         return $user;
-    //     }
-
-    //     return false;
-    // }
 }

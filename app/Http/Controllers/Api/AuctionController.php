@@ -33,23 +33,163 @@ class AuctionController extends ApiController
     //all auction in home page
     public function index()
     {
-        $auctions = Auction::all();
-
+        $auctions = $this->auctionService->getListAuction();
         return [
             'auctions' => $auctions->map(function ($auction) {
                 return [
                     'auction_id' => $auction->auction_id,
-                    'category_id' => $auction->category_id,
                     'selling_user_id' => $auction->selling_user_id,
                     'title' => $auction->title,
-                    'title_en' => $auction->title_en,
-                    'description' => $auction->description,
                     'start_date' => $auction->start_date,
                     'end_date' => $auction->end_date,
                     'created_at' => $auction->created_at->format('Y/m/d H:i:s'),
                     'updated_at' => $auction->updated_at->format('Y/m/d H:i:s'),
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                    'status' => $auction['auctionStatus']['status'],
                 ];
             }),
         ];
+    }
+
+    //detail auctions
+    public function detail($auctionId)
+    {
+        $itemId = Item::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('item_id');
+
+        $auction = $this->auctionService->getDetailAuctions($auctionId);
+        $maxPrice = $this->auctionService->getMaxPrice($auctionId);
+        $bids = $this->auctionService->getBids($auctionId);
+        $comments = $this->auctionService->getComments($auctionId);
+        $itemValue = $this->itemService->getInfor($itemId);
+        $images = $this->itemService->getImageLists($itemId);
+        $logo = Slider::logo();
+
+        return [
+            'logo' => $logo,
+            'auctions' => [
+                'auction_id' => $auction[0]['auction_id'],
+                'title' => $auction[0]['title'],
+                'start_date' => $auction[0]['start_date'],
+                'end_date' => $auction[0]['end_date'],
+                'status' => $auction[0]['auction_status']['status'],
+            ],
+            'category' => [
+                'name' => $auction[0]['category']['name'],
+                'image' => $auction[0]['category']['image'],
+                'type' => $auction[0]['category']['type'],
+            ],
+            'items' => [
+                'item_id' => $auction[0]['items']['item_id'],
+                'name' => $auction[0]['items']['name'],
+                'buying_user_id' => $auction[0]['items']['buying_user_id'],
+                'brand_id' => $auction[0]['items']['brand_id'],
+                'series' => $auction[0]['items']['series'],
+                'description' => $auction[0]['items']['description'],
+                'starting_price' => $auction[0]['items']['starting_price'],
+                'images' => $images->map(function ($image) {
+                    return [
+                        'image' => $image,
+                    ];
+                }),
+                'values' => $itemValue->map(function ($value) {
+                    return [
+                        $value['categoryValues']['name'] => $value['value'],
+                    ];
+                }),
+            ],
+            'selling_user' => [
+                'selling_user_id' => $auction[0]['user_selling']['user_id'],
+                'selling_user_name' => $auction[0]['user_selling']['name'],
+                'selling_user_avatar' => $auction[0]['user_selling']['avatar']
+            ],
+            'max_bid' => $maxPrice,
+            'bids' => $bids->map(function ($bid) {
+                return [
+                    'bid_id' => $bid->bid_id,
+                    'price' => $bid->price,
+                    'created_at' => $bid->created_at->format('Y/m/d H:i:s'),
+                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                    'user' => $bid['users']['name'],
+                    'user_avatar' => $bid['users']['avatar']
+                ];
+            }),
+            'comments' => $comments->map(function ($comment) {
+                return [
+                    'comment_id' => $comment->comment_id,
+                    'content' => $comment->content,
+                    'created_at' => $comment->created_at->format('Y/m/d H:i:s'),
+                    'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
+                    'user' => $comment['users']['name'],
+                    'user_avatar' => $comment['users']['avatar']
+                ];
+            }),
+
+        ];
+    }
+
+    public function listAuctionByType($typeId)
+    {
+        $auctions = $this->auctionService->getListAuctionByType($typeId);
+        return [
+            'auctions' => $auctions->map(function ($auction) {
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'selling_user_id' => $auction->selling_user_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'created_at' => $auction->created_at->format('Y/m/d H:i:s'),
+                    'updated_at' => $auction->updated_at->format('Y/m/d H:i:s'),
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                    'status' => $auction['auctionStatus']['status'],
+                ];
+            }),
+        ];
+    }
+
+    public function listAuctionsByUser($userId)
+    {
+        $auctions = $this->auctionService->getListAuctionsByUser($userId);
+        return [
+            'auctions' => $auctions->map(function ($auction) {
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'selling_user_id' => $auction->selling_user_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'created_at' => $auction->created_at->format('Y/m/d H:i:s'),
+                    'updated_at' => $auction->updated_at->format('Y/m/d H:i:s'),
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                    'status' => $auction['auctionStatus']['status'],
+                ];
+            }),
+        ];
+    }
+
+    public function create(Request $request)
+    {
+        $validator = $this->auctionService->auctionValidation($request->all());
+
+        if ($validator->fails()) {
+            return $this->response->errorValidation($validator);
+        }
+
+        $data = $this->auctionService->create($request->all());
+        return $this->response->withData($data);
     }
 }
