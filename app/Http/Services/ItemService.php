@@ -71,7 +71,6 @@ class ItemService implements ItemServiceInterface
             'brand_id' => "required",
             'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
-            'name_en' => "max:255",
             'starting_price' => 'required|numeric'
         ];
 
@@ -96,7 +95,6 @@ class ItemService implements ItemServiceInterface
             'brand_id' => $request['brand_id'],
             'series' => $request['series'],
             'name' => $request['name'],
-            'name_en' => $request['name_en'],
             'starting_price' => $request['starting_price'],
             'description' => $request['description']
         ]);

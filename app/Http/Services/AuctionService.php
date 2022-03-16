@@ -145,7 +145,6 @@ class AuctionService implements AuctionServiceInterface
         $rules = [
             'category_id' => "required",
             'title_ni' => "required|max:255|unique:auctions,title",
-            'title_en' => "nullable|max:255",
             'start_date' => "required|date|after_or_equal:tomorrow",
             'end_date' => "required|date|after:start_date"
         ];
@@ -162,7 +161,6 @@ class AuctionService implements AuctionServiceInterface
         $attributes = [
             'category_id' => 'カテゴリー',
             'title_ni' => 'オークション名',
-            'title_en' => 'オークション名　（英語）',
             'start_date' => '始まる時間',
             'end_date' => '終わる時間'
         ];

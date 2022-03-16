@@ -39,17 +39,6 @@
 							@endif
 						</div>
 						<div class="form-group">
-							<label for="title_en"><b>タイトル（英語）</b></label>
-							<input type="text" class="form-control size-119" id="title_en" name="title_en" value="{{ old('title_en') }}" placeholder="英語でタイトルを入力してください">
-							@if($errors->has('title_en'))
-								<label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('title_en')}}</label><br/>
-							@endif
-						</div>
-						<div class="form-group">
-							<label for="description"><b>内容</b></label>
-							<textarea class="form-control" id="description" name="description" rows="2" value="{{ old('description') }}"　placeholder="入力してください"></textarea>
-						</div>
-						<div class="form-group">
 							<div class="row">
 								<div class="col">
 								<label for="start_date"><b>始まる時間  </b><i class="fa fa-calendar" aria-hidden="true"></i></label>

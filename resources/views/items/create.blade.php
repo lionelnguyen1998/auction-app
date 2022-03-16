@@ -54,17 +54,10 @@
                                             <label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('name')}}</label><br/>
                                         @endif
 									</div>
-									<div class="col">
-                                        <label for="name_en"><b>名前（英語）  </b></label>
-                                        <input type="text" class="form-control size-119" name="name_en" value="{{ old('name_en') }}" placeholder="英語で名前を入力してください"/>
-                                        @if($errors->has('name_en'))
-                                            <label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('name_en')}}</label><br/>
-                                        @endif
-									</div>
 								</div>
 							</div>
                             <div class="form-group">
-								<label for="title_en"><b>始値</b><i class="fa fa-asterisk" aria-hidden="true" style="color: red"></i></label>
+								<label for="starting_price"><b>始値</b><i class="fa fa-asterisk" aria-hidden="true" style="color: red"></i></label>
 								<input type="text" class="form-control size-119" id="starting_price" name="starting_price" value="{{ old('starting_price') }}" placeholder="始値を入力してください">
 								@if($errors->has('starting_price'))
 									<label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('starting_price')}}</label><br/>

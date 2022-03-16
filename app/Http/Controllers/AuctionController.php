@@ -60,8 +60,6 @@ class AuctionController extends Controller
             'category_id' => $request['category_id'],
             'selling_user_id' => (int)$request['selling_user_id'] ?? null,
             'title' => $request['title_ni'],
-            'title_en' => $request['title_en'] ?? null,
-            'description' => $request['description'] ?? null,
             'start_date' => date('Y/m/d H:i', strtotime($request['start_date'])),
             'end_date' => date('Y/m/d H:i', strtotime($request['end_date']))
         ]);
