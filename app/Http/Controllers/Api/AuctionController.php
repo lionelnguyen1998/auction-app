@@ -181,6 +181,7 @@ class AuctionController extends ApiController
         ];
     }
 
+    //create auctions
     public function create(Request $request)
     {
         $validator = $this->auctionService->auctionValidation($request->all());
@@ -190,6 +191,62 @@ class AuctionController extends ApiController
         }
 
         $data = $this->auctionService->create($request->all());
+        return $this->response->withData($data);
+    }
+
+    //delete auctions
+    public function delete($auctionId)
+    {
+        $status = AuctionStatus::where('auction_id', '=', $auctionId)
+            ->get()
+            ->pluck('status');
+        if ($status[0] == 3) {
+            $itemId = Item::where('auction_id', '=', $auctionId)
+                ->get()
+                ->pluck('item_id')
+                ->toArray();
+    
+            if (isset($itemId[0])) {
+                ItemValue::where('item_id', '=', $itemId[0])->delete();
+                Item::where('item_id', '=', $itemId[0])->delete();
+                Bid::where('auction_id', '=', $auctionId)->delete();
+                Comment::where('auction_id', '=', $auctionId)->delete();
+                Auction::find($auctionId)->delete();
+                $message = "Da xoa";
+            }
+        } else {
+            $message = "Khong the xoa";
+        }
+        return $this->response->withData($message);
+    }
+
+    //edit auction when auctions đang chờ duyệt
+    public function edit(Request $request, $auctionId)
+    {
+        $status = AuctionStatus::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('status');
+        
+        if ($status[0] == 4) {
+            $validator = $this->auctionService->auctionValidation($request->all());
+    
+            if ($validator->fails()) {
+                return $this->response->errorValidation($validator);
+            }
+
+            $data = $this->auctionService->edit($auctionId, $request->all());
+            return $this->response->withData($data);
+        } else {
+            $message = "Khong the chinh sua";
+            return $this->response->withData($message);
+        } 
+    }
+
+    //create comment
+    public function comments($auctionId, Request $request) 
+    {
+        $data = $this->auctionService->comments($auctionId, $request->all());
+
         return $this->response->withData($data);
     }
 }

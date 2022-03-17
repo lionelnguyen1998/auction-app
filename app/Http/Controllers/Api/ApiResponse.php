@@ -56,4 +56,9 @@ class ApiResponse
     {
         return $this->respond(400, null, $validator->errors());
     }
+
+    public function errorUnauthorized()
+    {
+        return $message = "Chua dang nhap";
+    }
 }

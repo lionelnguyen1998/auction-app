@@ -6,6 +6,7 @@ use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\Comment;
 use App\Models\Item;
+use App\Models\Image;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\CategoryValue;
@@ -17,7 +18,6 @@ use Illuminate\Support\Facades\Validator;
 class AuctionService implements AuctionServiceInterface
 {
     const LIMIT = 16;
-
     //api
     public function getDetailAuctions($auctionId)
     {
@@ -67,18 +67,6 @@ class AuctionService implements AuctionServiceInterface
         return $comments;
     }
 
-    //api
-    public function getInfor($itemId)
-    {
-        $categoryId = Item::findOrFail($itemId[0])->category_id;
-        $itemInfor = ItemValue::with(['categoryValues' => function ($query) use ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }])
-            ->where('item_id', $itemId)
-            ->get();
-
-        return $itemInfor;
-    }
 
     // value of category
     public function getCategoryValueName($auctionId)
@@ -123,6 +111,7 @@ class AuctionService implements AuctionServiceInterface
             ->pluck('category_id');
 
         $auction = Auction::with('category', 'auctionStatus')
+            ->orderBy('created_at', 'DESC')
             ->whereIn('category_id', $categoryId)
             ->get();
 
@@ -134,6 +123,7 @@ class AuctionService implements AuctionServiceInterface
     public function getListAuction()
     {
         $auction = Auction::with('category', 'auctionStatus')
+            ->orderBy('created_at', 'DESC')
             ->get();
 
         return $auction;
@@ -189,6 +179,7 @@ class AuctionService implements AuctionServiceInterface
     //api
     public function create($request)
     {
+        
         $auction = Auction::create([
             'category_id' => $request['category_id'],
             'selling_user_id' => (int)$request['selling_user_id'] ?? null,
@@ -213,28 +204,72 @@ class AuctionService implements AuctionServiceInterface
             'description' => $request['description'] ?? null
         ]);
 
-        $images = $request['images'];
-        dd($images);
-        foreach ($images as $key => $value) {
-            if ($value != null) {
-                Image::create([
-                    'item_id' => $item->item_id,
-                    'image' => $value
-                ]);
+        if (isset($request['images'])) {
+            $images = $request['images'];
+            foreach ($images as $key => $value) {
+                if ($value != null) {
+                    $image = Image::create([
+                        'item_id' => $item->item_id,
+                        'image' => $value
+                    ]);
+                }
             }
         }
 
-        $values = $request['values'];
-        foreach ($values as $key => $value)
-        { 
-            if ($value != null) {
-                $itemValues = ItemValue::create([
-                    'item_id' => $item->item_id,
-                    'category_value_id' => $key,
-                    'value' => $value,
-                ]);
+        if (isset($request['values'])) {
+            $values = $request['values'];
+            foreach ($values as $key => $value)
+            { 
+                if ($value != null) {
+                    $itemValues = ItemValue::create([
+                        'item_id' => $item->item_id,
+                        'category_value_id' => $key,
+                        'value' => $value,
+                    ]);
+                }
             }
         }
+
+        $categoryId = $auction->category_id;
+        $itemValue = ItemValue::with(['categoryValues' => function ($query) use ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }])
+            ->where('item_id', $item->item_id)
+            ->get();
+
+        return $data = [
+            'auctions' => [
+                'auction_id' => $auction->auction_id,
+                'title' => $auction->title,
+                'category_id' => $auction->category_id,
+                'selling_user_id' => $auction->selling_user_id,
+                'start_date' => $auction->start_date,
+                'end_date' => $auction->end_date,
+                'created_at' => $auction->created_at,
+                'updated_at' => $auction->updated_at
+            ],
+            'item' => [
+                'item_id' => $item->item_id,
+                'brand_id' => $item->brand_id,
+                'series' => $item->series,
+                'name' => $item->name,
+                'description' => $item->description,
+                'images' => $images ?? null,
+                'values' => $itemValue->map(function ($value) {
+                    return [
+                        $value['categoryValues']['name'] => $value['value'],
+                    ];
+                }),
+                'created_at' => $auction->created_at,
+                'updated_at' => $auction->updated_at
+            ],
+        ];
+    }
+
+    //edit api
+    public function edit($auctionId, $request)
+    {
+        //
     }
 
     public function deny()
@@ -257,5 +292,14 @@ class AuctionService implements AuctionServiceInterface
             })
             ->limit(self::LIMIT)
             ->get();
+    }
+
+    public function comments($auctionId, $request)
+    {
+        return Comment::create([
+            'auction_id' => $auctionId, 
+            'user_id' => auth()->user()->user_id,
+            'content' => $request['content']
+        ]);
     }
 }

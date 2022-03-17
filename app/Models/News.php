@@ -17,7 +17,6 @@ class News extends Model
         'new_id',
         'user_id',
         'title',
-        'title_en',
         'content'
     ];
 

@@ -28,4 +28,16 @@ class UserController extends ApiController
         $data = $this->userService->register($request->all());
         return $this->response->withData($data);
     }
+
+    public function login(Request $request)
+    {
+        $validator = $this->userService->loginValidation($request->all());
+
+        if ($validator->fails()) {
+            return $this->response->errorValidation($validator);
+        }
+
+        $data = $this->userService->login($request->all());
+        return $this->response->withData($data);
+    }
 }

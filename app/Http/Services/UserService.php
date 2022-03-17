@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendMail;
 use App\Models\Contact;
+use Illuminate\Support\Facades\Auth;
 
 class UserService implements UserServiceInterface
 {
@@ -20,6 +21,7 @@ class UserService implements UserServiceInterface
     }
 
     //register validation
+    //api
     public function registerValidation($request) 
     {
         $rules = [
@@ -117,6 +119,7 @@ class UserService implements UserServiceInterface
     }
 
     //login validation
+    //api
     public function loginValidation($request) 
     {
         $rules = [
@@ -200,5 +203,25 @@ class UserService implements UserServiceInterface
         ]);
 
         return $user;
+    }
+
+    public function login($request) 
+    {
+        $email = $request['email'];
+        $password = $request['password'];
+        //dd($request);
+
+        if (Auth::attempt([
+                'email' => $email,
+                'password' => $password
+            ])) {
+
+            return $data = [
+                'email' => $email,
+            ]; 
+        } else {
+            $message = "Khong co quyen";
+            return $message;
+        }
     }
 }
