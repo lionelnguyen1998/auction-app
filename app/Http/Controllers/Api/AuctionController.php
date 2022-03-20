@@ -14,8 +14,8 @@ use App\Models\User;
 use App\Models\Bid;
 use App\Models\Item;
 use App\Models\ItemValue;
+use App\Models\Favorite;
 use App\Models\Comment;
-use App\Models\AuctionStatus;
 
 class AuctionController extends ApiController
 {
@@ -197,10 +197,9 @@ class AuctionController extends ApiController
     //delete auctions
     public function delete($auctionId)
     {
-        $status = AuctionStatus::where('auction_id', '=', $auctionId)
-            ->get()
-            ->pluck('status');
-        if ($status[0] == 3) {
+        $status = Auction::findOrFail($auctionId)->status;
+
+        if ($status == 3) {
             $itemId = Item::where('auction_id', '=', $auctionId)
                 ->get()
                 ->pluck('item_id')
@@ -211,6 +210,7 @@ class AuctionController extends ApiController
                 Item::where('item_id', '=', $itemId[0])->delete();
                 Bid::where('auction_id', '=', $auctionId)->delete();
                 Comment::where('auction_id', '=', $auctionId)->delete();
+                Favorite::where('auction_id', '=', $auctionId)->delete();
                 Auction::find($auctionId)->delete();
                 $message = "Da xoa";
             }
@@ -223,9 +223,7 @@ class AuctionController extends ApiController
     //edit auction when auctions đang chờ duyệt
     public function edit(Request $request, $auctionId)
     {
-        $status = AuctionStatus::where('auction_id', $auctionId)
-            ->get()
-            ->pluck('status');
+        $status = Auction::findOrFail($auctionId)->status;
         
         if ($status[0] == 4) {
             $validator = $this->auctionService->auctionValidation($request->all());
@@ -248,5 +246,79 @@ class AuctionController extends ApiController
         $data = $this->auctionService->comments($auctionId, $request->all());
 
         return $this->response->withData($data);
+    }
+
+    //create bids
+    public function bids($auctionId, Request $request)
+    {
+        $validator = $this->auctionService->bidValidation($request->all(), $auctionId);
+
+        if ($validator->fails()) {
+            return $this->response->errorValidation($validator);
+        }
+
+        $data = $this->auctionService->bids($auctionId, $request->all());
+
+        return $this->response->withData($data);
+    }
+
+    //update like
+    public function updateLike(Request $request)
+    {
+        $userId = auth()->user()->user_id;
+        $auctionId = $request['auction_id'];
+        
+        $validated = $this->auctionService->likeValidation($request->all());
+
+        if ($validated->fails()) {
+            return redirect(url()->previous())
+                ->withErrors($validated)
+                ->withInput();
+        }
+
+        $is_liked = Favorite::where('auction_id', $auctionId)
+            ->get()
+            ->firstOrFail();
+
+        if (isset($is_liked)) {
+            $is_liked->timestamps = false;
+            $is_liked->is_liked = !($is_liked->is_liked);
+            $is_liked->update();
+        } else {
+            $is_liked = Favorite::insert([
+                'user_id' => auth()->user()->user_id,
+                'auction_id' => $auctionId ?? null,
+                'is_liked' => true
+            ]);
+        }
+
+        return $this->response->withData($is_liked);
+    }
+
+    //accept bid
+    public function accept($auctionId, Request $request)
+    {
+        $userSelling = Auction::where('selling_user_id', auth()->user()->user_id)
+            ->where('auction_id', $auctionId)
+            ->get()
+            ->toArray();
+
+        if ($userSelling) {
+            $data = $this->auctionService->accept($request->all(), $auctionId);
+            return $this->response->withData($data);
+        } else {
+            return [
+                'message' => 'khong co quyen'
+            ];
+        }
+    }
+
+    //update status
+    public function updateStatus()
+    {
+        $auctionId = Auction::get()
+            ->pluck('auction_id')
+            ->toArray();
+        return Auction::updateStatus($auctionId);
     }
 }

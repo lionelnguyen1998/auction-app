@@ -9,15 +9,19 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SendMail;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Services\UploadService;
 
 class UserService implements UserServiceInterface
 {
-    public function __construct()
+    protected $uploadService;
+
+    public function __construct(UploadService $uploadService)
     {
         //Error Messages
         $this->messageRequired = config('message.MSG_01');
         $this->messageErrorFormatEmail = config('message.MSG_02');
         $this->messageErrorMax = config('message.MSG_03');
+        $this->uploadService = $uploadService;
     }
 
     //register validation
@@ -32,17 +36,21 @@ class UserService implements UserServiceInterface
             'name' => 'required|max:255'
         ];
 
-        $allUserId = User::withTrashed()
+        $allUserEmail = User::withTrashed()
             ->get()
-            ->pluck('user_id')
+            ->pluck('email')
             ->toArray();
 
         if (isset($request["user_id"])) {
             $userId = $request["user_id"];
-            $rules['email'] = "required|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
+            $rules['email'] = "required|email|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
         } else {
-            foreach ($allUserId as $key => $id) {
-                $rules['email'] = "required|max:255|unique:users,email,$id,user_id,deleted_at,NULL";
+            foreach ($allUserEmail as $key => $value) {
+                if ($request['email'] == $value) {
+                    $rules['email'] = "required|email|max:255|unique:users,email";
+                } else {
+                    $rules['email'] = "required|email|max:255";
+                }
             }
         }
 
@@ -144,12 +152,14 @@ class UserService implements UserServiceInterface
     }
 
     //sendEmail
+    //api
     public function contactValidation($request) 
     {
         $rules = [
             'phone' => 'required|max:60',
             'name' => 'required|max:255',
-            'email' => 'required|max:255|email'
+            'email' => 'required|max:255|email',
+            'content' => 'required'
         ];
 
         $messages = [
@@ -164,16 +174,9 @@ class UserService implements UserServiceInterface
 
     }
 
+    //api
     public function sendEmail($request)
     {
-        $validated = $this->contactValidation($request);
-
-        if ($validated->fails()) {
-            return redirect(url()->previous())
-                ->withErrors($validated)
-                ->withInput();
-        }
-
         $newContact = Contact::create([
             'email' => $request['email'],
             'phone' => $request['phone'],
@@ -184,6 +187,8 @@ class UserService implements UserServiceInterface
         $adminMail = config('mail.mailers.smtp.username');
 
         Mail::to($adminMail)->send(new SendMail($newContact));
+
+        return $newContact;
     }
 
 
@@ -191,6 +196,10 @@ class UserService implements UserServiceInterface
     public function register($request) 
     {
         $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
+
+        if (isset($request['avatar'])) {
+            $request['avatar'] = $this->uploadService->store($request['avatar']);
+        }
 
         $user = User::create([
             'name' => $request['name'],
@@ -201,27 +210,31 @@ class UserService implements UserServiceInterface
             'avatar' => $request['avatar'] ?? $avatarDefault,
             'role' => 2
         ]);
-
+      
         return $user;
     }
 
-    public function login($request) 
+    public function edit($request)
     {
-        $email = $request['email'];
-        $password = $request['password'];
-        //dd($request);
+        $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
 
-        if (Auth::attempt([
-                'email' => $email,
-                'password' => $password
-            ])) {
-
-            return $data = [
-                'email' => $email,
-            ]; 
-        } else {
-            $message = "Khong co quyen";
-            return $message;
+        if (isset($request['avatar'])) {
+            $request['avatar'] = $this->uploadService->store($request['avatar']);
         }
+
+        $request['password'] = Hash::make($request['password']);
+
+        $user = tap(User::where('user_id', auth()->user()->user_id))
+            ->update($request)->firstOrFail();
+
+        auth()->user()->name = $user->name;
+        auth()->user()->email = $user->email;
+        auth()->user()->phone = $user->phone;
+        auth()->user()->address = $user->address ?? null;
+        auth()->user()->password = Hash::make($user->password);
+        auth()->user()->avatar = $user->avatar ?? $avatarDefault;
+
+        $message = "update thanh cong";
+        return $message;
     }
 }

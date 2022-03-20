@@ -23,6 +23,7 @@ class Item extends Model
         'series',
         'name',
         'starting_price',
+        'selling_info',
     ];
 
     protected $dates = [
@@ -59,6 +60,26 @@ class Item extends Model
     public function images()
     {
         return $this->hasMany(Image::class, 'item_id', 'item_id');
+    }
+
+    public function listAccept()
+    {
+        $userId = auth()->user()->user_id;
+       
+        $auctionId = Auction::where('status', '=', 6)
+            ->get()
+            ->pluck('auction_id');
+   
+        if (isset($auctionId[0])) {
+            $auctionSelling = Auction::join('items', 'items.auction_id', '=', 'auctions.auction_id')
+                ->where('items.buying_user_id', $userId)
+                ->where('auctions.auction_id', $auctionId)
+                ->get();
+    
+            return $auctionSelling;
+        } else {
+            return false;
+        }   
     }
 
 }

@@ -5,16 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AuctionStatus extends Model
+class UserReadNews extends Model
 {
     use HasFactory;
 
-    protected $table = 'auctions_status';
-    protected $primaryKey = 'auction_status_id';
+    protected $table = 'user_read_news';
+    protected $primaryKey = 'user_read_new_id';
 
     protected $fillable = [
-        'auction_status_id',
+        'user_read_new_id',
+        'new_id',
         'auction_id',
-        'status'
+        'item_id',
+        'is_read'
     ];
 }

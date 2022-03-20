@@ -304,7 +304,7 @@
                 type: 'POST',
                 dataType: 'JSON',
                 data: form,
-                url: "{{ route('uploadFiles') }}",
+                url: "",
                 success: function (results) {
                     if (results.error === false) {
                             $('#image_show_user-{{$i}}').html('<a href="' + results.url + '" target="_blank">' +
@@ -328,7 +328,7 @@
             type: 'POST',
             dataType: 'JSON',
             data: form,
-            url: "{{ route('uploadFiles') }}",
+            url: "",
             success: function (results) {
                 if (results.error === false) {
                         $('#image_show_avatar').html('<a href="' + results.url + '" target="_blank">' +

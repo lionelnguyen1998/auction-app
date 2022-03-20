@@ -23,6 +23,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('VUE.home');
+        return view('VUE.home', [
+            'title' => 'AUCTIONS'
+        ]);
     }
 }
