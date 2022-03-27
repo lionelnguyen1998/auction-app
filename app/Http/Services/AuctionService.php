@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\CategoryValue;
 use App\Models\ItemValue;
+use App\Models\Brand;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -122,6 +123,17 @@ class AuctionService implements AuctionServiceInterface
     public function getListAuction()
     {
         $auction = Auction::with('category')
+            ->where('status', '<>', 4)
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return $auction;
+    }
+
+    public function getListAuctionByStatus($statusId)
+    {
+        $auction = Auction::with('category')
+            ->where('status', $statusId)
             ->orderBy('created_at', 'DESC')
             ->get();
 
@@ -280,8 +292,7 @@ class AuctionService implements AuctionServiceInterface
     public function likeValidation($request)
     {
         $rules = [
-            'auction_id' => 'exists:auctions,auction_id',
-            'item_id' => 'exists:items,item_id'
+            'auction_id' => 'required|exists:auctions,auction_id',
         ];
 
         $messages = [
@@ -296,35 +307,48 @@ class AuctionService implements AuctionServiceInterface
     public function sellingInfo($auctionId)
     {
         $maxPrice = $this->getMaxPrice($auctionId);
-    
-        $userBuying = Bid::where('auction_id', $auctionId)->get()
-            ->pluck('user_id')
-            ->firstOrFail();
-
-        $auction = Auction::findOrFail($auctionId);
-
         $item = Item::where('auction_id', $auctionId)
             ->get()
             ->firstOrFail();
 
+        $auctionInfo = Auction::findOrFail($auctionId)
+            ->where('auction_id', $auctionId)
+            ->select('title', 'start_date', 'end_date')
+            ->get();
+
+        $itemInfo = Item::with('userBuying')
+            ->where('auction_id', $auctionId)
+            ->where('buying_user_id', auth()->user()->user_id)
+            ->get()
+            ->firstOrFail();
+            
+        $brand = Brand::where('brand_id', $item->brand_id)
+            ->get()
+            ->pluck('name')
+            ->firstOrFail();
+
         return [
-            'buying_user_name' => User::findOrFail($userBuying)->name,
-            'buying_user_phone' => User::findOrFail($userBuying)->phone,
-            'buying_user_email' => User::findOrFail($userBuying)->email,
-            'max_price' => $maxPrice,
-            'auctions' => [
-                'title' => $auction->title,
-                'category_id' => $auction->category_id,
-                'start_date' => $auction->start_date,
-                'end_date' => $auction->end_date,
+            'item_info' => [
+                'name' => $itemInfo->name,
+                'selling_user' => [
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'adress' => auth()->user()->address,
+                    'phone' => auth()->user()->phone
+                ],
+                'buying_user' => [
+                    'name' => $itemInfo->userBuying->name,
+                    'email' => $itemInfo->userBuying->email,
+                    'address' => $itemInfo->userBuying->email,
+                    'phone' => $itemInfo->userBuying->phone
+                ],
+                'brand' => $brand,
+                'series' => $itemInfo->series,
+                'starting_price' => $itemInfo->starting_price,
+                'max_price' => $maxPrice,
+                'selling_info' => $itemInfo->selling_info,
             ],
-            'item' => [
-                'name' => $item->name,
-                'brand_id' => $item->brand_id,
-                'series' => $item->series,
-                'description' => $item->description,
-                'selling_info' => $item->selling_info
-            ],
+            'auction_info' => $auctionInfo
         ];
     }
 
@@ -335,14 +359,49 @@ class AuctionService implements AuctionServiceInterface
             ->whereNotNull('selling_info')
             ->get();
 
+        $checkAuction = Auction::findOrFail($auctionId)
+            ->where('auction_id', $auctionId)
+            ->where('status', '<>', 3)
+            ->get()
+            ->toArray();
+
+        $checkSellingUser = Auction::findOrFail($auctionId)
+            ->where('selling_user_id', auth()->user()->user_id)
+            ->get()
+            ->toArray();
+
+        $bids = Bid::where('auction_id', $auctionId)
+            ->get()
+            ->toArray();
+        
+        if (empty($checkSellingUser))
+        {
+            return [
+                'message' => 'User không có quyền'
+            ];
+        }
+        if ($checkAuction)
+        {
+            return [
+                'message' => 'Phiên đấu giá chưa kết thúc hoặc phiên đấu giá không tồn tại'
+            ];
+        }
         if (isset($check[0])) {
-            return $check;
+            return [ 
+                'message' => 'Đã chấp nhận'
+            ];
+        }
+        if (empty($bids)) {
+            return [ 
+                'message' => 'Chưa có trả giá nào'
+            ];
         } else {
             $maxPrice = $this->getMaxPrice($auctionId);
     
-            $userBuying = Bid::where('auction_id', $auctionId)->get()
-                ->pluck('user_id')
+            $userBuying = Bid::where('auction_id', $auctionId)
                 ->orderBy('price', 'DESC')
+                ->get()
+                ->pluck('user_id')
                 ->firstOrFail();
     
             $auction = Auction::findOrFail($auctionId);
@@ -361,12 +420,44 @@ class AuctionService implements AuctionServiceInterface
                 $auction->status = 6;
                 $auction->update();
             }
-            
+
+            $auctionInfo = Auction::findOrFail($auctionId)
+                ->where('auction_id', $auctionId)
+                ->select('title', 'start_date', 'end_date')
+                ->get();
+
+            $itemInfo = Item::with('userBuying')
+                ->where('auction_id', $auctionId)
+                ->where('buying_user_id', $item->buying_user_id)
+                ->get()
+                ->firstOrFail();
+            $brand = Brand::where('brand_id', $item->brand_id)
+                ->get()
+                ->pluck('name')
+                ->firstOrFail();
+               
             $data = [
-                'name' => $item->name,
-                'buying_user_id' => $item->buying_user_id,
-                'auction_id' => $item->auction_id,
-                'selling_info' => $item->selling_info,
+                'item_info' => [
+                    'name' => $itemInfo->name,
+                    'selling_user' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'adress' => auth()->user()->address,
+                        'phone' => auth()->user()->phone
+                    ],
+                    'buying_user' => [
+                        'name' => $itemInfo->userBuying->name,
+                        'email' => $itemInfo->userBuying->email,
+                        'address' => $itemInfo->userBuying->email,
+                        'phone' => $itemInfo->userBuying->phone
+                    ],
+                    'brand' => $brand,
+                    'series' => $itemInfo->series,
+                    'starting_price' => $itemInfo->starting_price,
+                    'max_price' => $maxPrice,
+                    'selling_info' => $itemInfo->selling_info,
+                ],
+                'auction_info' => $auctionInfo
             ];
     
             return $data;

@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\NewController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,19 +30,27 @@ Route::group(['middleware' => 'api'], function(){
 
     //User
     Route::post('register', [UserController::class, 'register'])->name('register');
-    Route::get('login', [AuthController::class, 'login'])->name('login');
-    
+    Route::post('login', [AuthController::class, 'login'])->name('login');
 
+    //Slider
+    Route::get('slider', [HomeController::class, 'slider'])->name('slider');
+    
     //Auction
     Route::prefix('auctions')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('listAuction');
+        Route::get('/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail'])->name('detailAuctions');
-        //khong can thiet lam
         Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType'])->name('listAuctionByType');
         Route::get('/listAuctionsByUser/{userId}', [AuctionController::class, 'listAuctionsByUser'])->name('listAuctionsByUser');
     });
 
     Route::post('/contactUs', [UserController::class, 'contactUs'])->name('contactUs');
+
+    //list comment
+    Route::get('/comments/{auctionId}', [AuctionController::class, 'listComments'])->name('listComments');
+
+    //list bids
+    Route::get('/bids/{auctionId}', [AuctionController::class, 'listBids'])->name('listBids');
 
     //New
     Route::prefix('news')->group(function () {
@@ -71,7 +80,7 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/create/{auctionId}', [AuctionController::class, 'comments'])->name('createComments');
         });
 
-        //Bid
+         //Bid
         Route::prefix('bids')->group(function () {
             Route::post('/create/{auctionId}', [AuctionController::class, 'bids'])->name('createBids');
         });

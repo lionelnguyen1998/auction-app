@@ -37,6 +37,11 @@ class Item extends Model
         return $this->belongsTo(User::class, 'selling_user_id', 'user_id');
     }
 
+    public function userBuying()
+    {
+        return $this->belongsTo(User::class, 'buying_user_id', 'user_id');
+    }
+
     public function auctions()
     {
         return $this->belongsTo(Auction::class, 'auction_id', 'auction_id');

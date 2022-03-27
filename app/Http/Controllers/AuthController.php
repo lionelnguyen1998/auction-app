@@ -6,15 +6,18 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Services\UserService;
+use App\Http\Controllers\Api\ApiResponse;
+use App\Http\Controllers\Api\ApiController;
 
-class AuthController extends Controller
+class AuthController extends ApiController
 {
     protected $userService;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, ApiResponse $response, Request $request)
     {
         $this->middleware('auth:api', ['except' => ['login']]);
         $this->userService = $userService;
+        parent::__construct($request, $response);
     }
 
     /**
@@ -26,15 +29,17 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $validator = $this->userService->loginValidation($credentials);
 
         if ($validator->fails()) {
             return $this->response->errorValidation($validator);
         }
+
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        
 
         return $this->respondWithToken($token);
     }
@@ -82,8 +87,14 @@ class AuthController extends Controller
     {
         return response()->json([
             'access_token' => $token,
+            'user' => $this->guard(),
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 600
         ]);
+    }
+
+    public function guard()
+    {
+        return Auth::Guard('api')->user();
     }
 }

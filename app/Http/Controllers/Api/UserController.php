@@ -36,8 +36,7 @@ class UserController extends ApiController
     public function edit(Request $request)
     {
         $validator = $this->userService->registerValidation($request->all());
-
-        dd($validator);
+        
         if ($validator->fails()) {
             return $this->response->errorValidation($validator);
         }
