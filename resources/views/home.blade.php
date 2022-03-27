@@ -1,14 +1,79 @@
+<script>
+	var auctionApi = 'http://localhost:8080/api/auctions';
+
+	function start() {
+		getAuctions(function(auctions) {
+			renderAuctions(auctions);
+		});
+	}
+
+	start();
+
+	// get list auctions
+	function getAuctions(callback) {
+		fetch(auctionApi) 
+			.then(function(response) {
+				return response.json();
+			})
+			.then(callback);
+	}
+
+	function getAuctionStatus(callback) {
+		fetch(auctionApi + '/' + 2) 
+			.then(function(response) {
+				return response.json();
+			})
+			.then(callback);
+	}
+
+	function renderAuctions(auctions) {
+		var auctions = auctions.data.auctions;
+		var listAuctionBlock = document.querySelector('#list-auctions');
+		var htmls = auctions.map(function(auction) {
+			return `
+			<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item">
+				<div class="block2">
+					<div class="block2-pic hov-img0">
+						<img src="${ auction.category.image}" alt="IMG-PRODUCT">
+
+						<a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+							Quick View
+						</a>
+					</div>
+
+					<div class="block2-txt flex-w flex-t p-t-14">
+						<div class="block2-txt-child1 flex-col-l ">
+							<a href="" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+							${ auction.title }
+							</a>
+							<span class="stext-105 cl3">
+								<p class="btn btn-success">${ auction.status }</p>
+							</span>
+						</div>
+
+						<div class="block2-txt-child2 flex-r p-t-3">
+							<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+								<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
+								<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			`;
+		});
+		listAuctionBlock.innerHTML = htmls.join('');
+	}
+</script>
+<style>
+	.container, .container-sm, .container-md, .container-lg, .container-xl {
+		max-width: 1200px !important;
+	}
+</style>
 @extends('main')
 @section('content')
 
-	<style>
-		.block2-pic img {
-			height: 200px;
-			/* width: auto; */
-		}
-	</style>
-
-	@include('slider')
+@include('slider')
 
 	<!-- Product -->
 	<section class="bg0 p-t-23 p-b-140">
@@ -21,19 +86,19 @@
 
 			<div class="flex-w flex-sb-m p-b-52">
 				<div class="flex-w flex-l-m filter-tope-group m-tb-10">
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
+					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1">
 						全て 
 					</button>
 
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".status1">
+					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5">
 						{{ config('const.status.1') }}
 					</button>
 
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".status2">
+					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" onclick="getAuctionStatus()">
 						{{ config('const.status.2') }}
 					</button>
 
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".status3">
+					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5">
 						{{ config('const.status.3') }}
 					</button>
 				</div>
@@ -124,87 +189,9 @@
 			</div>
 
 			<div class="row isotope-grid">
-                @foreach ($auctions as $key => $auction)
-					@php
-						$status = config('const.status');
-						$index = $auction["auction_status"]["status"];
-					@endphp
+				<div id="list-auctions">
 
-					<!--dang dien ra-->
-					@if ($index == 1)
-						<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item status1">
-							<!-- Block2 -->
-							<div class="block2">
-								<div class="block2-pic hov-img0">
-									<img src="{{ $auction["category"]["image"] }}" alt="IMG-PRODUCT">
-								</div>
-
-								<div class="block2-txt flex-w flex-t p-t-14">
-									<div class="block2-txt-child1 flex-col-l ">
-										<a href="{{ route('detailAuctions', ['auctionId' => $auction['auction_id']]) }}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-											{{ $auction['title'] }}
-										</a>
-
-										<span class="stext-105 cl3">
-											<p class="btn btn-success">{{ $status[$index] }}</p>
-										</span>
-									</div>
-
-									@include('like')
-								</div>
-							</div>
-						</div>
-					@endif
-					<!--sap dien ra-->
-					@if ($index == 2)
-						<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item status2">
-							<!-- Block2 -->
-							<div class="block2">
-								<div class="block2-pic hov-img0">
-									<img src="{{ $auction["category"]["image"] }}" alt="IMG-PRODUCT">
-								</div>
-
-								<div class="block2-txt flex-w flex-t p-t-14">
-									<div class="block2-txt-child1 flex-col-l ">
-										<a href="{{ route('detailAuctions', ['auctionId' => $auction['auction_id']]) }}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-											{{ $auction['title'] }}
-										</a>
-
-										<span class="stext-105 cl3">
-											<p class="btn btn-warning">{{ $status[$index] }}</p>
-										</span>
-									</div>
-
-									@include('like')
-								</div>
-							</div>
-						</div>
-					@endif
-					<!--da ket thuc-->
-					@if ($index == 3)
-						<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item status3">
-							<!-- Block2 -->
-							<div class="block2">
-								<div class="block2-pic hov-img0">
-									<img src="{{ $auction["category"]["image"] }}" alt="IMG-PRODUCT">
-								</div>
-
-								<div class="block2-txt flex-w flex-t p-t-14">
-									<div class="block2-txt-child1 flex-col-l ">
-										<a href="{{ route('detailAuctions', ['auctionId' => $auction['auction_id']]) }}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-											{{ $auction['title'] }}
-										</a>
-
-										<span class="stext-105 cl3">
-											<p class="btn btn-danger">{{ $status[$index] }}</p>
-										</span>
-									</div>
-									@include('like')
-								</div>
-							</div>
-						</div>
-					@endif
-                @endforeach
+				</div>
 			</div>
 			<!-- Load more -->
 			<div class="flex-c-m flex-w w-full p-t-45" id="button-loadMore">

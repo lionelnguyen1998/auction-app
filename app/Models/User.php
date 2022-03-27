@@ -9,8 +9,9 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
     use SoftDeletes; 
@@ -63,20 +64,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    // public function scopeByEmail($query, $email)
-    // {
-    //     return $query->where('email', $email);
-    // }
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
 
-    // //Login by email 
-    // public function loginByEmail($request)
-    // {
-    //     $user = self::byEmail($request['email'])->first();
-
-    //     if (!empty($user) && Hash::check($request['password'], $user->password)) {
-    //         return $user;
-    //     }
-
-    //     return false;
-    // }
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

@@ -4,6 +4,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuctionController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\NewController;
+use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,77 +26,84 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::group(['namespace' => 'Api'], function(){
-    Route::post('register', [UserController::class, 'register'])->name('registerUser');
-    //client
-    //login
-    Route::get('login', [UserController::class, 'index'])->name('loginUser');
-    Route::get('logout', [UserController::class, 'logout'])->name('logoutUser');
+Route::group(['middleware' => 'api'], function(){
+
+    //User
+    Route::post('register', [UserController::class, 'register'])->name('register');
+    Route::post('login', [AuthController::class, 'login'])->name('login');
+
+    //Slider
+    Route::get('slider', [HomeController::class, 'slider'])->name('slider');
     
-    Route::get('edit/{userId}', [UserController::class, 'edit'])->name('editUser');
-    Route::post('update', [UserController::class, 'update'])->name('updateUser');
-    Route::post('login/store', [UserController::class, 'store'])->name('storeUserAccount');
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::post('/services/load-auction', [HomeController::class, 'loadAuction'])->name('loadAuction');
-
-    //Upload
-    Route::post('user/upload/services', [UploadController::class, 'store'])->name('uploadFiles');
-
-    //product 
-    Route::prefix('categories')->group(function () {
-        Route::get('product/{typeId}', [ProductController::class, 'index'])->name('productOfCategory');
-        Route::get('product/detail/{auctionId}', [ProductController::class, 'detail'])->name('detailAuctions');
-        // Route::get('product/list/{auctionId}', [ProductController::class, 'list'])->name('listItemOfAuctions');
-    });
-
-    //contact
-    Route::prefix('contacts')->group(function () {
-        Route::get('/', [UserController::class, 'contact'])->name('contact');
-        Route::post('/create', [UserController::class, 'contactUs'])->name('contactUs');
-    });
-
     //Auction
     Route::prefix('auctions')->group(function () {
-        Route::get('/', [AuctionController::class, 'index'])->name('listAuctionHome');
+        Route::get('/', [AuctionController::class, 'index'])->name('listAuction');
+        Route::get('/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
+        Route::get('/detail/{auctionId}', [AuctionController::class, 'detail'])->name('detailAuctions');
+        Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType'])->name('listAuctionByType');
+        Route::get('/listAuctionsByUser/{userId}', [AuctionController::class, 'listAuctionsByUser'])->name('listAuctionsByUser');
     });
 
-    Route::middleware(['auth'])->group(function () {
+    Route::post('/contactUs', [UserController::class, 'contactUs'])->name('contactUs');
 
-        //bid
-        Route::prefix('bids')->group(function () {
-            Route::post('create', [BidController::class, 'create'])->name('insertBid');
-        });
-    
-         //Comments
-         Route::prefix('comments')->group(function () {
-            Route::post('create', [CommentController::class, 'create'])->name('insertComment');
-        });
-    
-        //Auctions
+    //list comment
+    Route::get('/comments/{auctionId}', [AuctionController::class, 'listComments'])->name('listComments');
+
+    //list bids
+    Route::get('/bids/{auctionId}', [AuctionController::class, 'listBids'])->name('listBids');
+
+    //New
+    Route::prefix('news')->group(function () {
+        Route::get('/', [NewController::class, 'index'])->name('listNews');
+        Route::get('/read/{newId}', [NewController::class, 'read'])->name('readNews');
+    });
+
+    Route::middleware(['auth'])->group(function () { 
+        //Account
+        Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('edit', [UserController::class, 'edit'])->name('edit');
+
+        //auctions
         Route::prefix('auctions')->group(function () {
-            Route::get('list/{userId}', [AuctionController::class, 'list'])->name('listAuctions');
-            Route::get('create', [AuctionController::class, 'create'])->name('createAuction');
-            Route::post('store', [AuctionController::class, 'store'])->name('insertAuction');
-            //report deny auction
-            Route::get('deny', [AuctionController::class, 'deny'])->name('auctionDeny');
-            //delete auction
-            Route::get('/delete/{auctionId}', [AuctionController::class, 'delete'])->name('auctionDelete');
+            Route::post('/create', [AuctionController::class, 'create'])->name('createAuctions');
+            Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete'])->name('deleteAuctions');
+            Route::post('/edit/{auctionId}', [AuctionController::class, 'edit'])->name('editAuctions');
         });
-    
-        //item
+
         Route::prefix('items')->group(function () {
-            Route::get('create/{auctionId}/{categoryId}', [ItemController::class, 'create'])->name('createItem');
-            Route::post('store', [ItemController::class, 'store'])->name('insertItem');
+            Route::post('/create/{auctionId}', [ItemController::class, 'create'])->name('createItems');
+            Route::post('/edit/{itemId}', [ItemController::class, 'edit'])->name('editItems');
         });
-    
-        //like
-        Route::post('like/{auctionId}', [FavoriteController::class, 'like'])->name('likeAuction');
-    
-        //sendEmail when accept bid
-        Route::get('acceptBid/{bidId}', [AuctionController::class, 'acceptBid'])->name('acceptBid');
-    
-        //chat when negotiate
-        Route::get('chat', [ChatController::class, 'chat'])->name('chat');  
-    
+
+        //Commnents
+        Route::prefix('comments')->group(function () {
+            Route::post('/create/{auctionId}', [AuctionController::class, 'comments'])->name('createComments');
+        });
+
+         //Bid
+        Route::prefix('bids')->group(function () {
+            Route::post('/create/{auctionId}', [AuctionController::class, 'bids'])->name('createBids');
+        });
+
+        //Like
+        Route::post('updateLike', [AuctionController::class, 'updateLike'])->name('updateLike');
+
+        //read reject auctions report
+        Route::get('reason/{auctionDenyId}', [NewController::class, 'reason'])->name('readReason');
+
+        //accept bid => send report
+        Route::prefix('accept')->group(function () {
+            Route::post('/{auctionId}', [AuctionController::class, 'accept'])->name('acceptBid');
+            Route::get('/read/{itemId}', [NewController::class, 'readAccept'])->name('readAcceptBid');
+        });
+
+        //upload file
+        Route::post('/uploadFile', [UploadController::class, 'upload'])->name('uploadFile');
+
+        //update auction status
+        Route::get('/updateStatus', [AuctionController::class, 'updateStatus'])->name('updateStatus');
+
+        //negotiate by chat box
+
     });
 });

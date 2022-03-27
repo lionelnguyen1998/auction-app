@@ -19,7 +19,6 @@ class CategoryValue extends Model
         'icon',
         'type',
         'name',
-        'name_en'
     ];
 
     protected $dates = [

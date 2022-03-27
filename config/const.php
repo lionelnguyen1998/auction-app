@@ -9,11 +9,12 @@ return [
 
     //status
     'status' => [
-        1 => '起こっている',
+        1 => '起こる',
         2 => 'もうすぐ',
         3 => '終わった',
         4 => '評価',
-        5 => '断った'
+        5 => '断った',
+        6 => '売りました'
     ],
 
     //category
@@ -37,5 +38,9 @@ return [
         9 => 'ロゴ',
         10 => 'コンタクト',
         11 => '私達について'
-    ]
+    ],
+
+    'jwt_key' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjEzODY4OTkxMzEsImlzcyI6ImppcmE6MTU0ODk1OTUiLCJxc2giOiI4MDYzZmY0Y2ExZTQxZGY3YmM5MGM4YWI2ZDBmNjIwN2Q0OTFjZjZkYWQ3YzY2ZWE3OTdiNDYxNGI3MTkyMmU5IiwiaWF0IjoxMzg2ODk4OTUxfQ.uKqU9dTB6gKwG6jQCuXYAiMNdfNRw98Hw_IWuA5MaMo',
+
+    
 ];

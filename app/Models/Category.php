@@ -16,7 +16,6 @@ class Category extends Model
         'category_id',
         'image',
         'name',
-        'name_en',
         'type',
     ];
 

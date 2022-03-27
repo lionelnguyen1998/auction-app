@@ -17,7 +17,6 @@ class News extends Model
         'new_id',
         'user_id',
         'title',
-        'title_en',
         'content'
     ];
 
@@ -30,5 +29,10 @@ class News extends Model
     public function users()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function listNews()
+    {
+        return News::all();
     }
 }

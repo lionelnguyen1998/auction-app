@@ -14,7 +14,6 @@ class Bid extends Model
         'bid_id',
         'user_id',
         'auction_id',
-        'item_id',
         'price',
         'phone',
     ];
