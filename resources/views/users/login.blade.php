@@ -67,6 +67,53 @@
     </div>
 
     <!-- JS -->
+     <!-- <script>
+        let inMemoryToken;
+        var loginBlock = document.querySelector('.form-submit');
+        loginBlock.addEventListener('click', (e) => {
+            const email = document.querySelector('input[name="email"]').value;
+            const password = document.querySelector('input[name="password"]').value;
+            
+            e.preventDefault();
+            var loginApi = 'http://localhost:8080/api/login';
+            fetch(loginApi, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain,*/*',
+                        'Content-Type': 'application/json',
+                        'redirect': 'manual'
+                    },
+                    body: JSON.stringify({
+                        "email": email,
+                        "password": password,
+                    })
+                })
+                .then(function(res) {
+                    return res.json();
+                })
+                .then(res => {
+                    //console.log(res)
+                    if (res.error) {
+                        document.getElementById('error-all').innerHTML = "Mật khẩu hoặc email không đúng ):";
+                    } else if (res.errors) {
+                        if (res.errors.password && res.errors.email) {
+                            document.getElementById('error-password').innerHTML = res.errors.password;
+                            document.getElementById('error-email').innerHTML = res.errors.email;
+                        } else if (res.errors.email) {
+                            document.getElementById('error-email').innerHTML = res.errors.email;
+                        } else {
+                            document.getElementById('error-password').innerHTML = res.errors.password;
+                        }
+                    } else {
+                        let inMemoryToken = res.access_token;
+                        const user = await User.findByCredentials(req.body.email, req.body.password)
+                        localStorage.setItem('user', JSON.stringify(res));
+                        // return window.location.href="http://localhost:8080/";
+                        return inMemoryToken;
+                    }
+                }) 
+        }); 
+    </script> -->
     <script src="/template/register/vendor/jquery/jquery.min.js"></script>
     <script src="/template/register/js/main.js"></script>
 </body><!-- This templates was made by Colorlib (https://colorlib.com) -->

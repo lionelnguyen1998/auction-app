@@ -36,13 +36,6 @@
 											<label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('brand_id')}}</label><br/>
 										@endif
 									</div>
-									<div class="col">
-                                        <label for="series"><b>シリーズ  </b></label>
-                                        <input type="text" class="form-control size-119" name="series" value="{{ old('series') }}" placeholder="シリーズを入力してください" />
-                                        @if($errors->has('series'))
-                                            <label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('series')}}</label><br/>
-                                        @endif
-									</div>
 								</div>
 							</div>
 							<div class="form-group">
@@ -55,10 +48,10 @@
                                         @endif
 									</div>
 									<div class="col">
-                                        <label for="name_en"><b>名前（英語）  </b></label>
-                                        <input type="text" class="form-control size-119" name="name_en" value="{{ old('name_en') }}" placeholder="英語で名前を入力してください"/>
-                                        @if($errors->has('name_en'))
-                                            <label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('name_en')}}</label><br/>
+                                        <label for="series"><b>シリーズ  </b></label>
+                                        <input type="text" class="form-control size-119" name="series" value="{{ old('series') }}" placeholder="シリーズを入力してください" />
+                                        @if($errors->has('series'))
+                                            <label class="control-label" for="inputError" style="color: red; padding-left: 5px;">{{ $errors->first('series')}}</label><br/>
                                         @endif
 									</div>
 								</div>

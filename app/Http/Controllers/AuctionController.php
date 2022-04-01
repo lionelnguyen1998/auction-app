@@ -13,7 +13,6 @@ use App\Models\Bid;
 use App\Models\Item;
 use App\Models\ItemValue;
 use App\Models\Comment;
-use App\Models\AuctionStatus;
 
 class AuctionController extends Controller
 {
@@ -30,7 +29,7 @@ class AuctionController extends Controller
     {
         return view('auctions.list', [
             'title' => 'オークション一覧', 
-            'auctions' => $this->auctionService->getListAuctions($userId),
+            'auctions' => $this->auctionService->getListAuctionsByUser($userId),
             'inforUser' => User::findOrFail($userId),
             'logo' => Slider::logo(),
         ]);
@@ -61,11 +60,7 @@ class AuctionController extends Controller
             'selling_user_id' => (int)$request['selling_user_id'] ?? null,
             'title' => $request['title_ni'],
             'start_date' => date('Y/m/d H:i', strtotime($request['start_date'])),
-            'end_date' => date('Y/m/d H:i', strtotime($request['end_date']))
-        ]);
-
-        $auctionStatus = AuctionStatus::create([
-            'auction_id' => $auction->auction_id,
+            'end_date' => date('Y/m/d H:i', strtotime($request['end_date'])),
             'status' => 4
         ]);
 

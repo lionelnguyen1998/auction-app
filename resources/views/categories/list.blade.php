@@ -258,7 +258,7 @@
                 @foreach ($auctionByCategory as $key => $auction)
                 @php
                     $status = config('const.status');
-                    $index = $auction["auction_status"]["status"];
+                    $index = $auction["status"];
                 @endphp
                 
 				<!--dang dien ra-->

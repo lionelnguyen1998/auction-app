@@ -74,7 +74,6 @@ class ItemService implements ItemServiceInterface
             'brand_id' => "required",
             'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
-            'name_en' => "max:255",
             'starting_price' => 'required|numeric'
         ];
 
@@ -92,6 +91,7 @@ class ItemService implements ItemServiceInterface
 
     public function registerItem($request)
     {
+        dd($request);
         $item = Item::create([
             'category_id' => $request['category_id'],
             'selling_user_id' => $request['selling_user_id'],
@@ -99,7 +99,6 @@ class ItemService implements ItemServiceInterface
             'brand_id' => $request['brand_id'],
             'series' => $request['series'],
             'name' => $request['name'],
-            'name_en' => $request['name_en'],
             'starting_price' => $request['starting_price'],
             'description' => $request['description']
         ]);
@@ -206,34 +205,23 @@ class ItemService implements ItemServiceInterface
         return $data;
     }
 
-    public function edit($request, $itemId)
+    public function edit($request, $itemId, $images)
     {
         DB::beginTransaction();
             $item = Item::findOrFail($itemId);
-            $auctionId = $item->auction_id;
-            $status = AuctionStatus::where('auction_id', '=', $auctionId)
-                ->get()
-                ->pluck('status')
-                ->firstOrFail();
+            $image = Image::where('item_id', $itemId);
             
-            if ($status == 4) {
-                // if (isset($request['images'])) {
-                //     $images = $request['images'];
-                //     $image = DB::table('images')->where('item_id', $itemId)->update($images);
-                // }
-        
-                // if (isset($request['values'])) {
-                //     $values = $request['values'];
-                //     $values = DB::table('item_values')->where('item_id', $itemId)->update($values);
-                // }
-                unset($request['values']);
-                unset($request['images']);
-                $item = DB::table('items')->where('item_id', $itemId)->update($request);
-            } else {
-                return [
-                    'message' => 'Khong the chinh sua'
-                ];
+            if (isset($images)) {
+                Image::insert($images);
             }
+            dd($images);
+    
+            // if (isset($request['values'])) {
+            //     $values = $request['values'];
+            //     $values = DB::table('item_values')->where('item_id', $itemId)->update($values);
+            // }
+            unset($request['values']);
+            $item = DB::table('items')->where('item_id', $itemId)->update($request);
         DB::commit();
     }
 }

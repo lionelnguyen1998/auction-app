@@ -26,7 +26,6 @@ class HomeController extends Controller
             ->toArray();
 
         $updateStatus = Auction::updateStatus($auctionId);
-        //dd($this->auctionService->getListAuction());
 
         return view('home', [
             'title' => 'オークション',
