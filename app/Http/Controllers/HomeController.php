@@ -16,6 +16,10 @@ class HomeController extends Controller
         $this->auctionService = $auctionService;
     }
 
+    public function welcome()
+    {
+        return view('welcome');
+    }
     public function index() 
     {
         $slider = Slider::whereIn('type', [6, 7, 8])

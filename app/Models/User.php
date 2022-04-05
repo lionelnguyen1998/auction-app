@@ -73,4 +73,19 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function scopeByEmail($query, $email)
+    {
+        return $query->where('email', $email);
+    }
+
+    public static function loginByEmail($request) 
+    {
+        $user = self::byEmail($request['email'])->first();
+        if (isset($user) && Hash::check($request['password'], $user->password)) {
+            return $user;
+        }
+
+        return false;
+    }
 }

@@ -9,6 +9,7 @@ use App\Http\Services\UserService;
 use App\Http\Services\UploadService;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends ApiController
 {
@@ -30,6 +31,33 @@ class UserController extends ApiController
 
         $data = $this->userService->register($request->all());
         return $this->response->withData($data);
+    }
+
+    public function login(Request $request)
+    {
+        // $validator = $this->userService->loginValidation($request->all());
+        // if ($validator->fails()) {
+        //     return $this->response->errorValidation($validator);
+        // }
+
+        // $user = User::loginByEmail($request->all());
+        // $data = $request->all();
+        
+        // $token = Str::random(60);
+        // $userInfo = [
+        //     'api_token' => hash('sha256', $token),
+        //     'user_info' => [
+        //         'user_id' => $user->user_id,
+        //         'name' => $user->name,
+        //         'phone' => $user->phone,
+        //         'address' => $user->address,
+        //         'avatar' => $user->avatar,
+        //         'email' => $user->email
+        //     ]
+        // ];
+
+        // return $this->response->withData($userInfo);
+
     }
 
     //edit user

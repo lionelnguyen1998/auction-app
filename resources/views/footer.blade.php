@@ -247,12 +247,64 @@
 
 	// get list auctions
 	function getAuctions(callback) {
-		fetch(auctionApi) 
+        const localStorageUser = JSON.parse(localStorage.getItem('token'));
+        const inMemmoryToken = localStorageUser.access_token;
+		fetch(auctionApi, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + `${inMemmoryToken}`
+                }
+            }) 
 			.then(function(response) {
 				return response.json();
 			})
+            .then(res => {
+                const avatar = document.getElementById('avatar-header');
+                console.log(res)
+                if (res.user_info) {
+                    avatar.innerHTML = `
+                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <div data-toggle="dropdown" aria-hidden="true">
+                            <img src="${res.user_info.avatar}" alt="Avatar" class="avatar">
+                        </div>        
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! ${res.user_info.name}</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="">編集</a>
+                            <a class="dropdown-item" href="{{ route('logoutUser') }}">ログアウト</a>
+                        </div>	
+                    </div>
+                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+                        <i class="zmdi zmdi-notifications-active"></i>
+                    </div>
+
+                    <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <i class="zmdi zmdi-favorite-outline"></i>
+                    </a>
+                
+                    <a href="" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <i class="zmdi zmdi-spellcheck"></i>
+                    </a>
+                    `;
+                } else {
+                    avatar.innerHTML = `
+                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <div data-toggle="dropdown" aria-hidden="true">
+                            <i class="zmdi zmdi-account"></i>
+                        </div>        
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="{{ route('registerUser') }}">登録</a>
+                            <a class="dropdown-item" href="{{ route('loginUser') }}">ログイン</a>
+                        </div>	
+                    </div>
+                    `;
+                }
+            })
 			.then(callback);
 	}
+
 
 	function getAuctionByStatus(id, callback) {
 		fetch(auctionApi + '/' + id) 

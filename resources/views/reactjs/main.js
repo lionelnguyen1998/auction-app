@@ -594,23 +594,23 @@
  * Lắng nghe / Hủy bỏ lắng nghe
  */
 
-var btn = document.getElementById('btn')
+// var btn = document.getElementById('btn')
 
-function viec1(){
-    console.log('Việc 1')
-}
+// function viec1(){
+//     console.log('Việc 1')
+// }
 
-function viec2(){
-    console.log('Việc 2')
-}
+// function viec2(){
+//     console.log('Việc 2')
+// }
 
-btn.addEventListener('click', viec1)
+// btn.addEventListener('click', viec1)
 
-btn.addEventListener('click', viec2)
+// btn.addEventListener('click', viec2)
 
-setTimeout(() => {
-    btn.removeEventListener('click', viec1)
-}, 3000)
+// setTimeout(() => {
+//     btn.removeEventListener('click', viec1)
+// }, 3000)
 
 /**
  * JSON: là định dạng dữ liệu (chuỗi)
@@ -872,88 +872,180 @@ setTimeout(() => {
 
 
 
-var auctionApi = 'http://localhost:8080/api/auctions';
+// var auctionApi = 'http://localhost:8080/api/auctions';
 
-function start() {
-    getAuctions(function(auctions) {
-        renderAuctions(auctions);
-    });
-    handleCreateForm();
-    handlerDeleteAuction();
-}
+// function start() {
+//     getAuctions(function(auctions) {
+//         renderAuctions(auctions);
+//     });
+//     handleCreateForm();
+//     handlerDeleteAuction();
+// }
 
-start();
+// start();
 
-var auctionCreateApi = 'http://localhost:8080/api/auctions/create';
-function getAuctions(callback) {
-    fetch(auctionApi) 
-        .then(function(response) {
-            return response.json();
-        })
-        .then(callback);
-}
+// var auctionCreateApi = 'http://localhost:8080/api/auctions/create';
+// function getAuctions(callback) {
+//     fetch(auctionApi) 
+//         .then(function(response) {
+//             return response.json();
+//         })
+//         .then(callback);
+// }
 
-function createAuction(data, callback) {
-    var options = {
-        method: 'POST', 
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-    }
-    fetch(auctionCreateApi, options)
-        .then(function(response) {
-            response.json();
-        })
-        .then(callback)
-}
+// function createAuction(data, callback) {
+//     var options = {
+//         method: 'POST', 
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(data),
+//     }
+//     fetch(auctionCreateApi, options)
+//         .then(function(response) {
+//             response.json();
+//         })
+//         .then(callback)
+// }
 
-function handlerDeleteAuction(id) {
-    var options = {
-        method: 'DELETE', 
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }
-    fetch(auctionApi + '/' + id, options)
-        .then(function(response) {
-            response.json();
-        })
-        //gỡ khỏi DOM khi xóa
-        .then(function() {
-            var auctionItem = document.querySelector('.auction-item-' + id);
-            if (auctionItem) {
-                auctionItem.remove();
-            }
-        })
-}
-function renderAuctions(auctions) {
-    var auctionBlock = document.getElementById('list-auctions');
-    var auctionss = auctions.data.auctions;
-    var htmls = auctionss.map(function(auction) {
-        return `
-            <li class="auction-item-${auction.auction_id}">
-                <h4>${auction.title}</h4>
-                <button onclick="handlerDeleteAuction(${auction.auction_id})">Xóa</button>
-            </li>
-        `;
-    })
-    auctionBlock.innerHTML = htmls.join('')
-}
+// function handlerDeleteAuction(id) {
+//     var options = {
+//         method: 'DELETE', 
+//         headers: {
+//             'Content-Type': 'application/json'
+//         }
+//     }
+//     fetch(auctionApi + '/' + id, options)
+//         .then(function(response) {
+//             response.json();
+//         })
+//         //gỡ khỏi DOM khi xóa
+//         .then(function() {
+//             var auctionItem = document.querySelector('.auction-item-' + id);
+//             if (auctionItem) {
+//                 auctionItem.remove();
+//             }
+//         })
+// }
+// function renderAuctions(auctions) {
+//     var auctionBlock = document.getElementById('list-auctions');
+//     var auctionss = auctions.data.auctions;
+//     var htmls = auctionss.map(function(auction) {
+//         return `
+//             <li class="auction-item-${auction.auction_id}">
+//                 <h4>${auction.title}</h4>
+//                 <button onclick="handlerDeleteAuction(${auction.auction_id})">Xóa</button>
+//             </li>
+//         `;
+//     })
+//     auctionBlock.innerHTML = htmls.join('')
+// }
 
-function handleCreateForm() {
-    var createBtn = document.getElementById('create')
-    createBtn.onclick = function() {
-        var name = document.querySelector('input[name="name"]').value;
-        var formData = {
-            name: name,
-        }
-        createAuction(formData, function(){
-            // getAuctions(function(auctions) {
-            //     renderAuctions(auctions);
-            // });
-            //load lại trang luôn ( trong comment )
-            getAuctions(renderAuctions);
-        })
-    }
-}
+// function handleCreateForm() {
+//     var createBtn = document.getElementById('create')
+//     createBtn.onclick = function() {
+//         var name = document.querySelector('input[name="name"]').value;
+//         var formData = {
+//             name: name,
+//         }
+//         createAuction(formData, function(){
+//             // getAuctions(function(auctions) {
+//             //     renderAuctions(auctions);
+//             // });
+//             //load lại trang luôn ( trong comment )
+//             getAuctions(renderAuctions);
+//         })
+//     }
+// }
+
+
+/**
+ * ECMAScript6
+ */
+
+//Enhanced Object
+
+// var fieldName = 'new-name';
+// var fieldPrice = 'price';
+
+// const course = {
+//     [fieldName]: 'Tra',
+//     [fieldPrice]: '10000'
+// };
+
+// console.log(course);
+
+// //Destructuting, Rest: Phân rã, dùng với object và array
+// //Rest lấy ra phần còn lại ( định nghĩa ra tham số)
+
+// var array = ['Javascript', 'PHP', 'Ruby'];
+
+// var [a, b, c] = array;
+// var [a, , c] = array;
+// var [a] = array;
+// var [a, ...rest] = array;
+
+// console.log(rest);
+
+// var course1 = {
+//     name: 'Javascript', 
+//     price: 2000, 
+//     children: {
+//         name: 'ReactJs'
+//     }
+// };
+
+// var { name, price } = course1;
+// console.log(name, price);
+// var { name: newName, children: {name}} = course1;
+// console.log(newName);
+
+// function restFunction(...rest) {
+//     console.log(...rest)
+// }
+
+// restFunction(1, 2, 3, 4)
+
+// //Spread ( chuyển đổi tham số)
+// var array1 = ['JS', 'Ruby', 'Java'];
+// var array2 = ['Dart', 'PHP'];
+// var array3 = [...array1, ...array2];
+
+// console.log(array3);
+
+// var defaultConfig = {
+//     api: 'http://localhost:8080',
+//     apiV: 'v1',
+//     description: 'description content'
+// }
+
+// var exerciseConfig = {
+//     ...defaultConfig,
+//     api: 'http://localhost:8080//exercise'
+// }
+
+// console.log(exerciseConfig);
+
+
+// function logger(...rest) {
+//     console.log(...rest)
+// }
+
+// logger(...array3);
+
+
+//Modules: Import/Export
+
+// import logger from './logger.js';
+// import {
+//     TYPE_WARNING,
+//     TYPE_ERROR,
+//     TYPE_LOG
+// } from './constants.js'
+
+// console.log(logger);
+
+// logger('Test messages', TYPE_ERROR)
+
+
+//React js
