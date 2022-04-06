@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\NewController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,7 @@ Route::group(['middleware' => 'api'], function(){
     //User
     Route::post('register', [UserController::class, 'register'])->name('register');
     Route::post('login', [AuthController::class, 'login'])->name('login');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
     //Slider
     Route::get('slider', [HomeController::class, 'slider'])->name('slider');
@@ -56,6 +58,11 @@ Route::group(['middleware' => 'api'], function(){
     Route::prefix('news')->group(function () {
         Route::get('/', [NewController::class, 'index'])->name('listNews');
         Route::get('/read/{newId}', [NewController::class, 'read'])->name('readNews');
+    });
+
+    //category
+    Route::prefix('categories')->group(function () {
+        Route::get('/', [CategoryController::class, 'index']);
     });
 
     Route::middleware(['auth'])->group(function () { 

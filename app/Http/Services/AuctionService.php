@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 class AuctionService implements AuctionServiceInterface
 {
     const LIMIT = 16;
+    
     //api
     public function getDetailAuctions($auctionId)
     {
@@ -160,6 +161,37 @@ class AuctionService implements AuctionServiceInterface
             'start_date' => "required|date|after_or_equal:tomorrow",
             'end_date' => "required|date|after:start_date",
         ];
+        
+        $messages = [
+            'required' => '必須項目が未入力です。',
+            'max' => ':max文字以下入力してください。 ',
+            'date' => 'データのフォーマットが正しくありません',
+            'after_or_equal' => '始まる時間が明日か行かなければなりません',
+            'after' => '始まる時間よりです。',
+            'unique' => '既に使用されています。',
+            'numeric' => '番号を入力してください。'
+        ];
+
+        $attributes = [
+            'category_id' => 'カテゴリー',
+            'title_ni' => 'オークション名',
+            'start_date' => '始まる時間',
+            'end_date' => '終わる時間'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages, $attributes);
+
+        return $validated;
+    }
+
+    public function auctionValidationEdit($request, $auctionId)
+    {
+        $rules = [
+            'category_id' => "required",
+            'title_ni' => "required|max:255|unique:auctions,title,$auctionId,auction_id,deleted_at,NULL",
+            'start_date' => "required|date|after_or_equal:tomorrow",
+            'end_date' => "required|date|after:start_date",
+        ];
 
         $messages = [
             'required' => '必須項目が未入力です。',
@@ -215,7 +247,17 @@ class AuctionService implements AuctionServiceInterface
     //edit api
     public function edit($auctionId, $request)
     {
-        
+        $auction = Auction::findOrFail($auctionId);
+
+        if ($auction) {
+            $auction->category_id = $request['category_id'];
+            $auction->start_date = $request['start_date'];
+            $auction->end_date = $request['end_date'];
+            $auction->title = $request['title_ni'];
+            $auction->update();
+        }
+//dd($auction);
+        return $auction;
     }
 
     public function get($page = null)
@@ -462,5 +504,37 @@ class AuctionService implements AuctionServiceInterface
     
             return $data;
         }
+    }
+
+    //get auction by categoryId and typeCategory
+    public function getAuctionByCategory($typeId)
+    {
+        $categoryId = Category::where('type', $typeId)
+            ->get()
+            ->pluck('category_id')
+            ->toArray();
+
+        $auction = Auction::with('category', 'items')
+            ->whereIn('category_id', $categoryId)
+            ->get()
+            ->toArray();
+
+        return $auction;
+    }
+
+    public function getInfor($auctionId)
+    {
+        $categoryId = Auction::findOrFail($auctionId)->category_id;
+
+        $itemId = Item::where('auction_id', $auctionId)
+            ->where('category_id', $categoryId)
+            ->get()
+            ->pluck('item_id');    
+        $itemInfor = ItemValue::where('item_id', $itemId)
+            ->get()
+            ->pluck('value', 'category_value_id')
+            ->toArray();
+
+        return $itemInfor;
     }
 }

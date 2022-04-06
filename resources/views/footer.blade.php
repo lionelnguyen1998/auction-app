@@ -234,3 +234,135 @@
         @endif
 
 </script>
+<script>
+	var auctionApi = 'http://localhost:8080/api/auctions';
+
+	function start() {
+		getAuctions(function(auctions) {
+			renderAuctions(auctions);
+		});
+	}
+
+	start();
+
+	// get list auctions
+	function getAuctions(callback) {
+        const localStorageUser = JSON.parse(localStorage.getItem('token'));
+        const inMemmoryToken = localStorageUser.access_token;
+		fetch(auctionApi, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + `${inMemmoryToken}`
+                }
+            }) 
+			.then(function(response) {
+				return response.json();
+			})
+            .then(res => {
+                const avatar = document.getElementById('avatar-header');
+                console.log(res)
+                if (res.user_info) {
+                    avatar.innerHTML = `
+                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <div data-toggle="dropdown" aria-hidden="true">
+                            <img src="${res.user_info.avatar}" alt="Avatar" class="avatar">
+                        </div>        
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="#" style="padding-bottom:20px">おはいよ! ${res.user_info.name}</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="">編集</a>
+                            <a class="dropdown-item" href="{{ route('logoutUser') }}">ログアウト</a>
+                        </div>	
+                    </div>
+                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+                        <i class="zmdi zmdi-notifications-active"></i>
+                    </div>
+
+                    <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <i class="zmdi zmdi-favorite-outline"></i>
+                    </a>
+                
+                    <a href="" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <i class="zmdi zmdi-spellcheck"></i>
+                    </a>
+                    `;
+                } else {
+                    avatar.innerHTML = `
+                    <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
+                        <div data-toggle="dropdown" aria-hidden="true">
+                            <i class="zmdi zmdi-account"></i>
+                        </div>        
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="{{ route('registerUser') }}">登録</a>
+                            <a class="dropdown-item" href="{{ route('loginUser') }}">ログイン</a>
+                        </div>	
+                    </div>
+                    `;
+                }
+            })
+			.then(callback);
+	}
+
+
+	function getAuctionByStatus(id, callback) {
+		fetch(auctionApi + '/' + id) 
+			.then(function(response) {
+				return response.json();
+			})
+			.then(callback);
+	}
+
+	function renderAuctions(auctions) {
+		var auctions = auctions.data.auctions;
+		var listAuctionBlock = document.querySelector('#list-auctions');
+		var htmls = auctions.map(function(auction) {
+		var status;
+			if (auction.statusId == 1) {
+				status = `<p class="btn btn-success">${ auction.status }</p>`;
+			} else if (auction.statusId == 2) {
+				status = `<p class="btn btn-warning">${ auction.status }</p>`;
+			} else if (auction.statusId == 3) {
+				status = `<p class="btn btn-danger">${ auction.status }</p>`;
+			} else {
+				status = `<p class="btn btn-info">${ auction.status }</p>`;
+			}
+			return `
+			<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item">
+				<div class="block2">
+					<div class="block2-pic hov-img0">
+						<img src="${ auction.category.image}" alt="IMG-PRODUCT">
+
+						<a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+							Quick View
+						</a>
+					</div>
+
+					<div class="block2-txt flex-w flex-t p-t-14">
+						<div class="block2-txt-child1 flex-col-l ">
+							<a href="" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+							${ auction.title }
+							</a>
+							<span class="stext-105 cl3">
+								${status}
+							</span>
+						</div>
+
+						<div class="block2-txt-child2 flex-r p-t-3">
+							<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+								<img class="icon-heart1 dis-block trans-04" src="template/images/icons/icon-heart-01.png" alt="ICON">
+								<img class="icon-heart2 dis-block trans-04 ab-t-l" src="template/images/icons/icon-heart-02.png" alt="ICON">
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			`;
+		});
+		listAuctionBlock.innerHTML = htmls.join('');
+	}
+</script>
+<script>
+    
+</script>

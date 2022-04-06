@@ -46,14 +46,27 @@ class ItemController extends ApiController
 
     public function edit(Request $request, $itemId)
     {
-        $validator = $this->itemService->itemValidation($request->all());
+        $auctionId = Item::findOrFail($itemId)->auction_id;
+        $status = Auction::findOrFail($auctionId)->status;
+        if ($status == 4) {
+            $validator = $this->itemService->itemValidation($request->all());
+    
+            if ($validator->fails()) {
+                return $this->response->errorValidation($validator);
+            }
 
-        if ($validator->fails()) {
-            return $this->response->errorValidation($validator);
-        }
+            $images = array();
+            foreach ($request['images'] as $key => $value) {
+                $url = $this->uploadService->store($value);
+                array_push($images, $url);
+            }
 
-        $data = $this->itemService->edit($request->all(), $itemId);
-
-        return $this->response->withData($data);
+            $item = $request->except('images');
+            $data = $this->itemService->edit($item, $itemId, $images);
+            return $this->response->withData($data);
+        } else {
+            $message = "Khong the chinh sua";
+            return $this->response->withData($message);
+        } 
     }
 }

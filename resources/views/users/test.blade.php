@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,22 +28,22 @@
 
                     <div class="signin-form">
                         <h2 class="form-title">ログイン</h2>
-                        <label id="error-all" style="color: red; padding-left: 5px; margin-top:20px"><b></b></label><br/>
+                        @include('alert')
 
-                        <div class="register-form">
+                        <form method="POST" action="{{ route('storeUserAccount') }}" class="register-form">
                             <div class="form-group">
                                 <label for="email"><i class="zmdi zmdi-email"></i></label>
                                 <input type="text" name="email" id="email" placeholder="メールを入力してください"/>
-                               
-                                <label class="control-label" for="inputError" id="error-email" style="color: red; padding-left: 5px; margin-top:20px"><b></b></label><br/>
-                            
+                                @if($errors->has('email'))
+                                    <label class="control-label" for="inputError" style="color: red; padding-left: 5px; margin-top:20px"><b>{{ $errors->first('email')}}</b></label><br/>
+                                @endif
                             </div>
                             <div class="form-group">
                                 <label for="password"><i class="zmdi zmdi-lock"></i></label>
                                 <input type="password" name="password" id="password" placeholder="パスワードを入力してください"/>
-                              
-                                <label class="control-label" for="inputError" id="error-password" style="color: red; padding-left: 5px; margin-top:20px"><b></b></label><br/>
-                             
+                                @if($errors->has('password'))
+                                    <label class="control-label" for="inputError" style="color: red; padding-left: 5px; margin-top:20px"><b>{{ $errors->first('password')}}</b></label><br/>
+                                @endif
                             </div>
                             <div class="form-group">
                                 <input type="checkbox" name="remember-me" id="remember-me" class="agree-term" />
@@ -51,7 +52,8 @@
                             <div class="form-group form-button">
                                 <input type="submit" name="signup" id="signup" class="form-submit" value="ログイン"/>
                             </div>
-                        </div>
+                            @csrf
+                        </form>
                         <div class="social-login">
                             <ul class="socials">
                                 <li><a href="#"><i class="display-flex-center zmdi zmdi-facebook"></i></a></li>
@@ -67,49 +69,6 @@
     </div>
 
     <!-- JS -->
-    <script>
-        let inMemoryToken;
-        var loginBlock = document.querySelector('.form-submit');
-        loginBlock.addEventListener('click', (e) => {
-            const email = document.querySelector('input[name="email"]').value;
-            const password = document.querySelector('input[name="password"]').value;
-            e.preventDefault();
-            var loginApi = 'http://localhost:8080/api/login';
-            fetch(loginApi, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json, text/plain,*/*',
-                        'Content-Type': 'application/json',
-                        'redirect': 'manual',
-                    },
-                    body: JSON.stringify({
-                        "email": email,
-                        "password": password,
-                    })
-                })
-                .then(function(res) {
-                    return res.json();
-                })
-                .then(res => {
-                    if (res.error) {
-                        document.getElementById('error-all').innerHTML = "Mật khẩu hoặc email không đúng ):";
-                    } else if (res.errors) {
-                        if (res.errors.password && res.errors.email) {
-                            document.getElementById('error-password').innerHTML = res.errors.password;
-                            document.getElementById('error-email').innerHTML = res.errors.email;
-                        } else if (res.errors.email) {
-                            document.getElementById('error-email').innerHTML = res.errors.email;
-                        } else {
-                            document.getElementById('error-password').innerHTML = res.errors.password;
-                        }
-                    } else {
-                        let inMemoryToken = res.access_token;
-                        localStorage.setItem('token', JSON.stringify(res));
-                        return window.location.href="http://localhost:8080/";
-                    }
-                }) 
-        }); 
-    </script>
     <script src="/template/register/vendor/jquery/jquery.min.js"></script>
     <script src="/template/register/js/main.js"></script>
 </body><!-- This templates was made by Colorlib (https://colorlib.com) -->

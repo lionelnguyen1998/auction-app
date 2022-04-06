@@ -16,6 +16,10 @@ class HomeController extends Controller
         $this->auctionService = $auctionService;
     }
 
+    public function welcome()
+    {
+        return view('welcome');
+    }
     public function index() 
     {
         $slider = Slider::whereIn('type', [6, 7, 8])
@@ -26,7 +30,6 @@ class HomeController extends Controller
             ->toArray();
 
         $updateStatus = Auction::updateStatus($auctionId);
-        //dd($this->auctionService->getListAuction());
 
         return view('home', [
             'title' => 'オークション',

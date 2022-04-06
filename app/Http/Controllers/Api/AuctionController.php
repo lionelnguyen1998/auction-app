@@ -263,9 +263,9 @@ class AuctionController extends ApiController
     public function edit(Request $request, $auctionId)
     {
         $status = Auction::findOrFail($auctionId)->status;
-        
-        if ($status[0] == 4) {
-            $validator = $this->auctionService->auctionValidation($request->all());
+
+        if ($status == 4) {
+            $validator = $this->auctionService->auctionValidationEdit($request->all(), $auctionId);
     
             if ($validator->fails()) {
                 return $this->response->errorValidation($validator);

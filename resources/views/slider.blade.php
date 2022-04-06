@@ -1,22 +1,3 @@
-<script>
-	fetch('/api/slider')
-	.then(
-		function(response) {
-		if (response.status !== 200) {
-			console.log('Lỗi, mã lỗi ' + response.status);
-			return;
-		}
-		// parse response data
-		response.json().then(data => {
-			console.log(data.data[1].image);
-			document.getElementById("demo").innerHTML = data.data[1].image;
-		})
-		}
-	)
-	.catch(err => {
-		console.log('Error :-S', err)
-	});
-</script>
 <!-- Slider -->
 <section class="section-slide">
 		<div class="wrap-slick1">

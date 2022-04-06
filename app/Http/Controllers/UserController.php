@@ -8,6 +8,7 @@ use App\Models\Slider;
 use App\Http\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use GuzzleHttp\Client;
 
 class UserController extends Controller
 {

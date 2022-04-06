@@ -18,6 +18,10 @@ return [
         'passwords' => 'users',
     ],
 
+    // 'defaults' => [
+    //     'guard' => 'web',
+    //     'passwords' => 'users',
+    // ],
     /*
     |--------------------------------------------------------------------------
     | Authentication Guards
@@ -40,6 +44,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
+        // 'web' => [
+        //     'driver' => 'session',
+        //     'provider' => 'users',
+        // ],
     ],
 
     /*
