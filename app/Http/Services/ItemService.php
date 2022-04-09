@@ -4,7 +4,6 @@ namespace App\Http\Services;
 
 use App\Models\Item;
 use App\Models\Image;
-use App\Models\ItemValue;
 use App\Models\Auction;
 use App\Models\AuctionStatus;
 use Illuminate\Support\Facades\Validator;
@@ -74,7 +73,8 @@ class ItemService implements ItemServiceInterface
             'brand_id' => "required",
             'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
-            'starting_price' => 'required|numeric'
+            'starting_price' => 'required|numeric',
+            'description' => 'required'
         ];
 
         $messages = [
@@ -91,7 +91,6 @@ class ItemService implements ItemServiceInterface
 
     public function registerItem($request)
     {
-        dd($request);
         $item = Item::create([
             'category_id' => $request['category_id'],
             'selling_user_id' => $request['selling_user_id'],
@@ -112,31 +111,8 @@ class ItemService implements ItemServiceInterface
                 ]);
             }
         }
-        $values = $request['values'];
-        foreach ($values as $key => $value)
-        { 
-            if ($value != null) {
-                $itemValues = ItemValue::create([
-                    'item_id' => $item->item_id,
-                    'category_value_id' => $key,
-                    'value' => $value,
-                ]);
-            }
-        }
     }
 
-    //api
-    public function getInfor($itemId)
-    {
-        $categoryId = Item::findOrFail($itemId[0])->category_id;
-        $itemInfor = ItemValue::with(['categoryValues' => function ($query) use ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }])
-            ->where('item_id', $itemId)
-            ->get();
-
-        return $itemInfor;
-    }
 
     //api
     public function create($request, $auctionId, $images)
@@ -165,26 +141,6 @@ class ItemService implements ItemServiceInterface
             }
         }
 
-        if (isset($request['values'])) {
-            $values = $request['values'];
-            foreach ($values as $key => $value)
-            { 
-                if ($value != null) {
-                    $itemValues = ItemValue::create([
-                        'item_id' => $item->item_id,
-                        'category_value_id' => $key,
-                        'value' => $value,
-                    ]);
-                }
-            }
-        }
-
-        $categoryId = $auction->category_id;
-        $itemValue = ItemValue::with(['categoryValues' => function ($query) use ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }])
-            ->where('item_id', $item->item_id)
-            ->get();
         $data = [
             'item' => [
                 'item_id' => $item->item_id,
@@ -193,11 +149,6 @@ class ItemService implements ItemServiceInterface
                 'name' => $item->name,
                 'description' => $item->description,
                 'images' => $images ?? null,
-                'values' => $itemValue->map(function ($value) {
-                    return [
-                        $value['categoryValues']['name'] => $value['value'],
-                    ];
-                }),
                 'created_at' => $auction->created_at,
                 'updated_at' => $auction->updated_at,
             ],

@@ -17,7 +17,9 @@ class Contact extends Model
         'email',
         'name',
         'phone',
-        'content'
+        'content',
+        'report_type',
+        'file'
     ];
 
     protected $dates = [

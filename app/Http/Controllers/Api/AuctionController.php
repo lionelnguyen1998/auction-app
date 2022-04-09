@@ -14,7 +14,6 @@ use App\Models\User;
 use App\Models\Bid;
 use App\Models\Item;
 use App\Models\Brand;
-use App\Models\ItemValue;
 use App\Models\Favorite;
 use App\Models\Comment;
 use App\Models\Category;
@@ -31,7 +30,6 @@ class AuctionController extends ApiController
         parent::__construct($request, $response);
     }
 
-    //API
     //all auction in home page
     public function index()
     {
@@ -77,7 +75,6 @@ class AuctionController extends ApiController
         $maxPrice = $this->auctionService->getMaxPrice($auctionId);
         $bids = $this->auctionService->getBids($auctionId);
         $comments = $this->auctionService->getComments($auctionId);
-        $itemValue = $this->itemService->getInfor($itemId);
         $images = $this->itemService->getImageLists($itemId);
         $brand = Brand::where('brand_id', $auction[0]['items']['brand_id'])
             ->get()
@@ -85,10 +82,8 @@ class AuctionController extends ApiController
             ->firstOrFail();
         $status = config('const.status');
         $index = $auction[0]['status'];
-        //$logo = Slider::logo();
 
         return [
-            //'logo' => $logo,
             'auctions' => [
                 'auction_id' => $auction[0]['auction_id'],
                 'title' => $auction[0]['title'],
@@ -115,12 +110,7 @@ class AuctionController extends ApiController
                     return [
                         'image' => $image,
                     ];
-                }),
-                'values' => $itemValue->map(function ($value) {
-                    return [
-                        $value['categoryValues']['name'] => $value['value'],
-                    ];
-                }),
+                })
             ],
             'selling_user' => [
                 'selling_user_id' => $auction[0]['user_selling']['user_id'],
@@ -245,7 +235,6 @@ class AuctionController extends ApiController
                 ->toArray();
     
             if (isset($itemId[0])) {
-                ItemValue::where('item_id', '=', $itemId[0])->delete();
                 Item::where('item_id', '=', $itemId[0])->delete();
                 Bid::where('auction_id', '=', $auctionId)->delete();
                 Comment::where('auction_id', '=', $auctionId)->delete();

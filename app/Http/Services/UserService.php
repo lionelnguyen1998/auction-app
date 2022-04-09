@@ -159,7 +159,8 @@ class UserService implements UserServiceInterface
             'phone' => 'required|max:60',
             'name' => 'required|max:255',
             'email' => 'required|max:255|email',
-            'content' => 'required'
+            'content' => 'required',
+            'report_type' => 'required'
         ];
 
         $messages = [
@@ -181,7 +182,9 @@ class UserService implements UserServiceInterface
             'email' => $request['email'],
             'phone' => $request['phone'],
             'name' => $request['name'],
-            'content' => $request['content']
+            'content' => $request['content'],
+            'file' => $request['file'] ?? null,
+            'report_type' => $request['report_type']
         ]);
 
         $adminMail = config('mail.mailers.smtp.username');
@@ -210,8 +213,17 @@ class UserService implements UserServiceInterface
             'avatar' => $request['avatar'] ?? $avatarDefault,
             'role' => 2
         ]);
+
+        $userInfo = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'avatar' => $user->avatar,
+            'role' => $user->role
+        ];
       
-        return $user;
+        return $userInfo;
     }
 
     public function edit($request)

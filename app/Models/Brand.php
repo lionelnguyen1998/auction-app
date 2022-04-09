@@ -23,4 +23,10 @@ class Brand extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function getBrandList()
+    {
+        $listBrands = Brand::all();
+        return $listBrands;
+    }
 }

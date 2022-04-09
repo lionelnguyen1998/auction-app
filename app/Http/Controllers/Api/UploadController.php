@@ -29,4 +29,16 @@ class UploadController extends ApiController
         }
         return $this->response->withData($url);
     }
+
+    public function uploads(Request $request)
+    {
+        $url = $this->uploadService->storeImage($request);
+        
+        if ($url !== false) {
+            return response()->json([
+                $url
+            ]);
+        }
+        return $this->response->withData($url);
+    }
 }

@@ -85,9 +85,16 @@ class AuthController extends ApiController
     {
         return response()->json([
             'access_token' => $token,
-            'user' => $this->guard(),
+            'user' => [
+                'name' => $this->guard()->name,
+                'role' => $this->guard()->role,
+                'avatar' => $this->guard()->avatar,
+                'email' => $this->guard()->email,
+                'address' => $this->guard()->address,
+                'phone' => $this->guard()->phone
+            ],
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 600
+            'expires_in' => auth()->factory()->getTTL() * 6000
         ]);
     }
 

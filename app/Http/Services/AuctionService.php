@@ -9,8 +9,6 @@ use App\Models\Item;
 use App\Models\Image;
 use App\Models\User;
 use App\Models\Category;
-use App\Models\CategoryValue;
-use App\Models\ItemValue;
 use App\Models\Brand;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -68,18 +66,6 @@ class AuctionService implements AuctionServiceInterface
         return $comments;
     }
 
-
-    // value of category
-    public function getCategoryValueName($auctionId)
-    {
-        $categoryId = Auction::findOrFail($auctionId)->category_id;
-
-        $categoryValue = CategoryValue::where('category_id', $categoryId)
-            ->get()
-            ->pluck('name', 'category_value_id');
-
-        return $categoryValue;
-    }
 
     //general auction
     public function getGeneralInfo()
@@ -256,7 +242,6 @@ class AuctionService implements AuctionServiceInterface
             $auction->title = $request['title_ni'];
             $auction->update();
         }
-//dd($auction);
         return $auction;
     }
 
@@ -529,11 +514,7 @@ class AuctionService implements AuctionServiceInterface
         $itemId = Item::where('auction_id', $auctionId)
             ->where('category_id', $categoryId)
             ->get()
-            ->pluck('item_id');    
-        $itemInfor = ItemValue::where('item_id', $itemId)
-            ->get()
-            ->pluck('value', 'category_value_id')
-            ->toArray();
+            ->pluck('item_id');
 
         return $itemInfor;
     }
