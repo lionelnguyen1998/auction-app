@@ -29,9 +29,4 @@ class Category extends Model
     {
         return $this->hasMany(Auction::class, 'category_id', 'category_id');
     }
-
-    public function categoryValues()
-    {
-        return $this->hasMany(CategoryValue::class, 'category_id', 'category_id');
-    }
 }

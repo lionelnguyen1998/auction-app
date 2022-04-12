@@ -9,7 +9,6 @@ use App\Http\Services\ItemService;
 use App\Models\Auction;
 use App\Models\User;
 use App\Models\Item;
-use App\Models\ItemValue;
 use App\Http\Services\UploadService;
 
 class ItemController extends ApiController
@@ -25,7 +24,6 @@ class ItemController extends ApiController
 
     public function create(Request $request, $auctionId)
     {
-        $dataRequest = $request->all();
         $validator = $this->itemService->itemValidation($request->all());
 
         if ($validator->fails()) {
@@ -33,12 +31,15 @@ class ItemController extends ApiController
         }
 
         $images = array();
-        foreach ($request['images'] as $key => $value) {
-            $url = $this->uploadService->store($value);
-            array_push($images, $url);
+        if ($request['images']) {
+            foreach ($request['images'] as $key => $value) {
+                //$url = $this->uploadService->store($value);
+                array_push($images, $value);
+            }
+            $item = $request->except('images');
+        } else {
+            $item = $request->all();
         }
-
-        $item = $request->except('images');
         $data = $this->itemService->create($item, $auctionId, $images);
 
         return $this->response->withData($data);
@@ -56,12 +57,17 @@ class ItemController extends ApiController
             }
 
             $images = array();
-            foreach ($request['images'] as $key => $value) {
-                $url = $this->uploadService->store($value);
-                array_push($images, $url);
+            if ($request['images']) {
+                foreach ($request['images'] as $key => $value) {
+                    $url = $this->uploadService->store($value);
+                    array_push($images, $url);
+                }
+    
+                $item = $request->except('images');
+            } else {
+                $item = $request->all();
             }
 
-            $item = $request->except('images');
             $data = $this->itemService->edit($item, $itemId, $images);
             return $this->response->withData($data);
         } else {

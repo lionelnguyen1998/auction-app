@@ -15,7 +15,7 @@ class Auction extends Model
     protected $table = 'auctions';
     protected $primaryKey = 'auction_id';
 
-    const PER_PAGE = 6;
+    const PER_PAGE = 20;
 
     protected $fillable = [
         'auction_id',

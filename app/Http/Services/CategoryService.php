@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\Category;
 use Illuminate\Support\Facades\Validator;
+use App\Models\CategoryValue;
 
 class CategoryService implements CategoryServiceInterface
 {

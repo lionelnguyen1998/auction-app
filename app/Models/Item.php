@@ -52,11 +52,6 @@ class Item extends Model
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
 
-    public function itemValues()
-    {
-        return $this->hasMany(ItemValue::class, 'item_id', 'item_id');
-    }
-
     public function brands()
     {
         return $this->belongsTo(Brand::class, 'brand_id', 'brand_id');

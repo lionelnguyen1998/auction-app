@@ -40,7 +40,15 @@ return [
         11 => '私達について'
     ],
 
+    'report_type' => [
+        1 => 'システムのエラー',
+        2 => '使い方',
+        3 => '他に'
+    ],
+    'type' => [
+        'error' => 1,
+        'use' => 2,
+        'dif' => 3,
+    ],
     'jwt_key' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjEzODY4OTkxMzEsImlzcyI6ImppcmE6MTU0ODk1OTUiLCJxc2giOiI4MDYzZmY0Y2ExZTQxZGY3YmM5MGM4YWI2ZDBmNjIwN2Q0OTFjZjZkYWQ3YzY2ZWE3OTdiNDYxNGI3MTkyMmU5IiwiaWF0IjoxMzg2ODk4OTUxfQ.uKqU9dTB6gKwG6jQCuXYAiMNdfNRw98Hw_IWuA5MaMo',
-
-    
 ];
