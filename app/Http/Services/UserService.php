@@ -152,7 +152,6 @@ class UserService implements UserServiceInterface
     }
 
     //sendEmail
-    //api
     public function contactValidation($request) 
     {
         $rules = [
@@ -160,7 +159,7 @@ class UserService implements UserServiceInterface
             'name' => 'required|max:255',
             'email' => 'required|max:255|email',
             'content' => 'required',
-            'report_type' => 'required'
+            'report_type' => 'required|in:' . config('const.type.error') . ',' .config('const.type.dif'),
         ];
 
         $messages = [

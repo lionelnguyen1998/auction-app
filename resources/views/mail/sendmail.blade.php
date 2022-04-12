@@ -19,7 +19,7 @@ $index = $contacts['report_type']
 </h4>
 <h4>* * * * * * * * * * * *</h4>
 <h4>
-   写真: {{ $contacts['file'] }}
+   写真:{{ $contacts["file"] }}
 </h4>
 <h4>* * * * * * * * * * * *</h4>
 <div>
