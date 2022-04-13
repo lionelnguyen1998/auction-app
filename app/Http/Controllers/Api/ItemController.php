@@ -33,13 +33,14 @@ class ItemController extends ApiController
         $images = array();
         if ($request['images']) {
             foreach ($request['images'] as $key => $value) {
-                //$url = $this->uploadService->store($value);
-                array_push($images, $value);
+                $url = $this->uploadService->store($value);
+                array_push($images, $url);
             }
             $item = $request->except('images');
         } else {
             $item = $request->all();
         }
+        dd($images);
         $data = $this->itemService->create($item, $auctionId, $images);
 
         return $this->response->withData($data);

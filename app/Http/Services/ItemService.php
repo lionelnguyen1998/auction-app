@@ -89,32 +89,7 @@ class ItemService implements ItemServiceInterface
         return $validated;
     }
 
-    public function registerItem($request)
-    {
-        $item = Item::create([
-            'category_id' => $request['category_id'],
-            'selling_user_id' => $request['selling_user_id'],
-            'auction_id' => $request['auction_id'],
-            'brand_id' => $request['brand_id'],
-            'series' => $request['series'],
-            'name' => $request['name'],
-            'starting_price' => $request['starting_price'],
-            'description' => $request['description']
-        ]);
-
-        $images = $request['images'];
-        foreach ($images as $key => $value) {
-            if ($value != null) {
-                Image::create([
-                    'item_id' => $item->item_id,
-                    'image' => $value
-                ]);
-            }
-        }
-    }
-
-
-    //api
+    //creat new item
     public function create($request, $auctionId, $images)
     {
         $auction = Auction::findOrFail($auctionId);

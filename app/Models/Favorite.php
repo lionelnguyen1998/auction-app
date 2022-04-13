@@ -15,7 +15,6 @@ class Favorite extends Model
         'favorite_id', 
         'user_id',
         'auction_id',
-        'item_id',
         'is_liked',
     ];
 }

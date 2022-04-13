@@ -10,6 +10,7 @@ use App\Models\Image;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Favorite;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +18,7 @@ class AuctionService implements AuctionServiceInterface
 {
     const LIMIT = 16;
     
-    //api
+    //detail auctions
     public function getDetailAuctions($auctionId)
     {
         $auctions = Auction::with('category', 'items', 'comments', 'userSelling')
@@ -90,9 +91,10 @@ class AuctionService implements AuctionServiceInterface
     }
 
     //get auction by categoryId and typeCategory
-    //api
-    public function getListAuctionByType($typeId)
+    public function getListAuctionByType($typeId, $request)
     {
+        $page = $request['page'];
+        $perPage = $request['per_page'];
         $categoryId = Category::where('type', $typeId)
             ->get()
             ->pluck('category_id');
@@ -100,45 +102,73 @@ class AuctionService implements AuctionServiceInterface
         $auction = Auction::with('category')
             ->orderBy('created_at', 'DESC')
             ->whereIn('category_id', $categoryId)
+            ->forPage($page, $perPage)
             ->get();
 
         return $auction;
     }
 
     //get list auctions
-    //api
-    public function getListAuction()
+    public function getListAuction($request)
     {
+        $page = $request['page'];
+        $perPage = $request['per_page'];
         $auction = Auction::with('category')
             ->where('status', '<>', 4)
             ->orderBy('created_at', 'DESC')
+            ->forPage($page, $perPage)
+            ->get();
+
+        return $auction;
+    }
+    
+    //get list auctions like
+    public function getListAuctionLike($request)
+    {
+        $userId = auth()->user()->user_id;
+        $auctionId = Favorite::where('user_id', $userId)
+            ->where('is_liked', 1)
+            ->get()
+            ->pluck('auction_id');
+        
+        $page = $request['page'];
+        $perPage = $request['per_page'];
+        $auction = Auction::with('category')
+            ->orderBy('created_at', 'DESC')
+            ->whereIn('auction_id', $auctionId)
+            ->forPage($page, $perPage)
             ->get();
 
         return $auction;
     }
 
-    public function getListAuctionByStatus($statusId)
+    public function getListAuctionByStatus($statusId, $request)
     {
+        $page = $request['page'];
+        $perPage = $request['per_page'];
         $auction = Auction::with('category')
             ->where('status', $statusId)
             ->orderBy('created_at', 'DESC')
+            ->forPage($page, $perPage)
             ->get();
 
         return $auction;
     }
 
-    //api
-    public function getListAuctionsByUser($userId)
+    //get list auctions by user id
+    public function getListAuctionsByUser($userId, $request)
     {
+        $page = $request['page'];
+        $perPage = $request['per_page'];
         $list = Auction::with('category')
             ->where('selling_user_id', $userId)
+            ->forPage($page, $perPage)
             ->get();
 
         return $list;
     }
 
     //validate create auction 
-    //api
     public function auctionValidation($request)
     {
         $rules = [
@@ -260,16 +290,27 @@ class AuctionService implements AuctionServiceInterface
         $status = Auction::findOrFail($auctionId)->status;
 
         if($status == 1 || $status == 2) {
-            return Comment::create([
+            $comment = Comment::create([
                 'auction_id' => $auctionId, 
                 'user_id' => auth()->user()->user_id,
                 'content' => $request['content']
             ]);
+
+            $data = [
+                'auction_id' => $comment->auction_id,
+                'user_id' => $comment->user_id,
+                'content' => $comment->content,
+                'update_date' => $comment->updated_at->format('Y/m/d H:i:s')
+            ];
+
+            return $data;
         } else {
             return [
                 'message' => 'Khong the comment',
             ];
         }
+
+        
     }
 
     //bid validation
@@ -282,7 +323,7 @@ class AuctionService implements AuctionServiceInterface
             'price' => 'required|numeric'
         ];
 
-        if ($request['price'] <= $maxBid) {
+        if (isset($request['price']) && $request['price'] <= $maxBid) {
             $rules['price'] = 'max:0';
         }
 
@@ -303,12 +344,22 @@ class AuctionService implements AuctionServiceInterface
         $status = Auction::findOrFail($auctionId)->status;
 
         if($status == 1 || $status == 2) {
-            return Bid::create([
+            $bid = Bid::create([
                 'auction_id' => $auctionId, 
                 'user_id' => auth()->user()->user_id,
                 'price' => $request['price'],
                 'phone' => $request['phone'] ?? null,
             ]);
+
+            $data = [
+                'auction_id' => $bid->auction_id,
+                'user_id' => $bid->user_id,
+                'price' => $bid->price,
+                'phone' => $bid->phone,
+                'updated_at' => $bid->updated_at->format('Y/m/d H:i:s')
+            ];
+
+            return $data;
         } else {
             return [
                 'message' => 'Khong the nhap bid',

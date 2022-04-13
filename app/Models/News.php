@@ -31,8 +31,15 @@ class News extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function listNews()
+    public function listNews($request)
     {
-        return News::all();
+        $page = $request['page'];
+        $perPage = $request['per_page'];
+        
+        $news = News::orderBy('created_at', 'DESC')
+            ->forPage($page, $perPage)
+            ->get();
+
+        return $news;
     }
 }
