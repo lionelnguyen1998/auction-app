@@ -10,6 +10,9 @@ class Bid extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'bids';
+    protected $primaryKey = 'bid_id';
+
     protected $fillable = [
         'bid_id',
         'user_id',

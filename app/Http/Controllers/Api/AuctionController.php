@@ -31,12 +31,11 @@ class AuctionController extends ApiController
     }
 
     //all auction in home page
-    public function index()
+    public function index(Request $request)
     {
-        $auctions = $this->auctionService->getListAuction();
-        $auction = Auction::with('category')
-            ->orderBy('created_at', 'DESC');
-        $auctionPaginate = $auction->paginate(Auction::PER_PAGE);
+        $page = $request->page;
+        $perPage = $request->per_page;
+        $auctions = $this->auctionService->getListAuction($request->all());
         $status = config('const.status');
         $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
@@ -56,10 +55,8 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'per_page' => $auctionPaginate->perPage(),
-            'total' => $auctionPaginate->total(),
-            'current_page' => $auctionPaginate->currentPage(),
-            'last_page' => $auctionPaginate->lastPage(),
+            'page' => $page,
+            'per_page' => $perPage
         ];
         return $this->response->withData($data);
     }
@@ -120,21 +117,19 @@ class AuctionController extends ApiController
             'max_bid' => $maxPrice,
             'bids' => $bids->map(function ($bid) {
                 return [
-                    'bid_id' => $bid->bid_id,
                     'price' => $bid->price,
                     'created_at' => $bid->created_at->format('Y/m/d H:i:s'),
                     'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
-                    'user' => $bid['users']['name'],
+                    'user_name' => $bid['users']['name'],
                     'user_avatar' => $bid['users']['avatar']
                 ];
             }),
             'comments' => $comments->map(function ($comment) {
                 return [
-                    'comment_id' => $comment->comment_id,
                     'content' => $comment->content,
                     'created_at' => $comment->created_at->format('Y/m/d H:i:s'),
                     'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
-                    'user' => $comment['users']['name'],
+                    'user_name' => $comment['users']['name'],
                     'user_avatar' => $comment['users']['avatar']
                 ];
             }),
@@ -142,18 +137,16 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listAuctionByType($typeId)
+    public function listAuctionByType($typeId, Request $request)
     {
-        $auctions = $this->auctionService->getListAuctionByType($typeId);
+        $page = $request->page;
+        $perPage = $request->per_page;
+        $auctions = $this->auctionService->getListAuctionByType($typeId, $request->all());
         $categoryId = Category::where('type', $typeId)
             ->get()
             ->pluck('category_id');
-        $auction = Auction::with('category')
-            ->whereIn('category_id', $categoryId)
-            ->orderBy('created_at', 'DESC');
-        $auctionPaginate = $auction->paginate(Auction::PER_PAGE);
         $status = config('const.status');
-        return [
+        $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
                 $index = $auction->status;
                 return [
@@ -171,21 +164,19 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'per_page' => $auctionPaginate->perPage(),
-            'total' => $auctionPaginate->total(),
-            'current_page' => $auctionPaginate->currentPage(),
-            'last_page' => $auctionPaginate->lastPage(),
+            'per_page' => $perPage,
+            'page' => $page,
         ];
+        return $this->response->withData($data);
     }
 
-    public function listAuctionsByUser($userId)
+    public function listAuctionsByUser($userId, Request $request)
     {
-        $auctions = $this->auctionService->getListAuctionsByUser($userId);
-        $auction = Auction::where('selling_user_id', $userId)
-            ->orderBy('created_at', 'DESC');
-        $auctionPaginate = $auction->paginate(Auction::PER_PAGE);
+        $page = $request->page;
+        $perPage = $request->per_page;
+        $auctions = $this->auctionService->getListAuctionsByUser($userId, $request->all());
         $status = config('const.status');
-        return [
+        $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
                 $index = $auction->status;
                 return [
@@ -203,11 +194,10 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'per_page' => $auctionPaginate->perPage(),
-            'total' => $auctionPaginate->total(),
-            'current_page' => $auctionPaginate->currentPage(),
-            'last_page' => $auctionPaginate->lastPage(),
+            'per_page' => $perPage,
+            'page' => $page
         ];
+        return $this->response->withData($data);
     }
 
     //create auctions
@@ -277,11 +267,28 @@ class AuctionController extends ApiController
     }
 
     //list comment
-    public function listComments($auctionId)
+    public function listComments($auctionId, Request $request)
     {
-        $data = Comment::where('auction_id', $auctionId)
+        $page = $request->page;
+        $perPage = $request->per_page;
+
+        $comments = Comment::where('auction_id', $auctionId)
             ->orderBy('created_at', 'DESC')
+            ->forPage($page, $perPage)
             ->get();
+
+        $data = [
+            'comments' => $comments->map(function($comment) {
+                return [
+                    'user_id' => $comment->user_id,
+                    'content' => $comment->content,
+                    'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
+                ];
+            }),
+            'page' => $page,
+            'per_page' => $perPage
+        ];
+
         return $this->response->withData($data);
     }
 
@@ -300,11 +307,27 @@ class AuctionController extends ApiController
     }
 
     //list bids
-    public function listBids($auctionId)
+    public function listBids($auctionId, Request $request)
     {
-        $data = Bid::where('auction_id', $auctionId)
+        $page = $request->page;
+        $perPage = $request->per_page;
+
+        $bids = Bid::where('auction_id', $auctionId)
             ->orderBy('created_at', 'DESC')
+            ->forPage($page, $perPage)
             ->get();
+
+        $data = [
+            'bids' => $bids->map(function($bid) {
+                return [
+                    'user_id' => $bid->user_id,
+                    'price' => $bid->price,
+                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                ];
+            }),
+            'page' => $page,
+            'per_page' => $perPage
+        ];
 
         return $this->response->withData($data);
     }
@@ -343,7 +366,42 @@ class AuctionController extends ApiController
             ]);
         }
 
-        return $this->response->withData($is_liked);
+        $data = [
+            'user_id' => $is_liked->user_id,
+            'auction_id' => $is_liked->auction_id,
+            'is_liked' => $is_liked->is_liked
+        ];
+
+        return $this->response->withData($data);
+    }
+
+    public function listLikes(Request $request) {
+        $page = $request->page;
+        $perPage = $request->per_page;
+        $auctions = $this->auctionService->getListAuctionLike($request->all());
+        $status = config('const.status');
+        $data = [
+            'auctions' => $auctions->map(function ($auction) use ($status) {
+                $index = $auction->status;
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'statusId' => $index,
+                    'status' => $status[$index],
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                    'is_liked' => true,
+                ];
+            }),
+            'page' => $page,
+            'per_page' => $perPage
+        ];
+        return $this->response->withData($data);
     }
 
     //accept bid
@@ -374,12 +432,11 @@ class AuctionController extends ApiController
     }
 
     //listAuctionByStatus
-    public function listAuctionByStatus($statusId) 
+    public function listAuctionByStatus($statusId, Request $request) 
     {
-        $auctions = $this->auctionService->getListAuctionByStatus($statusId);
-        $auction = Auction::with('category')
-            ->orderBy('created_at', 'DESC');
-        $auctionPaginate = $auction->paginate(Auction::PER_PAGE);
+        $page = $request->page;
+        $perPage = $request->per_page;
+        $auctions = $this->auctionService->getListAuctionByStatus($statusId, $request->all());
         $status = config('const.status');
         $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
@@ -399,10 +456,8 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'per_page' => $auctionPaginate->perPage(),
-            'total' => $auctionPaginate->total(),
-            'current_page' => $auctionPaginate->currentPage(),
-            'last_page' => $auctionPaginate->lastPage(),
+            'page' => $page,
+            'per_page' => $perPage
         ];
         return $this->response->withData($data);
     }

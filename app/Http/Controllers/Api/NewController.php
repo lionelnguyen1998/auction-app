@@ -23,66 +23,65 @@ class NewController extends ApiController
         parent::__construct($request, $response);
     }
 
-    public function index()
+    //list notifications
+    public function notifications()
     {
-        $news = News::listNews();
-        
-        if (isset(auth()->user()->user_id)) {
-            $denys = Auction::listDeny();
-            $deny = [];
-            if ($denys) {
-                $deny = [
-                    'deny' => $denys->map(function ($deny) {
-                        return [
-                            'title' => $deny->title,
-                            'start_date' => $deny->start_date,
-                            'end_date' => $deny->end_date,
-                            'reason' => $deny->reason
-                        ];
-                    }),
-                ];
-            }
-
-            $acceptBids = Item::listAccept();
-            $accept = [];
-            if ($acceptBids) {
-                $accept = [
-                    'accept_bid' => $acceptBids->map(function ($accept) {
-                        $auctionId = $accept->auction_id;
-                        return $this->auctionService->sellingInfo($auctionId);
-                    })
-                ];
-            }
-            
-            $data = [
-                'news' => $news->map(function ($new) {
+        $denys = Auction::listDeny();
+        $deny = [];
+        if ($denys) {
+            $deny = [
+                'deny' => $denys->map(function ($deny) {
                     return [
-                        'new_id' => $new->new_id,
-                        'user_id' => $new->user_id,
-                        'title' => $new->title,
-                        'content' => $new->content,
-                        'created_at' => $new->created_at->format('Y/m/d H:i'),
-                        'updated_at' => $new->updated_at->format('Y/m/d H:i')
-                    ];
-                }),
-                'denys' => $deny,
-                'accepts' => $accept,
-            ];
-        } else {
-            $data = [
-                'news' => $news->map(function ($new) {
-                    return [
-                        'new_id' => $new->new_id,
-                        'user_id' => $new->user_id,
-                        'title' => $new->title,
-                        'content' => $new->content,
-                        'created_at' => $new->created_at->format('Y/m/d H:i'),
-                        'updated_at' => $new->updated_at->format('Y/m/d H:i')
+                        'title' => $deny->title,
+                        'start_date' => $deny->start_date,
+                        'end_date' => $deny->end_date,
+                        'reason' => $deny->reason
                     ];
                 }),
             ];
         }
 
+        $acceptBids = Item::listAccept();
+        $accept = [];
+        if ($acceptBids) {
+            $accept = [
+                'accept_bid' => $acceptBids->map(function ($accept) {
+                    $auctionId = $accept->auction_id;
+                    return $this->auctionService->sellingInfo($auctionId);
+                })
+            ];
+        }
+        
+        $data = [
+            'denys' => $deny,
+            'accepts' => $accept,
+        ];
+
+        return $this->response->withData($data);
+    }
+
+    //list news
+    public function news(Request $request)
+    {
+        $page = $request->page;
+        $perPage = $request->per_page;
+
+        $news = News::listNews($request->all());
+
+        $data = [
+            'news' => $news->map(function ($new) {
+                return [
+                    'user_id' => $new->user_id,
+                    'title' => $new->title,
+                    'content' => $new->content,
+                    'created_at' => $new->created_at->format('Y/m/d H:i'),
+                    'updated_at' => $new->updated_at->format('Y/m/d H:i')
+                ];
+            }),
+            'page' => $page,
+            'per_page' => $perPage
+        ];
+       
         return $this->response->withData($data);
     }
 

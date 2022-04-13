@@ -27,6 +27,16 @@ class Brand extends Model
     public function getBrandList()
     {
         $listBrands = Brand::all();
-        return $listBrands;
+
+        $data = [
+            'brand' => $listBrands->map(function($brand) {
+                return [
+                    'brand_id' => $brand->brand_id,
+                    'name' => $brand->name,
+                    'brand_info' => $brand->brand_info
+                ];
+            }),
+        ];
+        return $data;
     }
 }
