@@ -40,10 +40,16 @@ class ItemController extends ApiController
         } else {
             $item = $request->all();
         }
-        dd($images);
-        $data = $this->itemService->create($item, $auctionId, $images);
 
-        return $this->response->withData($data);
+        if (sizeof($images) > 4) {
+            return [
+                'message' => 'Chỉ được thêm tối đa 4 ảnh',
+            ];
+        } else {
+            $data = $this->itemService->create($item, $auctionId, $images);
+    
+            return $this->response->withData($data);
+        }
     }
 
     public function edit(Request $request, $itemId)
