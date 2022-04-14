@@ -177,12 +177,14 @@ class UserService implements UserServiceInterface
     //api
     public function sendEmail($request)
     {
+        $file = $this->uploadService->store($request['file'] ?? null);
+
         $newContact = Contact::create([
             'email' => $request['email'],
             'phone' => $request['phone'],
             'name' => $request['name'],
             'content' => $request['content'],
-            'file' => $request['file'] ?? null,
+            'file' => $file ?? null,
             'report_type' => $request['report_type']
         ]);
 

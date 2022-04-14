@@ -93,8 +93,8 @@ class AuctionService implements AuctionServiceInterface
     //get auction by categoryId and typeCategory
     public function getListAuctionByType($typeId, $request)
     {
-        $page = $request['page'];
-        $perPage = $request['per_page'];
+        $page = $request['index'];
+        $perPage = $request['count'];
         $categoryId = Category::where('type', $typeId)
             ->get()
             ->pluck('category_id');
@@ -111,8 +111,8 @@ class AuctionService implements AuctionServiceInterface
     //get list auctions
     public function getListAuction($request)
     {
-        $page = $request['page'];
-        $perPage = $request['per_page'];
+        $page = $request['index'];
+        $perPage = $request['count'];
         $auction = Auction::with('category')
             ->where('status', '<>', 4)
             ->orderBy('created_at', 'DESC')
@@ -131,8 +131,8 @@ class AuctionService implements AuctionServiceInterface
             ->get()
             ->pluck('auction_id');
         
-        $page = $request['page'];
-        $perPage = $request['per_page'];
+        $page = $request['index'];
+        $perPage = $request['count'];
         $auction = Auction::with('category')
             ->orderBy('created_at', 'DESC')
             ->whereIn('auction_id', $auctionId)
@@ -144,8 +144,8 @@ class AuctionService implements AuctionServiceInterface
 
     public function getListAuctionByStatus($statusId, $request)
     {
-        $page = $request['page'];
-        $perPage = $request['per_page'];
+        $page = $request['index'];
+        $perPage = $request['count'];
         $auction = Auction::with('category')
             ->where('status', $statusId)
             ->orderBy('created_at', 'DESC')
@@ -158,8 +158,8 @@ class AuctionService implements AuctionServiceInterface
     //get list auctions by user id
     public function getListAuctionsByUser($userId, $request)
     {
-        $page = $request['page'];
-        $perPage = $request['per_page'];
+        $page = $request['index'];
+        $perPage = $request['count'];
         $list = Auction::with('category')
             ->where('selling_user_id', $userId)
             ->forPage($page, $perPage)
@@ -306,7 +306,7 @@ class AuctionService implements AuctionServiceInterface
             return $data;
         } else {
             return [
-                'message' => 'Khong the comment',
+                'message' => 'Không thể comment',
             ];
         }
 

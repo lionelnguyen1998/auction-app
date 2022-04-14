@@ -33,8 +33,8 @@ class News extends Model
 
     public function listNews($request)
     {
-        $page = $request['page'];
-        $perPage = $request['per_page'];
+        $page = $request['index'];
+        $perPage = $request['count'];
         
         $news = News::orderBy('created_at', 'DESC')
             ->forPage($page, $perPage)

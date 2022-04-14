@@ -257,8 +257,8 @@ class AuctionController extends ApiController
     //list comment
     public function listComments($auctionId, Request $request)
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
+        $page = $request->index;
+        $perPage = $request->count;
 
         $comments = Comment::where('auction_id', $auctionId)
             ->orderBy('created_at', 'DESC')
@@ -295,8 +295,8 @@ class AuctionController extends ApiController
     //list bids
     public function listBids($auctionId, Request $request)
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
+        $page = $request->index;
+        $perPage = $request->count;
 
         $bids = Bid::where('auction_id', $auctionId)
             ->orderBy('created_at', 'DESC')

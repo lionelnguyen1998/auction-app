@@ -29,14 +29,14 @@ class AuthController extends ApiController
     {
         $credentials = request(['email', 'password']);
 
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        
         $validator = $this->userService->loginValidation($credentials);
 
         if ($validator->fails()) {
             return $this->response->errorValidation($validator);
-        }
-
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
         }
         
         return $this->respondWithToken($token);
