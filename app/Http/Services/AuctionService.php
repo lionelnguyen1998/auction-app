@@ -231,7 +231,7 @@ class AuctionService implements AuctionServiceInterface
         return $validated;
     }
 
-    //api
+    //create auctions
     public function create($request)
     {
         
@@ -260,7 +260,7 @@ class AuctionService implements AuctionServiceInterface
         ];
     }
 
-    //edit api
+    //edit auctions
     public function edit($auctionId, $request)
     {
         $auction = Auction::findOrFail($auctionId);
@@ -288,6 +288,12 @@ class AuctionService implements AuctionServiceInterface
     public function comments($auctionId, $request)
     {
         $status = Auction::findOrFail($auctionId)->status;
+        $lastIdComment = Comment::orderBy('updated_at', 'DESC')
+            ->get()
+            ->pluck('comment_id')
+            ->first();
+
+        $lastId = $request['comment_last_id'] ?? $lastIdComment;
 
         if($status == 1 || $status == 2) {
             $comment = Comment::create([
@@ -296,12 +302,32 @@ class AuctionService implements AuctionServiceInterface
                 'content' => $request['content']
             ]);
 
-            $data = [
-                'auction_id' => $comment->auction_id,
-                'user_id' => $comment->user_id,
-                'content' => $comment->content,
-                'update_date' => $comment->updated_at->format('Y/m/d H:i:s')
-            ];
+            $currentId = $comment->comment_id;
+
+            if ($currentId == ($lastId + 1)) {
+                $data = [
+                    'auction_id' => $comment->auction_id,
+                    'user_id' => $comment->user_id,
+                    'content' => $comment->content,
+                    'update_date' => $comment->updated_at->format('Y/m/d H:i:s')
+                ];
+            } else {
+                $comments = Comment::where('auction_id', $auctionId)
+                    ->where('comment_id', '>', $lastId)
+                    ->orderBy('created_at', 'DESC')
+                    ->get();
+
+                $data = [
+                    'comments' => $comments->map(function($comment) {
+                        return [
+                            'auction_id' => $comment->auction_id,
+                            'user_id' => $comment->user_id,
+                            'content' => $comment->content,
+                            'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
+                        ];
+                    }),
+                ];
+            }
 
             return $data;
         } else {
@@ -343,6 +369,13 @@ class AuctionService implements AuctionServiceInterface
     {
         $status = Auction::findOrFail($auctionId)->status;
 
+        $lastIdBid = Bid::orderBy('updated_at', 'DESC')
+        ->get()
+        ->pluck('bid_id')
+        ->first();
+
+        $lastId = $request['bid_last_id'] ?? $lastIdBid;
+
         if($status == 1 || $status == 2) {
             $bid = Bid::create([
                 'auction_id' => $auctionId, 
@@ -351,18 +384,39 @@ class AuctionService implements AuctionServiceInterface
                 'phone' => $request['phone'] ?? null,
             ]);
 
-            $data = [
-                'auction_id' => $bid->auction_id,
-                'user_id' => $bid->user_id,
-                'price' => $bid->price,
-                'phone' => $bid->phone,
-                'updated_at' => $bid->updated_at->format('Y/m/d H:i:s')
-            ];
+            $currentId = $bid->bid_id;
+
+            if ($currentId == ($lastId + 1)) {
+                $data = [
+                    'auction_id' => $bid->auction_id,
+                    'user_id' => $bid->user_id,
+                    'price' => $bid->price,
+                    'phone' => $bid->phone,
+                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s')
+                ];
+            } else {
+                $bids = Bid::where('auction_id', $auctionId)
+                    ->where('bid_id', '>', $lastId)
+                    ->orderBy('created_at', 'DESC')
+                    ->get();
+
+                $data = [
+                    'bids' => $bids->map(function($bid) {
+                        return [
+                            'auction_id' => $bid->auction_id,
+                            'user_id' => $bid->user_id,
+                            'price' => $bid->price,
+                            'phone' => $bid->phone,
+                            'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                        ];
+                    }),
+                ];
+            }
 
             return $data;
         } else {
             return [
-                'message' => 'Khong the nhap bid',
+                'message' => 'Không thể nhập bid',
             ];
         }
     }
