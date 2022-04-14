@@ -63,9 +63,6 @@ class NewController extends ApiController
     //list news
     public function news(Request $request)
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
-
         $news = News::listNews($request->all());
 
         $data = [
@@ -78,8 +75,6 @@ class NewController extends ApiController
                     'updated_at' => $new->updated_at->format('Y/m/d H:i')
                 ];
             }),
-            'page' => $page,
-            'per_page' => $perPage
         ];
        
         return $this->response->withData($data);

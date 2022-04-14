@@ -33,8 +33,6 @@ class AuctionController extends ApiController
     //all auction in home page
     public function index(Request $request)
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
         $auctions = $this->auctionService->getListAuction($request->all());
         $status = config('const.status');
         $data = [
@@ -55,8 +53,6 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'page' => $page,
-            'per_page' => $perPage
         ];
         return $this->response->withData($data);
     }
@@ -139,8 +135,6 @@ class AuctionController extends ApiController
 
     public function listAuctionByType($typeId, Request $request)
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
         $auctions = $this->auctionService->getListAuctionByType($typeId, $request->all());
         $categoryId = Category::where('type', $typeId)
             ->get()
@@ -163,17 +157,13 @@ class AuctionController extends ApiController
                         'type' => $auction['category']['type'],
                     ],
                 ];
-            }),
-            'per_page' => $perPage,
-            'page' => $page,
+            })
         ];
         return $this->response->withData($data);
     }
 
     public function listAuctionsByUser($userId, Request $request)
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
         $auctions = $this->auctionService->getListAuctionsByUser($userId, $request->all());
         $status = config('const.status');
         $data = [
@@ -194,8 +184,6 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'per_page' => $perPage,
-            'page' => $page
         ];
         return $this->response->withData($data);
     }
@@ -285,8 +273,6 @@ class AuctionController extends ApiController
                     'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
                 ];
             }),
-            'page' => $page,
-            'per_page' => $perPage
         ];
 
         return $this->response->withData($data);
@@ -325,8 +311,6 @@ class AuctionController extends ApiController
                     'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
                 ];
             }),
-            'page' => $page,
-            'per_page' => $perPage
         ];
 
         return $this->response->withData($data);
@@ -376,8 +360,6 @@ class AuctionController extends ApiController
     }
 
     public function listLikes(Request $request) {
-        $page = $request->page;
-        $perPage = $request->per_page;
         $auctions = $this->auctionService->getListAuctionLike($request->all());
         $status = config('const.status');
         $data = [
@@ -398,8 +380,6 @@ class AuctionController extends ApiController
                     'is_liked' => true,
                 ];
             }),
-            'page' => $page,
-            'per_page' => $perPage
         ];
         return $this->response->withData($data);
     }
@@ -434,8 +414,6 @@ class AuctionController extends ApiController
     //listAuctionByStatus
     public function listAuctionByStatus($statusId, Request $request) 
     {
-        $page = $request->page;
-        $perPage = $request->per_page;
         $auctions = $this->auctionService->getListAuctionByStatus($statusId, $request->all());
         $status = config('const.status');
         $data = [
@@ -456,8 +434,6 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
-            'page' => $page,
-            'per_page' => $perPage
         ];
         return $this->response->withData($data);
     }

@@ -40,7 +40,6 @@ class ItemController extends ApiController
         } else {
             $item = $request->all();
         }
-        dd($images);
         $data = $this->itemService->create($item, $auctionId, $images);
 
         return $this->response->withData($data);
