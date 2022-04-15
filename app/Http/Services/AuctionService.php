@@ -234,7 +234,6 @@ class AuctionService implements AuctionServiceInterface
     //create auctions
     public function create($request)
     {
-        
         $auction = Auction::create([
             'category_id' => $request['category_id'],
             'selling_user_id' => auth()->user()->user_id,
