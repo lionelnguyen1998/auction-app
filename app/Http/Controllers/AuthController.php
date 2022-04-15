@@ -15,7 +15,7 @@ class AuthController extends ApiController
 
     public function __construct(UserService $userService, ApiResponse $response, Request $request)
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->userService = $userService;
         parent::__construct($request, $response);
     }
@@ -28,15 +28,15 @@ class AuthController extends ApiController
     public function login()
     {
         $credentials = request(['email', 'password']);
-
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
         
         $validator = $this->userService->loginValidation($credentials);
 
         if ($validator->fails()) {
             return $this->response->errorValidation($validator);
+        }
+
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Mật khẩu hoặc Email không đúng'], 401);
         }
         
         return $this->respondWithToken($token);

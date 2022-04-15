@@ -32,8 +32,10 @@ Route::group(['middleware' => 'api'], function(){
 
     //User
     Route::post('register', [UserController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login'])->name('login');
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::get('loginfailed', function () {
+        return response()->json(['error' => 'Chưa đăng nhập']);
+    })->name('loginfailed');
 
     //Slider
     Route::get('slider', [HomeController::class, 'slider']);
