@@ -65,6 +65,8 @@ class NewController extends ApiController
     {
         $news = News::listNews($request->all());
 
+        $total = News::all()->count('new_id');
+
         $data = [
             'news' => $news->map(function ($new) {
                 return [
@@ -75,6 +77,7 @@ class NewController extends ApiController
                     'updated_at' => $new->updated_at->format('Y/m/d H:i')
                 ];
             }),
+            'total' => $total
         ];
        
         return $this->response->withData($data);
