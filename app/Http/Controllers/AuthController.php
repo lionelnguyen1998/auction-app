@@ -15,7 +15,7 @@ class AuthController extends ApiController
 
     public function __construct(UserService $userService, ApiResponse $response, Request $request)
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'signup']]);
         $this->userService = $userService;
         parent::__construct($request, $response);
     }
@@ -32,11 +32,21 @@ class AuthController extends ApiController
         $validator = $this->userService->loginValidation($credentials);
 
         if ($validator->fails()) {
-            return $this->response->errorValidation($validator);
+            $emailM = $validator->errors()->first("email");
+            $passwordM = $validator->errors()->first("password");
+            return [
+                "code" => 1001,
+                "message" => "email: " . $emailM . " &password: " . $passwordM,
+                "data" => null,
+            ];
         }
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Mật khẩu hoặc Email không đúng'], 401);
+            return [
+                "code" => 1002,
+                "message" => "Mật khẩu hoặc email không đúng",
+                "data" => null,
+            ];
         }
         
         return $this->respondWithToken($token);
@@ -61,7 +71,11 @@ class AuthController extends ApiController
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => null,
+        ];
     }
 
     /**
@@ -83,7 +97,7 @@ class AuthController extends ApiController
      */
     protected function respondWithToken($token)
     {
-        return response()->json([
+        $data = [
             'access_token' => $token,
             'user' => [
                 'name' => $this->guard()->name,
@@ -95,7 +109,13 @@ class AuthController extends ApiController
             ],
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 6000
-        ]);
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 
     public function guard()

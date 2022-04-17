@@ -21,32 +21,67 @@ class UserController extends ApiController
         parent::__construct($request, $response);
     }
 
-    public function register(Request $request)
+    public function signup(Request $request)
     {
-        $validator = $this->userService->registerValidation($request->all());
+        $validator = $this->userService->signupValidation($request->all());
 
         if ($validator->fails()) {
-            return $this->response->errorValidation($validator);
+            $name = $validator->errors()->first("name");
+            $phone = $validator->errors()->first("phone");
+            $address = $validator->errors()->first("address");
+            $email = $validator->errors()->first("email");
+            $password = $validator->errors()->first("password");
+            $rePass = $validator->errors()->first("re_pass");
+            $avatar = $validator->errors()->first("avatar");
+            return [
+                "code" => 1001,
+                "message" => "name: " . $name . "&phone: " . $phone . "&address: " . $address .
+                    "&email: " . $email . "&password: " . $password . 
+                    "&re_pass: " . $rePass . " &avatar: " . $avatar,
+                "data" => null,
+            ];
         }
 
-        $data = $this->userService->register($request->all());
-        return $this->response->withData($data);
+        $data = $this->userService->signup($request->all());
+        
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 
     //edit user
     public function edit(Request $request)
     {
-        $validator = $this->userService->registerValidation($request->all());
+        $validator = $this->userService->signupValidation($request->all());
         
         if ($validator->fails()) {
-            return $this->response->errorValidation($validator);
+            $name = $validator->errors()->first("name");
+            $phone = $validator->errors()->first("phone");
+            $address = $validator->errors()->first("address");
+            $email = $validator->errors()->first("email");
+            $password = $validator->errors()->first("password");
+            $rePass = $validator->errors()->first("re_pass");
+            $avatar = $validator->errors()->first("avatar");
+            return [
+                "code" => 1001,
+                "message" => "name: " . $name . "&phone: " . $phone . "&address: " . $address .
+                    "&email: " . $email . "&password: " . $password . 
+                    "&re_pass: " . $rePass . " &avatar: " . $avatar,
+                "data" => null,
+            ];
         }
 
         $dataInput = $request->except('re_pass');
 
-        $message = $this->userService->edit($dataInput);
+        $data = $this->userService->edit($dataInput);
 
-        return $this->response->withData($message);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 
     //contactUs
@@ -55,12 +90,27 @@ class UserController extends ApiController
         $validator = $this->userService->contactValidation($request->all());
 
         if ($validator->fails()) {
-            return $this->response->errorValidation($validator);
+            $name = $validator->errors()->first("name");
+            $phone = $validator->errors()->first("phone");
+            $email = $validator->errors()->first("email");
+            $content = $validator->errors()->first("content");
+            $reportType = $validator->errors()->first("report_type");
+            return [
+                "code" => 1001,
+                "message" => "name: " . $name . "&phone: " . $phone .
+                    "&email: " . $email . "&content: " . $content .
+                    "&report_type: " . $reportType,
+                "data" => null,
+            ];
         }
 
         $data = $this->userService->sendEmail($request->all());
 
-        return $this->response->withData($data);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 
 }

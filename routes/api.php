@@ -31,10 +31,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'api'], function(){
 
     //User
-    Route::post('register', [UserController::class, 'register']);
+    Route::post('signup', [UserController::class, 'signup']);
     Route::post('login', [AuthController::class, 'login']);
     Route::get('loginfailed', function () {
-        return response()->json(['error' => 'Chưa đăng nhập']);
+        return [
+            "code" => 1004,
+            "message" => "Chưa đăng nhập",
+            "data" => null,
+        ];
     })->name('loginfailed');
 
     //Slider
@@ -56,13 +60,6 @@ Route::group(['middleware' => 'api'], function(){
 
     //list bids
     Route::get('/bids/{auctionId}', [AuctionController::class, 'listBids']);
-
-    //news
-    Route::prefix('news')->group(function () {
-        Route::get('/', [NewController::class, 'news']);
-        Route::get('/read/{newId}', [NewController::class, 'read']);
-    });
-
 
     //category
     Route::prefix('categories')->group(function () {
@@ -127,6 +124,12 @@ Route::group(['middleware' => 'api'], function(){
         //notifications
         Route::prefix('notifications')->group(function () {
             Route::get('/', [NewController::class, 'notifications']);
+        });
+
+        //news
+        Route::prefix('news')->group(function () {
+            Route::get('/', [NewController::class, 'news']);
+            Route::get('/read/{newId}', [NewController::class, 'read']);
         });
 
     });

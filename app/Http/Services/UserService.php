@@ -24,16 +24,15 @@ class UserService implements UserServiceInterface
         $this->uploadService = $uploadService;
     }
 
-    //register validation
-    //api
-    public function registerValidation($request) 
+    //signup validation
+    public function signupValidation($request) 
     {
         $rules = [
             'password' => 'required|max:255',
             're_pass' => 'required_with:password|same:password|max:255',
             'phone' => 'required|max:60',
             'address' => 'max:255',
-            'name' => 'required|max:255'
+            'name' => 'required|max:255',
         ];
 
         $allUserEmail = User::withTrashed()
@@ -41,16 +40,21 @@ class UserService implements UserServiceInterface
             ->pluck('email')
             ->toArray();
 
-        if (isset($request["user_id"])) {
-            $userId = $request["user_id"];
+        if (isset(auth()->user()->user_id)) {
+            $userId = auth()->user()->user_id;
             $rules['email'] = "required|email|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
         } else {
-            foreach ($allUserEmail as $key => $value) {
-                if ($request['email'] == $value) {
-                    $rules['email'] = "required|email|max:255|unique:users,email";
-                } else {
-                    $rules['email'] = "required|email|max:255";
+            if (isset($request['email'])) {
+                foreach ($allUserEmail as $key => $value) {
+                    if ($request['email'] == $value) {
+                        $rules['email'] = "required|email|max:255|unique:users,email";
+                        break;
+                    } else {
+                        $rules['email'] = "required|email|max:255";
+                    }
                 }
+            } else {
+                $rules['email'] = "required|email|max:255";
             }
         }
 
@@ -75,7 +79,7 @@ class UserService implements UserServiceInterface
 
     public function insertUser($request) 
     {
-        $validated = $this->registerValidation($request);
+        $validated = $this->signupValidation($request);
 
         if ($validated->fails()) {
             return redirect(url()->previous())
@@ -100,7 +104,7 @@ class UserService implements UserServiceInterface
 
     public function updateUser($request)
     {
-        $validated = $this->registerValidation($request);
+        $validated = $this->signupValidation($request);
 
         if ($validated->fails()) {
             return redirect(url()->previous())
@@ -127,7 +131,6 @@ class UserService implements UserServiceInterface
     }
 
     //login validation
-    //api
     public function loginValidation($request) 
     {
         $rules = [
@@ -178,7 +181,6 @@ class UserService implements UserServiceInterface
     public function sendEmail($request)
     {
         $file = $this->uploadService->store($request['file'] ?? null);
-
         $newContact = Contact::create([
             'email' => $request['email'],
             'phone' => $request['phone'],
@@ -188,16 +190,25 @@ class UserService implements UserServiceInterface
             'report_type' => $request['report_type']
         ]);
 
+        $data = [
+            'name' => $newContact->name,
+            'phone' => $newContact->phone,
+            'email' => $newContact->email,
+            'content' => $newContact->content,
+            'file' => $newContact->file,
+            'report_type' => $newContact->report_type,
+        ];
+
         $adminMail = config('mail.mailers.smtp.username');
 
         Mail::to($adminMail)->send(new SendMail($newContact));
 
-        return $newContact;
+        return $data;
     }
 
 
     //API
-    public function register($request) 
+    public function signup($request) 
     {
         $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
 
@@ -247,7 +258,15 @@ class UserService implements UserServiceInterface
         auth()->user()->password = Hash::make($user->password);
         auth()->user()->avatar = $user->avatar ?? $avatarDefault;
 
-        $message = "update thanh cong";
-        return $message;
+        $data = [
+            'name' => auth()->user()->name,
+            'email' => auth()->user()->email,
+            'phone' => auth()->user()->phone,
+            'address' => auth()->user()->address,
+            'avatar' => auth()->user()->avatar,
+            'role' => auth()->user()->role
+        ];
+
+        return $data;
     }
 }

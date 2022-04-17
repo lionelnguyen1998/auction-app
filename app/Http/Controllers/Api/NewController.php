@@ -80,7 +80,11 @@ class NewController extends ApiController
             'total' => $total
         ];
        
-        return $this->response->withData($data);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 
     //read report reject and selling_info auction
@@ -103,21 +107,30 @@ class NewController extends ApiController
     //read news
     public function read($newId)
     {
+        News::findOrFail($newId);
         $is_read = UserReadNews::where('new_id', $newId)
             ->get();
 
         if (empty($is_read[0])) {
-            $is_read = UserReadNews::insert([
-                'auction_id' => null,
+            $is_reads = UserReadNews::insert([
                 'is_read' => true,
                 'new_id' => $newId,
             ]);
+
+            $is_read = [
+                'is_read' => 1,
+                'new_id' => $newId,
+            ];
         }
     
-        return $this->response->withData($is_read);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $is_read,
+        ];
     }
 
-    //read news
+    //read news accept auctions
     public function readAccept($itemId)
     {
         $is_read = UserReadNews::where('item_id', $itemId)

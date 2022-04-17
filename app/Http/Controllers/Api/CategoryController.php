@@ -21,6 +21,10 @@ class CategoryController extends ApiController
 
     public function index() {
         $data = $this->categoryService->getCategoryList();
-        return $this->response->withData($data);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 }

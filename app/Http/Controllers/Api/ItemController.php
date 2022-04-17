@@ -27,7 +27,18 @@ class ItemController extends ApiController
         $validator = $this->itemService->itemValidation($request->all());
 
         if ($validator->fails()) {
-            return $this->response->errorValidation($validator);
+            $brand = $validator->errors()->first("brand_id");
+            $name = $validator->errors()->first("name");
+            $series = $validator->errors()->first("series");
+            $description = $validator->errors()->first("description");
+            $startingPrice = $validator->errors()->first("starting_price");
+            return [
+                "code" => 1001,
+                "message" => "brand: " . $brand . "&name: " . $name .
+                    "&series: " . $series . "&description: " . $description .
+                    "&starting_price: " . $startingPrice,
+                "data" => null,
+            ];
         }
 
         $images = array();
@@ -43,12 +54,18 @@ class ItemController extends ApiController
 
         if (sizeof($images) > 4) {
             return [
-                'message' => 'Chỉ được thêm tối đa 4 ảnh',
+                "code" => 1007,
+                "message" => "Chỉ được thêm tối đa 4 ảnh",
+                "data" => null,
             ];
         } else {
             $data = $this->itemService->create($item, $auctionId, $images);
     
-            return $this->response->withData($data);
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => $data,
+            ];
         }
     }
 
@@ -56,11 +73,23 @@ class ItemController extends ApiController
     {
         $auctionId = Item::findOrFail($itemId)->auction_id;
         $status = Auction::findOrFail($auctionId)->status;
+
         if ($status == 4) {
             $validator = $this->itemService->itemValidation($request->all());
     
             if ($validator->fails()) {
-                return $this->response->errorValidation($validator);
+                $brand = $validator->errors()->first("brand_id");
+                $name = $validator->errors()->first("name");
+                $series = $validator->errors()->first("series");
+                $description = $validator->errors()->first("description");
+                $startingPrice = $validator->errors()->first("starting_price");
+                return [
+                    "code" => 1001,
+                    "message" => "brand: " . $brand . "&name: " . $name .
+                        "&series: " . $series . "&description: " . $description .
+                        "&starting_price: " . $startingPrice,
+                    "data" => null,
+                ];
             }
 
             $images = array();
@@ -69,17 +98,24 @@ class ItemController extends ApiController
                     $url = $this->uploadService->store($value);
                     array_push($images, $url);
                 }
-    
                 $item = $request->except('images');
             } else {
                 $item = $request->all();
             }
-
+            
             $data = $this->itemService->edit($item, $itemId, $images);
-            return $this->response->withData($data);
+
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => $data,
+            ];
         } else {
-            $message = "Khong the chinh sua";
-            return $this->response->withData($message);
+            return [
+                "code" => 1005,
+                "message" => "Không thể chỉnh sửa",
+                "data" => null,
+            ];
         } 
     }
 }

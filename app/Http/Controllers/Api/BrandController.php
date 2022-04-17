@@ -16,6 +16,10 @@ class BrandController extends ApiController
 
     public function index() {
         $data = Brand::getBrandList();
-        return $this->response->withData($data);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 }
