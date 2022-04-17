@@ -24,6 +24,7 @@ class Item extends Model
         'name',
         'starting_price',
         'selling_info',
+        'description'
     ];
 
     protected $dates = [
@@ -80,6 +81,18 @@ class Item extends Model
         } else {
             return false;
         }   
+
+        // $acceptBids = Item::listAccept();
+
+        // $accept = [];
+        // if ($acceptBids) {
+        //     $accept = [
+        //         'accept_bid' => $acceptBids->map(function ($accept) {
+        //             $auctionId = $accept->auction_id;
+        //             return $this->auctionService->sellingInfo($auctionId);
+        //         })
+        //     ];
+        // }
     }
 
 }

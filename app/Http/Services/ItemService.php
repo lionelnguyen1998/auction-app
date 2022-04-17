@@ -102,7 +102,7 @@ class ItemService implements ItemServiceInterface
             'series' => $request['series'] ?? null,
             'name' => $request['name'],
             'starting_price' => $request['starting_price'],
-            'description' => $request['description'] ?? null
+            'description' => $request['description']
         ]);
 
         if (isset($images)) {
@@ -117,16 +117,12 @@ class ItemService implements ItemServiceInterface
         }
 
         $data = [
-            'item' => [
-                'item_id' => $item->item_id,
-                'brand_id' => $item->brand_id,
-                'series' => $item->series,
-                'name' => $item->name,
-                'description' => $item->description,
-                'images' => $images ?? null,
-                'created_at' => $auction->created_at,
-                'updated_at' => $auction->updated_at,
-            ],
+            'auction_id' => $item->auction_id,
+            'brand_id' => $item->brand_id,
+            'series' => $item->series,
+            'name' => $item->name,
+            'description' => $item->description,
+            'images' => $images ?? null,
         ];
         return $data;
     }
@@ -135,17 +131,25 @@ class ItemService implements ItemServiceInterface
     {
         DB::beginTransaction();
             $item = Item::findOrFail($itemId);
-            $image = Image::where('item_id', $itemId);
+            $imageId = Image::where('item_id', $itemId)
+                ->get()
+                ->pluck('image_id');
+
+            $image = Image::findOrFail($imageId);
             
-            if (isset($images)) {
-                Image::insert($images);
+            if (empty($images)) {
+                dd('ko chinh sua');
+            } else {
+                //dd($itemId);
+                Image::where('item_id', '=', $itemId)->delete();
+                foreach ($images as $key => $value) {
+                    $image->image = $value;
+                    $image->item_id = $itemId;
+                    $image->update();
+                }
             }
             dd($images);
-    
-            // if (isset($request['values'])) {
-            //     $values = $request['values'];
-            //     $values = DB::table('item_values')->where('item_id', $itemId)->update($values);
-            // }
+
             unset($request['values']);
             $item = DB::table('items')->where('item_id', $itemId)->update($request);
         DB::commit();

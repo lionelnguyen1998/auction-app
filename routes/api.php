@@ -31,10 +31,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'api'], function(){
 
     //User
-    Route::post('register', [UserController::class, 'register']);
+    Route::post('signup', [UserController::class, 'signup']);
     Route::post('login', [AuthController::class, 'login']);
     Route::get('loginfailed', function () {
-        return response()->json(['error' => 'Chưa đăng nhập']);
+        return [
+            "code" => 1004,
+            "message" => "Chưa đăng nhập",
+            "data" => null,
+        ];
     })->name('loginfailed');
 
     //Slider
@@ -48,6 +52,9 @@ Route::group(['middleware' => 'api'], function(){
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
     });
 
+    //total likes of auctions
+    Route::get('totalLikes/{auctionId}', [AuctionController::class, 'totalLikes']);
+
     //contact
     Route::post('/contactUs', [UserController::class, 'contactUs']);
 
@@ -56,13 +63,6 @@ Route::group(['middleware' => 'api'], function(){
 
     //list bids
     Route::get('/bids/{auctionId}', [AuctionController::class, 'listBids']);
-
-    //news
-    Route::prefix('news')->group(function () {
-        Route::get('/', [NewController::class, 'news']);
-        Route::get('/read/{newId}', [NewController::class, 'read']);
-    });
-
 
     //category
     Route::prefix('categories')->group(function () {
@@ -79,7 +79,7 @@ Route::group(['middleware' => 'api'], function(){
     
     Route::middleware(['auth'])->group(function () { 
         //Account
-        Route::get('logout', [AuthController::class, 'logout']);
+        Route::post('logout', [AuthController::class, 'logout']);
         Route::post('edit', [UserController::class, 'edit']);
 
         //auctions
@@ -90,6 +90,7 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
         });
 
+        //items
         Route::prefix('items')->group(function () {
             Route::post('/create/{auctionId}', [ItemController::class, 'create']);
             Route::post('/edit/{itemId}', [ItemController::class, 'edit']);
@@ -104,9 +105,6 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('bids')->group(function () {
             Route::post('/create/{auctionId}', [AuctionController::class, 'bids']);
         });
-
-        //read reject auctions report
-        Route::get('reason/{auctionDenyId}', [NewController::class, 'reason']);
 
         //accept bid => send report
         Route::prefix('accept')->group(function () {
@@ -124,9 +122,16 @@ Route::group(['middleware' => 'api'], function(){
         //update auction status
         Route::get('/updateStatus', [AuctionController::class, 'updateStatus']);
 
-        //notifications
+        //notifications reject auction
         Route::prefix('notifications')->group(function () {
             Route::get('/', [NewController::class, 'notifications']);
+            Route::get('read/{auctionDenyId}', [NewController::class, 'reason']);
+        });
+
+        //news
+        Route::prefix('news')->group(function () {
+            Route::get('/', [NewController::class, 'news']);
+            Route::get('/read/{newId}', [NewController::class, 'read']);
         });
 
     });

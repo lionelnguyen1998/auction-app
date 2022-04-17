@@ -35,9 +35,10 @@ class ApiResponse
         }
         $data = [
             'errors' => $errors,
+            'code' => $code,
+            'message' => $message,
             'data' => $data,
             'user_info' => $userInfo ?? null,
-            'message' => $message
         ];
 
         if (!empty($this->headers)) {

@@ -244,18 +244,14 @@ class AuctionService implements AuctionServiceInterface
         ]);
 
         return $data = [
-            'auctions' => [
-                'auction_id' => $auction->auction_id,
-                'title' => $auction->title,
-                'category_id' => $auction->category_id,
-                'selling_user_id' => $auction->selling_user_id,
-                'start_date' => $auction->start_date,
-                'end_date' => $auction->end_date,
-                'status' => $auction->status,
-                'reason' => $auction->reason,
-                'created_at' => $auction->created_at,
-                'updated_at' => $auction->updated_at
-            ]
+            'auction_id' => $auction->auction_id,
+            'title' => $auction->title,
+            'category_id' => $auction->category_id,
+            'selling_user_id' => $auction->selling_user_id,
+            'start_date' => $auction->start_date,
+            'end_date' => $auction->end_date,
+            'status' => $auction->status,
+            'reason' => $auction->reason,
         ];
     }
 
@@ -331,7 +327,9 @@ class AuctionService implements AuctionServiceInterface
             return $data;
         } else {
             return [
-                'message' => 'Không thể comment',
+                "code" => 1008,
+                "message" => "Không thể bình luận",
+                "data" => null,
             ];
         }
 
@@ -427,7 +425,8 @@ class AuctionService implements AuctionServiceInterface
         ];
 
         $messages = [
-            'exists' => 'Khong ton tai',
+            'exists' => 'Phiên đấu giá không tồn tại',
+            'required' => '必須項目が未入力です。'
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -486,9 +485,7 @@ class AuctionService implements AuctionServiceInterface
     //accept bid
     public function accept($request, $auctionId)
     {
-        $check = Item::where('auction_id', $auctionId)
-            ->whereNotNull('selling_info')
-            ->get();
+        $status = Auction::findOrFail($auctionId)->status;
 
         $checkAuction = Auction::findOrFail($auctionId)
             ->where('auction_id', $auctionId)
@@ -496,35 +493,31 @@ class AuctionService implements AuctionServiceInterface
             ->get()
             ->toArray();
 
-        $checkSellingUser = Auction::findOrFail($auctionId)
-            ->where('selling_user_id', auth()->user()->user_id)
-            ->get()
-            ->toArray();
-
         $bids = Bid::where('auction_id', $auctionId)
             ->get()
             ->toArray();
         
-        if (empty($checkSellingUser))
-        {
+        if ($status == 6) {
             return [
-                'message' => 'User không có quyền'
+                "code" => 1010,
+                "message" => "Đã bán",
+                "data" => null,
             ];
         }
         if ($checkAuction)
         {
             return [
-                'message' => 'Phiên đấu giá chưa kết thúc hoặc phiên đấu giá không tồn tại'
+                "code" => 1009,
+                "message" => "Phiên đấu giá chưa kết thúc",
+                "data" => null,
             ];
         }
-        if (isset($check[0])) {
-            return [ 
-                'message' => 'Đã chấp nhận'
-            ];
-        }
+        
         if (empty($bids)) {
-            return [ 
-                'message' => 'Chưa có trả giá nào'
+            return [
+                "code" => 1011,
+                "message" => "Chưa có trả giá nào",
+                "data" => null,
             ];
         } else {
             $maxPrice = $this->getMaxPrice($auctionId);
@@ -591,7 +584,11 @@ class AuctionService implements AuctionServiceInterface
                 'auction_info' => $auctionInfo
             ];
     
-            return $data;
+            return [
+                "code" => 1000,
+                "message" => "Ok",
+                "data" => $data,
+            ];
         }
     }
 
