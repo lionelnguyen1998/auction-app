@@ -90,13 +90,16 @@ class Auction extends Model
         return $this->hasOne(AuctionSelling::class, 'auction_id', 'auction_id');
     }
 
-    public function listDeny()
+    public function listDeny($request)
     {
+        $page = $request['index'];
+        $perPage = $request['count'];
         $userId = auth()->user()->user_id;
         
         $auctionDeny = Auction::withTrashed()
             ->where('selling_user_id', $userId)
             ->where('status', '=', 5)
+            ->forPage($page, $perPage)
             ->get();
 
         return $auctionDeny;

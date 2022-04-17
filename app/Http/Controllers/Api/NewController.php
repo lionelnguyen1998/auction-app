@@ -24,13 +24,18 @@ class NewController extends ApiController
     }
 
     //list notifications
-    public function notifications()
+    public function notifications(Request $request)
     {
-        $denys = Auction::listDeny();
-        $deny = [];
+        $denys = Auction::listDeny($request);
+
+        $total = Auction::withTrashed()
+            ->where('selling_user_id', auth()->user()->user_id)
+            ->where('status', '=', 5)
+            ->count('auction_id');
+
         if ($denys) {
-            $deny = [
-                'deny' => $denys->map(function ($deny) {
+            $data = [
+                'denys' => $denys->map(function ($deny) {
                     return [
                         'title' => $deny->title,
                         'start_date' => $deny->start_date,
@@ -38,26 +43,21 @@ class NewController extends ApiController
                         'reason' => $deny->reason
                     ];
                 }),
+                'total' => $total
+            ];
+
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => $data,
+            ];
+        } else {
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => null,
             ];
         }
-
-        $acceptBids = Item::listAccept();
-        $accept = [];
-        if ($acceptBids) {
-            $accept = [
-                'accept_bid' => $acceptBids->map(function ($accept) {
-                    $auctionId = $accept->auction_id;
-                    return $this->auctionService->sellingInfo($auctionId);
-                })
-            ];
-        }
-        
-        $data = [
-            'denys' => $deny,
-            'accepts' => $accept,
-        ];
-
-        return $this->response->withData($data);
     }
 
     //list news
@@ -91,17 +91,31 @@ class NewController extends ApiController
     public function reason($auctionId)
     {
         $is_read = UserReadNews::where('auction_id', $auctionId)
-            ->get();
+            ->get()
+            ->first();
         
-        if (empty($is_read[0])) {
-            $is_read = UserReadNews::insert([
+        if (empty($is_read)) {
+            UserReadNews::insert([
                 'auction_id' => $auctionId,
                 'is_read' => true,
-                'new_id' => null,
             ]);
+
+            $data = [
+                'is_read' => 1,
+                'auction_id' => $auctionId
+            ];
+        } else {
+            $data = [
+                'is_read' => $is_read->is_read,
+                'auction_id' => $is_read->auction_id
+            ];
         }
 
-        return $this->response->withData($is_read);
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 
     //read news
@@ -109,24 +123,30 @@ class NewController extends ApiController
     {
         News::findOrFail($newId);
         $is_read = UserReadNews::where('new_id', $newId)
-            ->get();
+            ->get()
+            ->first();
 
-        if (empty($is_read[0])) {
-            $is_reads = UserReadNews::insert([
+        if (empty($is_read)) {
+            UserReadNews::insert([
                 'is_read' => true,
                 'new_id' => $newId,
             ]);
 
-            $is_read = [
+            $data = [
                 'is_read' => 1,
                 'new_id' => $newId,
+            ];
+        } else {
+            $data = [
+                'is_read' => $is_read->is_read,
+                'new_id' => $is_read->new_id,
             ];
         }
     
         return [
             "code" => 1000,
             "message" => "OK",
-            "data" => $is_read,
+            "data" => $data,
         ];
     }
 

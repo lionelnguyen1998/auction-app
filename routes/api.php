@@ -79,7 +79,7 @@ Route::group(['middleware' => 'api'], function(){
     
     Route::middleware(['auth'])->group(function () { 
         //Account
-        Route::get('logout', [AuthController::class, 'logout']);
+        Route::post('logout', [AuthController::class, 'logout']);
         Route::post('edit', [UserController::class, 'edit']);
 
         //auctions
@@ -90,6 +90,7 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
         });
 
+        //items
         Route::prefix('items')->group(function () {
             Route::post('/create/{auctionId}', [ItemController::class, 'create']);
             Route::post('/edit/{itemId}', [ItemController::class, 'edit']);
@@ -104,9 +105,6 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('bids')->group(function () {
             Route::post('/create/{auctionId}', [AuctionController::class, 'bids']);
         });
-
-        //read reject auctions report
-        Route::get('reason/{auctionDenyId}', [NewController::class, 'reason']);
 
         //accept bid => send report
         Route::prefix('accept')->group(function () {
@@ -124,9 +122,10 @@ Route::group(['middleware' => 'api'], function(){
         //update auction status
         Route::get('/updateStatus', [AuctionController::class, 'updateStatus']);
 
-        //notifications
+        //notifications reject auction
         Route::prefix('notifications')->group(function () {
             Route::get('/', [NewController::class, 'notifications']);
+            Route::get('read/{auctionDenyId}', [NewController::class, 'reason']);
         });
 
         //news

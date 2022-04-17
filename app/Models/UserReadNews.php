@@ -16,7 +16,6 @@ class UserReadNews extends Model
         'user_read_new_id',
         'new_id',
         'auction_id',
-        'item_id',
         'is_read'
     ];
 }
