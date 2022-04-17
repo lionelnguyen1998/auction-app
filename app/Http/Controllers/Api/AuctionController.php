@@ -478,7 +478,7 @@ class AuctionController extends ApiController
     }
 
     public function listLikes(Request $request) {
-        
+
         $userId = auth()->user()->user_id;
         $auctions = $this->auctionService->getListAuctionLike($request->all());
         $total = Favorite::where('user_id', $userId)->count('auction_id');
@@ -504,6 +504,25 @@ class AuctionController extends ApiController
             'total' => $total
         ];
 
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function totalLikes($auctionId) 
+    {
+        Auction::findOrFail($auctionId);
+        $total = Favorite::where('auction_id', $auctionId)
+            ->where('is_liked', 1)
+            ->count('auction_id');
+
+        $data = [
+            'auction_id' => $auctionId,
+            'total_liked' => $total
+        ];
+        
         return [
             "code" => 1000,
             "message" => "OK",

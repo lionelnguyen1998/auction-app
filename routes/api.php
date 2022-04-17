@@ -52,6 +52,9 @@ Route::group(['middleware' => 'api'], function(){
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
     });
 
+    //total likes of auctions
+    Route::get('totalLikes/{auctionId}', [AuctionController::class, 'totalLikes']);
+
     //contact
     Route::post('/contactUs', [UserController::class, 'contactUs']);
 
