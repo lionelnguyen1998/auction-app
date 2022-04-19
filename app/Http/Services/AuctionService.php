@@ -144,7 +144,7 @@ class AuctionService implements AuctionServiceInterface
 
     public function getListAuctionByStatus($statusId, $request)
     {
-        $page = $request['index'] ?? 1;
+        $page = $request['index'];
         $perPage = $request['count'];
         $auction = Auction::with('category')
             ->where('status', $statusId)

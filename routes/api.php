@@ -50,6 +50,7 @@ Route::group(['middleware' => 'api'], function(){
         Route::get('/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
         Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
+        Route::get('/upload/status', [AuctionController::class, 'uploadStatus']);
     });
 
     //total likes of auctions
