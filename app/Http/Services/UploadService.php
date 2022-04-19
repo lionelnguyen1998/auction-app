@@ -16,7 +16,7 @@ class UploadService implements UploadServiceInterface
                 'public/' . $pathFull, $name
             );
 
-            $url = 'http://localhost:8080';
+            $url = 'https://auctions-app-2.herokuapp.com';
             
             return $url . '/storage/' . $pathFull . '/' . $name;
         } catch (\Exception $error) {
@@ -34,7 +34,7 @@ class UploadService implements UploadServiceInterface
                     'public/' . $pathFull, $name
                 );
 
-                $url = 'http://localhost:8080';
+                $url = 'https://auctions-app-2.herokuapp.com';
                 
                 return $url . '/storage/' . $pathFull . '/' . $name;
             } catch (\Exception $error) {
