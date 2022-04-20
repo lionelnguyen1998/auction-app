@@ -210,7 +210,7 @@ class UserService implements UserServiceInterface
     //API
     public function signup($request) 
     {
-        $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
+        $avatarDefault = "https://res.cloudinary.com/daqvhmyif/image/upload/v1650429693/wtatjbj7jhpueicdrg6n.jpg";
 
         if (isset($request['avatar'])) {
             $request['avatar'] = $this->uploadService->store($request['avatar']);
