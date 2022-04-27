@@ -39,6 +39,11 @@ class UploadController extends ApiController
                 $url
             ]);
         }
-        return $this->response->withData($url);
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $url,
+        ];
     }
 }

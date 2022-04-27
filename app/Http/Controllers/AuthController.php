@@ -44,7 +44,7 @@ class AuthController extends ApiController
         if (! $token = auth()->attempt($credentials)) {
             return [
                 "code" => 1002,
-                "message" => "Mật khẩu hoặc email không đúng",
+                "message" => "メールとパスワードは違いました",
                 "data" => null,
             ];
         }
@@ -105,12 +105,13 @@ class AuthController extends ApiController
                 'avatar' => $this->guard()->avatar,
                 'email' => $this->guard()->email,
                 'address' => $this->guard()->address,
-                'phone' => $this->guard()->phone
+                'phone' => $this->guard()->phone,
+                'user_id' => $this->guard()->user_id,
             ],
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 6000
         ];
-
+        
         return [
             "code" => 1000,
             "message" => "OK",

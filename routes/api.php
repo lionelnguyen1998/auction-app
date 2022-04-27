@@ -47,10 +47,11 @@ Route::group(['middleware' => 'api'], function(){
     //Auction
     Route::prefix('auctions')->group(function () {
         Route::get('/', [AuctionController::class, 'index']);
-        Route::get('/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
+        Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
         Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
-        Route::get('/upload/status', [AuctionController::class, 'uploadStatus']);
+        Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
+        Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
     });
 
     //total likes of auctions
@@ -85,7 +86,7 @@ Route::group(['middleware' => 'api'], function(){
 
         //auctions
         Route::prefix('auctions')->group(function () {
-            Route::get('/listAuctionsByUser/{userId}', [AuctionController::class, 'listAuctionsByUser']);
+            Route::get('/listAuctionsByUser/{statusId}', [AuctionController::class, 'listAuctionsByUser']);
             Route::post('/create', [AuctionController::class, 'create']);
             Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete']);
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
@@ -114,14 +115,11 @@ Route::group(['middleware' => 'api'], function(){
         });
 
         //Like
-        Route::post('updateLike', [AuctionController::class, 'updateLike']);
+        Route::post('updateLike/{auctionId}', [AuctionController::class, 'updateLike']);
         Route::get('likes', [AuctionController::class, 'listLikes']);
 
         //upload file
         Route::post('/uploadFile', [UploadController::class, 'upload']);
-
-        //update auction status
-        Route::get('/updateStatus', [AuctionController::class, 'updateStatus']);
 
         //notifications reject auction
         Route::prefix('notifications')->group(function () {

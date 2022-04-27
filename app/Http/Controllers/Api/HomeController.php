@@ -16,7 +16,11 @@ class HomeController extends ApiController
 
     public function slider()
     {
-        $slider = Slider::all();
-        return $this->response->withData($slider);
+        $data = Slider::all();
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 }

@@ -28,6 +28,15 @@ class AuctionService implements AuctionServiceInterface
         return $auctions;
     }
 
+    public function getDetailAuctions1($auctionId)
+    {
+        $auctions = Auction::with('category', 'items')
+            ->where('auction_id', $auctionId)
+            ->get()
+            ->toArray();
+        return $auctions;
+    }
+
     public function getSellingUser($auctionId)
     {
         $userSelling = Item::with('users')
@@ -146,24 +155,42 @@ class AuctionService implements AuctionServiceInterface
     {
         $page = $request['index'];
         $perPage = $request['count'];
-        $auction = Auction::with('category')
-            ->where('status', $statusId)
-            ->orderBy('created_at', 'DESC')
-            ->forPage($page, $perPage)
-            ->get();
+        if ($statusId == 0) {
+            $auction = Auction::with('category')
+                ->where('status', '<>', 4)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $auction = Auction::with('category')
+                ->where('status', $statusId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        }
 
         return $auction;
     }
 
     //get list auctions by user id
-    public function getListAuctionsByUser($userId, $request)
+    public function getListAuctionsByUser($userId, $statusId, $request)
     {
         $page = $request['index'];
         $perPage = $request['count'];
-        $list = Auction::with('category')
-            ->where('selling_user_id', $userId)
-            ->forPage($page, $perPage)
-            ->get();
+        if ($statusId == 0) {
+            $list = Auction::with('category')
+                ->where('selling_user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $list = Auction::with('category')
+                ->where('status', $statusId)
+                ->where('selling_user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        }
 
         return $list;
     }
@@ -353,7 +380,7 @@ class AuctionService implements AuctionServiceInterface
         $messages = [
             'required' => '必須項目が未入力です。',
             'max' => '値段が今より高くなければなりません。',
-            'number' => '番号を入力してください',
+            'numeric' => '番号を入力してください',
         ];
 
         $validated = Validator::make($request, $rules, $messages);
