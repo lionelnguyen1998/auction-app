@@ -21,7 +21,7 @@ class AuctionService implements AuctionServiceInterface
     //detail auctions
     public function getDetailAuctions($auctionId)
     {
-        $auctions = Auction::with('category', 'items', 'comments', 'userSelling')
+        $auctions = Auction::with('category', 'items', 'comments', 'userSelling', 'like')
             ->where('auction_id', $auctionId)
             ->get()
             ->toArray();
@@ -132,7 +132,7 @@ class AuctionService implements AuctionServiceInterface
     }
     
     //get list auctions like
-    public function getListAuctionLike($request)
+    public function getListAuctionLike($statusId, $request)
     {
         $userId = auth()->user()->user_id;
         $auctionId = Favorite::where('user_id', $userId)
@@ -142,11 +142,20 @@ class AuctionService implements AuctionServiceInterface
         
         $page = $request['index'];
         $perPage = $request['count'];
-        $auction = Auction::with('category')
-            ->orderBy('created_at', 'DESC')
-            ->whereIn('auction_id', $auctionId)
-            ->forPage($page, $perPage)
-            ->get();
+        if ($statusId == 0) {
+            $auction = Auction::with('category')
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('auction_id', $auctionId)
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $auction = Auction::with('category')
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('auction_id', $auctionId)
+                ->where('status', $statusId)
+                ->forPage($page, $perPage)
+                ->get();
+        }
 
         return $auction;
     }
@@ -195,6 +204,31 @@ class AuctionService implements AuctionServiceInterface
         return $list;
     }
 
+    //list auctions by category
+    public function getListAuctionOfCategory($request)
+    {
+        $categoryId = $request['category_id'];
+        $statusId = $request['status_id'];
+        $page = $request['index'];
+        $perPage = $request['count'];
+
+        if ($statusId == 0) {
+            $list = Auction::with('category')
+                ->where('category_id', $categoryId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $list = Auction::with('category')
+                ->where('status', $statusId)
+                ->where('category_id', $categoryId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        }
+
+        return $list;
+    }
     //validate create auction 
     public function auctionValidation($request)
     {
@@ -317,7 +351,7 @@ class AuctionService implements AuctionServiceInterface
 
         $lastId = $request['comment_last_id'] ?? $lastIdComment;
 
-        if($status == 1 || $status == 2) {
+        if($status != 4) {
             $comment = Comment::create([
                 'auction_id' => $auctionId, 
                 'user_id' => auth()->user()->user_id,
@@ -359,8 +393,6 @@ class AuctionService implements AuctionServiceInterface
                 "data" => null,
             ];
         }
-
-        
     }
 
     //bid validation

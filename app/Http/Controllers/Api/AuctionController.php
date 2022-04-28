@@ -56,6 +56,7 @@ class AuctionController extends ApiController
                         'image' => $auction['category']['image'],
                         'type' => $auction['category']['type'],
                     ],
+                    
                 ];
             }),
             'total' => $total
@@ -95,6 +96,7 @@ class AuctionController extends ApiController
                 'end_date' => $auction[0]['end_date'],
                 'statusId' => $index,
                 'status' => $status[$index],
+                'like' => auth()->user() ? $auction[0]['like']['is_liked'] : null
             ],
             'category' => [
                 'name' => $auction[0]['category']['name'],
@@ -223,6 +225,49 @@ class AuctionController extends ApiController
         } else {
             $total = Auction::where('selling_user_id', $userId)
                 ->where('status', $statusId)
+                ->count('auction_id');
+        }
+
+        $status = config('const.status');
+        $data = [
+            'auctions' => $auctions->map(function ($auction) use ($status) {
+                $index = $auction->status;
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'selling_user_id' => $auction->selling_user_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'statusId' => $index,
+                    'status' => $status[$index],
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                ];
+            }),
+            'total' => $total
+        ];
+        
+        return [
+            'code' => 1000,
+            'message' => 'OK',
+            'data' => $data
+        ];
+    }
+
+    public function listAuctionOfCategory(Request $request)
+    {
+        $auctions = $this->auctionService->getListAuctionOfCategory($request->all());
+        $statusId = $request['status_id'];
+        $categoryId = $request['category_id'];
+        if ($statusId == 0) {
+            $total = Auction::where('category_id', $categoryId)
+                ->count('auction_id');
+        } else {
+            $total = Auction::where('status', $statusId)
+                ->where('category_id', $categoryId)
                 ->count('auction_id');
         }
 
@@ -546,11 +591,21 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listLikes(Request $request) {
+    public function listLikes($statusId, Request $request) {
 
         $userId = auth()->user()->user_id;
-        $auctions = $this->auctionService->getListAuctionLike($request->all());
-        $total = Favorite::where('user_id', $userId)->count('auction_id');
+        $auctions = $this->auctionService->getListAuctionLike($statusId, $request->all());
+        if ($statusId == 0) {
+            $total = Favorite::where('user_id', $userId)
+                ->where('is_liked', 1)
+                ->count('auction_id');
+        } else {
+            $total = Favorite::join('auctions', 'auctions.auction_id', '=', 'favories.auction_id')
+                ->where('auctions.status', $statusId)
+                ->where('favories.user_id', $userId)
+                ->where('favories.is_liked', 1)
+                ->count('favories.auction_id');
+        }
         $status = config('const.status');
         $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
@@ -589,6 +644,24 @@ class AuctionController extends ApiController
 
         $data = [
             'auction_id' => $auctionId,
+            'total_liked' => $total
+        ];
+        
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function totalLikeOfUser()
+    {
+        $userId = auth()->user()->user_id;
+        $total = Favorite::where('user_id', $userId)
+            ->where('is_liked', 1)
+            ->count('user_id');
+
+        $data = [
             'total_liked' => $total
         ];
         

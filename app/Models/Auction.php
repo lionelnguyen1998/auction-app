@@ -37,6 +37,10 @@ class Auction extends Model
         'deleted_at',
     ];
 
+    public function like() {
+        return $this->hasOne(Favorite::class, 'auction_id', 'auction_id');
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
