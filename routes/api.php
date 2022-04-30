@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,9 @@ Route::group(['middleware' => 'api'], function(){
     
     //uploadFiles
     Route::post('/uploadFiles', [UploadController::class, 'uploads']);
+
+    //search
+    Route::get('/search', [SearchController::class, 'search']);
     
     Route::middleware(['auth'])->group(function () { 
         //Account
@@ -103,6 +107,7 @@ Route::group(['middleware' => 'api'], function(){
         //Commnents
         Route::prefix('comments')->group(function () {
             Route::post('/create/{auctionId}', [AuctionController::class, 'comments']);
+            Route::post('/delete/{commentId}', [AuctionController::class, 'deleteComment']);
         });
 
          //Bid

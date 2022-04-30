@@ -472,6 +472,7 @@ class AuctionController extends ApiController
         $data = [
             'comments' => $comments->map(function($comment) {
                 return [
+                    'comment_id' => $comment->comment_id,
                     'user_name' => $comment['users']['name'],
                     'user_avatar' => $comment['users']['avatar'],
                     'content' => $comment->content,
@@ -486,6 +487,32 @@ class AuctionController extends ApiController
             "message" => "OK",
             "data" => $data,
         ];
+    }
+
+    public function deleteComment($commentId)
+    {
+        $comment = Comment::findOrFail($commentId);
+        $userId = auth()->user()->user_id;
+        $userCommentId = Comment::where('comment_id', $commentId)
+            ->get()
+            ->pluck('user_id')
+            ->first();
+        
+        if ($userId != $userCommentId) {
+            return [
+                "code" => 9999,
+                "message" => "Khong co quyen xoa comment nay",
+                "data" => null,
+            ];
+        } else {
+            $comment->delete();
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => null,
+            ];
+        }
+
     }
 
     //create bids
