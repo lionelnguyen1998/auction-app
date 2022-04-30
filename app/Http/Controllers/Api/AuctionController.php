@@ -500,8 +500,8 @@ class AuctionController extends ApiController
         
         if ($userId != $userCommentId) {
             return [
-                "code" => 9999,
-                "message" => "Khong co quyen xoa comment nay",
+                "code" => 1006,
+                "message" => "Khong co quyen",
                 "data" => null,
             ];
         } else {
@@ -509,7 +509,7 @@ class AuctionController extends ApiController
             return [
                 "code" => 1000,
                 "message" => "OK",
-                "data" => null,
+                "data" => 'Đã xóa comment',
             ];
         }
 
