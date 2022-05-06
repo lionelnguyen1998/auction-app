@@ -26,23 +26,45 @@ class NewController extends ApiController
     //list notifications
     public function notifications(Request $request)
     {
-        $denys = Auction::listDeny($request);
+        $userId = auth()->user()->user_id;
+        $isNotRead = $request->is_not_read;
+        $denys = Auction::listDeny($request, $userId, $isNotRead);
 
         $total = Auction::withTrashed()
             ->where('selling_user_id', auth()->user()->user_id)
             ->where('status', '=', 5)
             ->count('auction_id');
 
+        
+        $auctionDenyId = Auction::withTrashed()
+            ->where('selling_user_id', $userId)
+            ->where('status', '=', 5)
+            ->get()
+            ->pluck('auction_id');
+
+        $isRead = UserReadNews::whereIn('auction_id', $auctionDenyId)
+            ->where('user_id', $userId)
+            ->where('is_read', 1)
+            ->get()
+            ->count('user_read_new_id');
+
+        $notRead = $total - $isRead;
+        // type 2 reject, type 1 accept bid
         if ($denys) {
             $data = [
-                'denys' => $denys->map(function ($deny) {
+                'denys' => $denys->map(function ($deny) use ($userId) {
                     return [
+                        'auction_id' => $deny->auction_id,
                         'title' => $deny->title,
                         'start_date' => $deny->start_date,
                         'end_date' => $deny->end_date,
-                        'reason' => $deny->reason
+                        'reason' => $deny->reason,
+                        'updated_at' => $deny->updated_at->format('Y/m/d H:i:s'),
+                        'type' => 2,
+                        'is_read' => UserReadNews::isRead($deny->auction_id, $userId)
                     ];
                 }),
+                'total_not_read' => $notRead,
                 'total' => $total
             ];
 

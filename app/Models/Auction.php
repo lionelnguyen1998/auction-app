@@ -37,6 +37,10 @@ class Auction extends Model
         'deleted_at',
     ];
 
+    public function like() {
+        return $this->hasOne(Favorite::class, 'auction_id', 'auction_id');
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
@@ -90,17 +94,29 @@ class Auction extends Model
         return $this->hasOne(AuctionSelling::class, 'auction_id', 'auction_id');
     }
 
-    public function listDeny($request)
+    public function listDeny($request, $userId, $isNotRead)
     {
         $page = $request['index'];
         $perPage = $request['count'];
-        $userId = auth()->user()->user_id;
-        
-        $auctionDeny = Auction::withTrashed()
-            ->where('selling_user_id', $userId)
-            ->where('status', '=', 5)
-            ->forPage($page, $perPage)
-            ->get();
+        if ($isNotRead) {
+            $auctionId = UserReadNews::where('user_id', $userId)
+                ->get()
+                ->pluck('auction_id');
+            $auctionDeny = Auction::withTrashed()
+                ->where('selling_user_id', $userId)
+                ->where('status', '=', 5)
+                ->orderBy('created_at', 'DESC')
+                ->whereNotIn('auction_id', $auctionId)
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $auctionDeny = Auction::withTrashed()
+                ->where('selling_user_id', $userId)
+                ->where('status', '=', 5)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        }
 
         return $auctionDeny;
     }

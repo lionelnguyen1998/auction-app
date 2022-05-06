@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\ApiResponse;
 use App\Http\Services\UserService;
 use App\Http\Services\UploadService;
 use App\Models\User;
+use App\Models\Favorite;
+use App\Models\Auction;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -77,6 +79,34 @@ class UserController extends ApiController
 
         $data = $this->userService->edit($dataInput);
 
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function info()
+    {
+        $currentUser = auth()->user();
+        $userId = $currentUser->user_id;
+
+        $totalLike = Favorite::where('user_id', $userId)
+            ->where('is_liked', 1)
+            ->count('user_id');
+        $totalAuctions = Auction::where('selling_user_id', $userId)
+            ->count('selling_user_id');
+
+        $data = [
+            'name' => $currentUser->name,
+            'phone' => $currentUser->phone,
+            'address' => $currentUser->address,
+            'avatar' => $currentUser->avatar,
+            'role' => $currentUser->role,
+            'email' => $currentUser->email,
+            'total_like' => $totalLike,
+            'total_auctions' => $totalAuctions
+        ];
         return [
             "code" => 1000,
             "message" => "OK",

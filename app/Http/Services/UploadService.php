@@ -19,6 +19,10 @@ class UploadService implements UploadServiceInterface
             $url = 'http://localhost:8080';
             
             return $url . '/storage/' . $pathFull . '/' . $name;
+
+            // $result = $request->storeOnCloudinary();
+            // $url = $result->getPath();
+            // return $url;
         } catch (\Exception $error) {
             return false;
         }
@@ -37,6 +41,10 @@ class UploadService implements UploadServiceInterface
                 $url = 'http://localhost:8080';
                 
                 return $url . '/storage/' . $pathFull . '/' . $name;
+
+                // $result = $request->file('file')->storeOnCloudinary();
+                // $url = $result->getPath();
+                return $url;
             } catch (\Exception $error) {
                 return false;
             }

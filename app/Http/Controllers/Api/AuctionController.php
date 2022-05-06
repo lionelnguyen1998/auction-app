@@ -56,6 +56,7 @@ class AuctionController extends ApiController
                         'image' => $auction['category']['image'],
                         'type' => $auction['category']['type'],
                     ],
+                    
                 ];
             }),
             'total' => $total
@@ -95,6 +96,7 @@ class AuctionController extends ApiController
                 'end_date' => $auction[0]['end_date'],
                 'statusId' => $index,
                 'status' => $status[$index],
+                'like' => auth()->user() ? $auction[0]['like']['is_liked'] : null
             ],
             'category' => [
                 'name' => $auction[0]['category']['name'],
@@ -110,11 +112,7 @@ class AuctionController extends ApiController
                 'description' => $auction[0]['items']['description'],
                 'starting_price' => $auction[0]['items']['starting_price'],
                 'mainImage' => $images[0],
-                'images' => $images->map(function ($image) {
-                    return [
-                        'image' => $image,
-                    ];
-                })
+                'images' => $images,
             ],
             'selling_user' => [
                 'selling_user_id' => $auction[0]['user_selling']['user_id'],
@@ -141,6 +139,34 @@ class AuctionController extends ApiController
                 ];
             }),
 
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function detail1($auctionId)
+    {
+        $auction = $this->auctionService->getDetailAuctions1($auctionId);
+        $status = config('const.status');
+        $index = $auction[0]['status'];
+        $data = [
+            'auctions' => [
+                'auction_id' => $auction[0]['auction_id'],
+                'title' => $auction[0]['title'],
+                'start_date' => $auction[0]['start_date'],
+                'end_date' => $auction[0]['end_date'],
+                'statusId' => $index,
+                'status' => $status[$index],
+            ],
+            'category' => [
+                'name' => $auction[0]['category']['name'],
+                'image' => $auction[0]['category']['image'],
+                'type' => $auction[0]['category']['type'],
+            ],
         ];
 
         return [
@@ -189,11 +215,61 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listAuctionsByUser($userId, Request $request)
+    public function listAuctionsByUser($statusId, Request $request)
     {
-        $auctions = $this->auctionService->getListAuctionsByUser($userId, $request->all());
-        $total = Auction::where('selling_user_id', $userId)
-            ->count('auction_id');
+        $userId = auth()->user()->user_id;
+        $auctions = $this->auctionService->getListAuctionsByUser($userId, $statusId, $request->all());
+        if ($statusId == 0) {
+            $total = Auction::where('selling_user_id', $userId)
+                ->count('auction_id');
+        } else {
+            $total = Auction::where('selling_user_id', $userId)
+                ->where('status', $statusId)
+                ->count('auction_id');
+        }
+
+        $status = config('const.status');
+        $data = [
+            'auctions' => $auctions->map(function ($auction) use ($status) {
+                $index = $auction->status;
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'selling_user_id' => $auction->selling_user_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'statusId' => $index,
+                    'status' => $status[$index],
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                ];
+            }),
+            'total' => $total
+        ];
+        
+        return [
+            'code' => 1000,
+            'message' => 'OK',
+            'data' => $data
+        ];
+    }
+
+    public function listAuctionOfCategory(Request $request)
+    {
+        $auctions = $this->auctionService->getListAuctionOfCategory($request->all());
+        $statusId = $request['status_id'];
+        $categoryId = $request['category_id'];
+        if ($statusId == 0) {
+            $total = Auction::where('category_id', $categoryId)
+                ->count('auction_id');
+        } else {
+            $total = Auction::where('status', $statusId)
+                ->where('category_id', $categoryId)
+                ->count('auction_id');
+        }
 
         $status = config('const.status');
         $data = [
@@ -384,7 +460,8 @@ class AuctionController extends ApiController
 
         $auction = Auction::findOrFail($auctionId);
 
-        $comments = Comment::where('auction_id', $auctionId)
+        $comments = Comment::with('users')
+            ->where('auction_id', $auctionId)
             ->orderBy('created_at', 'DESC')
             ->forPage($page, $perPage)
             ->get();
@@ -395,7 +472,9 @@ class AuctionController extends ApiController
         $data = [
             'comments' => $comments->map(function($comment) {
                 return [
-                    'user_id' => $comment->user_id,
+                    'comment_id' => $comment->comment_id,
+                    'user_name' => $comment['users']['name'],
+                    'user_avatar' => $comment['users']['avatar'],
                     'content' => $comment->content,
                     'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
                 ];
@@ -408,6 +487,32 @@ class AuctionController extends ApiController
             "message" => "OK",
             "data" => $data,
         ];
+    }
+
+    public function deleteComment($commentId)
+    {
+        $comment = Comment::findOrFail($commentId);
+        $userId = auth()->user()->user_id;
+        $userCommentId = Comment::where('comment_id', $commentId)
+            ->get()
+            ->pluck('user_id')
+            ->first();
+        
+        if ($userId != $userCommentId) {
+            return [
+                "code" => 1006,
+                "message" => "Khong co quyen",
+                "data" => null,
+            ];
+        } else {
+            $comment->delete();
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => 'Đã xóa comment',
+            ];
+        }
+
     }
 
     //create bids
@@ -443,7 +548,8 @@ class AuctionController extends ApiController
         $total = Bid::where('auction_id', $auctionId)
             ->count('bid_id');
 
-        $bids = Bid::where('auction_id', $auctionId)
+        $bids = Bid::with('users')
+            ->where('auction_id', $auctionId)
             ->orderBy('created_at', 'DESC')
             ->forPage($page, $perPage)
             ->get();
@@ -451,7 +557,8 @@ class AuctionController extends ApiController
         $data = [
             'bids' => $bids->map(function($bid) {
                 return [
-                    'user_id' => $bid->user_id,
+                    'user_name' => $bid['users']['name'],
+                    'user_avatar' => $bid['users']['avatar'],
                     'price' => $bid->price,
                     'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
                 ];
@@ -466,31 +573,32 @@ class AuctionController extends ApiController
         ];
     }
 
+    public function maxBid($auctionId)
+    {
+        $maxPrice = $this->auctionService->getMaxPrice($auctionId);
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $maxPrice,
+        ];
+    }
+
     //update like
-    public function updateLike(Request $request)
+    public function updateLike($auctionId)
     {
         $userId = auth()->user()->user_id;
-        $auctionId = $request['auction_id'];
-        
-        $validator = $this->auctionService->likeValidation($request->all());
-
-        if ($validator->fails()) {
-            $auctionId = $validator->errors()->first("auction_id");
-            return [
-                "code" => 1001,
-                "message" => $auctionId,
-                "data" => null,
-            ];
-        }
 
         $checkLiked = Favorite::where('auction_id', $auctionId)
+            ->where('user_id', $userId)
             ->get()
             ->toArray();
 
         if ($checkLiked) {
             $is_liked = Favorite::where('auction_id', $auctionId)
+                ->where('user_id', $userId)
                 ->get()
-                ->firstOrFail();
+                ->first();
 
             $is_liked->timestamps = false;
             $is_liked->is_liked = !($is_liked->is_liked);
@@ -521,11 +629,21 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listLikes(Request $request) {
+    public function listLikes($statusId, Request $request) {
 
         $userId = auth()->user()->user_id;
-        $auctions = $this->auctionService->getListAuctionLike($request->all());
-        $total = Favorite::where('user_id', $userId)->count('auction_id');
+        $auctions = $this->auctionService->getListAuctionLike($statusId, $request->all());
+        if ($statusId == 0) {
+            $total = Favorite::where('user_id', $userId)
+                ->where('is_liked', 1)
+                ->count('auction_id');
+        } else {
+            $total = Favorite::join('auctions', 'auctions.auction_id', '=', 'favories.auction_id')
+                ->where('auctions.status', $statusId)
+                ->where('favories.user_id', $userId)
+                ->where('favories.is_liked', 1)
+                ->count('favories.auction_id');
+        }
         $status = config('const.status');
         $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
@@ -574,6 +692,24 @@ class AuctionController extends ApiController
         ];
     }
 
+    public function totalLikeOfUser()
+    {
+        $userId = auth()->user()->user_id;
+        $total = Favorite::where('user_id', $userId)
+            ->where('is_liked', 1)
+            ->count('user_id');
+
+        $data = [
+            'total_liked' => $total
+        ];
+        
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
     //accept bid
     public function accept($auctionId, Request $request)
     {
@@ -609,8 +745,13 @@ class AuctionController extends ApiController
     public function listAuctionByStatus($statusId, Request $request) 
     {
         $auctions = $this->auctionService->getListAuctionByStatus($statusId, $request->all());
-        $total = Auction::where('status', $statusId)
-            ->count('auction_id');
+        if ($statusId == 0) {
+            $total = Auction::where('status', '<>', 4)
+                ->count('auction_id');
+        } else {
+            $total = Auction::where('status', $statusId)
+                ->count('auction_id');
+        }
 
         $status = config('const.status');
         $data = [

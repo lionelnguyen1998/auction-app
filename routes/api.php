@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,10 +48,13 @@ Route::group(['middleware' => 'api'], function(){
     //Auction
     Route::prefix('auctions')->group(function () {
         Route::get('/', [AuctionController::class, 'index']);
-        Route::get('/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
+        Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
         Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
-        Route::get('/upload/status', [AuctionController::class, 'uploadStatus']);
+        Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
+        Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
+        Route::get('/listAuctionOfCategory', [AuctionController::class, 'listAuctionOfCategory']);
+        Route::get('/maxBid/{auctionId}', [AuctionController::class, 'maxBid']);
     });
 
     //total likes of auctions
@@ -77,18 +81,23 @@ Route::group(['middleware' => 'api'], function(){
     
     //uploadFiles
     Route::post('/uploadFiles', [UploadController::class, 'uploads']);
+
+    //search
+    Route::get('/search', [SearchController::class, 'search']);
     
     Route::middleware(['auth'])->group(function () { 
         //Account
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('edit', [UserController::class, 'edit']);
+        Route::get('info', [UserController::class, 'info']);
 
         //auctions
         Route::prefix('auctions')->group(function () {
-            Route::get('/listAuctionsByUser/{userId}', [AuctionController::class, 'listAuctionsByUser']);
+            Route::get('/listAuctionsByUser/{statusId}', [AuctionController::class, 'listAuctionsByUser']);
             Route::post('/create', [AuctionController::class, 'create']);
             Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete']);
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
+            
         });
 
         //items
@@ -100,6 +109,7 @@ Route::group(['middleware' => 'api'], function(){
         //Commnents
         Route::prefix('comments')->group(function () {
             Route::post('/create/{auctionId}', [AuctionController::class, 'comments']);
+            Route::post('/delete/{commentId}', [AuctionController::class, 'deleteComment']);
         });
 
          //Bid
@@ -114,14 +124,12 @@ Route::group(['middleware' => 'api'], function(){
         });
 
         //Like
-        Route::post('updateLike', [AuctionController::class, 'updateLike']);
-        Route::get('likes', [AuctionController::class, 'listLikes']);
+        Route::post('updateLike/{auctionId}', [AuctionController::class, 'updateLike']);
+        Route::get('likes/{statusId}', [AuctionController::class, 'listLikes']);
+        Route::get('listLikes', [AuctionController::class, 'totalLikeOfUser']);
 
         //upload file
         Route::post('/uploadFile', [UploadController::class, 'upload']);
-
-        //update auction status
-        Route::get('/updateStatus', [AuctionController::class, 'updateStatus']);
 
         //notifications reject auction
         Route::prefix('notifications')->group(function () {
