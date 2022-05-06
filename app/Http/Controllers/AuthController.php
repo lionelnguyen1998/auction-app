@@ -109,7 +109,7 @@ class AuthController extends ApiController
                 'user_id' => $this->guard()->user_id,
             ],
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 6000
+            'expires_in' => auth()->factory()->getTTL() * 6000000
         ];
         
         return [

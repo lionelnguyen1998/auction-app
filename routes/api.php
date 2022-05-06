@@ -54,6 +54,7 @@ Route::group(['middleware' => 'api'], function(){
         Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
         Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
         Route::get('/listAuctionOfCategory', [AuctionController::class, 'listAuctionOfCategory']);
+        Route::get('/maxBid/{auctionId}', [AuctionController::class, 'maxBid']);
     });
 
     //total likes of auctions
@@ -88,6 +89,7 @@ Route::group(['middleware' => 'api'], function(){
         //Account
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('edit', [UserController::class, 'edit']);
+        Route::get('info', [UserController::class, 'info']);
 
         //auctions
         Route::prefix('auctions')->group(function () {

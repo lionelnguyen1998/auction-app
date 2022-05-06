@@ -212,9 +212,9 @@ class UserService implements UserServiceInterface
     {
         $avatarDefault = "https://res.cloudinary.com/daqvhmyif/image/upload/v1650429693/wtatjbj7jhpueicdrg6n.jpg";
 
-        // if (isset($request['avatar'])) {
-        //     $request['avatar'] = $this->uploadService->store($request['avatar']);
-        // }
+        if (isset($request['avatar'])) {
+            $request['avatar'] = $this->uploadService->store($request['avatar']);
+        }
 
         $user = User::create([
             'name' => $request['name'],
@@ -240,8 +240,6 @@ class UserService implements UserServiceInterface
 
     public function edit($request)
     {
-        $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
-
         if (isset($request['avatar'])) {
             $request['avatar'] = $this->uploadService->store($request['avatar']);
         }
@@ -256,7 +254,7 @@ class UserService implements UserServiceInterface
         auth()->user()->phone = $user->phone;
         auth()->user()->address = $user->address ?? null;
         auth()->user()->password = Hash::make($user->password);
-        auth()->user()->avatar = $user->avatar ?? $avatarDefault;
+        auth()->user()->avatar = $user->avatar;
 
         $data = [
             'name' => auth()->user()->name,

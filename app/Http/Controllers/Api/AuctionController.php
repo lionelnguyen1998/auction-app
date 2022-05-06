@@ -573,6 +573,17 @@ class AuctionController extends ApiController
         ];
     }
 
+    public function maxBid($auctionId)
+    {
+        $maxPrice = $this->auctionService->getMaxPrice($auctionId);
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $maxPrice,
+        ];
+    }
+
     //update like
     public function updateLike($auctionId)
     {

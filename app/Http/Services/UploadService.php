@@ -16,7 +16,7 @@ class UploadService implements UploadServiceInterface
             //     'public/' . $pathFull, $name
             // );
 
-            // $url = 'https://auctions-app-2.herokuapp.com';
+            // $url = 'http://localhost:8080';
             
             // return $url . '/storage/' . $pathFull . '/' . $name;
 
@@ -38,7 +38,7 @@ class UploadService implements UploadServiceInterface
                 //     'public/' . $pathFull, $name
                 // );
 
-                // $url = 'https://auctions-app-2.herokuapp.com';
+                // $url = 'http://localhost:8080';
                 
                 // return $url . '/storage/' . $pathFull . '/' . $name;
 

@@ -16,6 +16,16 @@ class UserReadNews extends Model
         'user_read_new_id',
         'new_id',
         'auction_id',
-        'is_read'
+        'is_read',
+        'user_id'
     ];
+
+    public function isRead($auctionId, $userId) {
+        $isRead = UserReadNews::where('auction_id', $auctionId)
+            ->where('user_id', $userId)
+            ->where('is_read', 1)
+            ->get()
+            ->toArray();
+        return !empty($isRead);
+    }
 }

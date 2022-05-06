@@ -358,6 +358,9 @@ class AuctionService implements AuctionServiceInterface
                 'content' => $request['content']
             ]);
 
+            $total = Comment::where('auction_id', $auctionId)
+                ->count('comment_id');
+
             $currentId = $comment->comment_id;
 
             if ($currentId == ($lastId + 1)) {
@@ -365,7 +368,8 @@ class AuctionService implements AuctionServiceInterface
                     'auction_id' => $comment->auction_id,
                     'user_id' => $comment->user_id,
                     'content' => $comment->content,
-                    'update_date' => $comment->updated_at->format('Y/m/d H:i:s')
+                    'update_date' => $comment->updated_at->format('Y/m/d H:i:s'),
+                    'total' => $total
                 ];
             } else {
                 $comments = Comment::where('auction_id', $auctionId)
@@ -380,6 +384,7 @@ class AuctionService implements AuctionServiceInterface
                             'user_id' => $comment->user_id,
                             'content' => $comment->content,
                             'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
+                            'total' => $total
                         ];
                     }),
                 ];
@@ -440,6 +445,9 @@ class AuctionService implements AuctionServiceInterface
                 'phone' => $request['phone'] ?? null,
             ]);
 
+            $total = Bid::where('auction_id', $auctionId)
+                ->count('bid_id');
+
             $currentId = $bid->bid_id;
 
             if ($currentId == ($lastId + 1)) {
@@ -448,7 +456,8 @@ class AuctionService implements AuctionServiceInterface
                     'user_id' => $bid->user_id,
                     'price' => $bid->price,
                     'phone' => $bid->phone,
-                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s')
+                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                    'total' => $total
                 ];
             } else {
                 $bids = Bid::where('auction_id', $auctionId)
@@ -464,6 +473,7 @@ class AuctionService implements AuctionServiceInterface
                             'price' => $bid->price,
                             'phone' => $bid->phone,
                             'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                            'total' => $total
                         ];
                     }),
                 ];
