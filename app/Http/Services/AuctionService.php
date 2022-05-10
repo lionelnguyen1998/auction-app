@@ -204,6 +204,31 @@ class AuctionService implements AuctionServiceInterface
         return $list;
     }
 
+     //get list auctions by user id
+     public function getListAuctionsByUserK($userId, $statusId, $request)
+     {
+         $page = $request['index'];
+         $perPage = $request['count'];
+         if ($statusId == 0) {
+             $list = Auction::with('category')
+                 ->where('selling_user_id', $userId)
+                 ->orderBy('created_at', 'DESC')
+                 ->where('status', '<>', 4)
+                 ->forPage($page, $perPage)
+                 ->get();
+         } else {
+             $list = Auction::with('category')
+                 ->where('status', $statusId)
+                 ->where('selling_user_id', $userId)
+                 ->orderBy('created_at', 'DESC')
+                 ->where('status', '<>', 4)
+                 ->forPage($page, $perPage)
+                 ->get();
+         }
+ 
+         return $list;
+     }
+
     //list auctions by category
     public function getListAuctionOfCategory($request)
     {
@@ -512,7 +537,7 @@ class AuctionService implements AuctionServiceInterface
 
         $auctionInfo = Auction::findOrFail($auctionId)
             ->where('auction_id', $auctionId)
-            ->select('title', 'start_date', 'end_date')
+            ->select('title', 'start_date', 'end_date', 'auction_id')
             ->get();
 
         $itemInfo = Item::with('userBuying')
@@ -549,6 +574,21 @@ class AuctionService implements AuctionServiceInterface
             ],
             'auction_info' => $auctionInfo
         ];
+    }
+
+    public function sellingValidation($request)
+    {
+        $rules = [
+            'selling_info' => 'required',
+        ];
+
+        $messages = [
+            'required' => '必須項目が未入力です。'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
     }
 
     //accept bid

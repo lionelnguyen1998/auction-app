@@ -119,26 +119,7 @@ class AuctionController extends ApiController
                 'selling_user_name' => $auction[0]['user_selling']['name'],
                 'selling_user_avatar' => $auction[0]['user_selling']['avatar']
             ],
-            'max_bid' => $maxPrice,
-            'bids' => $bids->map(function ($bid) {
-                return [
-                    'price' => $bid->price,
-                    'created_at' => $bid->created_at->format('Y/m/d H:i:s'),
-                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
-                    'user_name' => $bid['users']['name'],
-                    'user_avatar' => $bid['users']['avatar']
-                ];
-            }),
-            'comments' => $comments->map(function ($comment) {
-                return [
-                    'content' => $comment->content,
-                    'created_at' => $comment->created_at->format('Y/m/d H:i:s'),
-                    'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
-                    'user_name' => $comment['users']['name'],
-                    'user_avatar' => $comment['users']['avatar']
-                ];
-            }),
-
+            'max_bid' => $maxPrice
         ];
 
         return [
@@ -257,10 +238,62 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listAuctionOfCategory(Request $request)
+    public function listAuctionsByUserK($userId, $statusId, Request $request)
+    {
+        $auctions = $this->auctionService->getListAuctionsByUserK($userId, $statusId, $request->all());
+        if ($statusId == 0) {
+            $total = Auction::where('selling_user_id', $userId)
+                ->count('auction_id');
+        } else {
+            $total = Auction::where('selling_user_id', $userId)
+                ->where('status', $statusId)
+                ->count('auction_id');
+        }
+
+        $userInfo = User::where('user_id', $userId)
+            ->get()
+            ->first();
+
+        $status = config('const.status');
+        $data = [
+            'auctions' => $auctions->map(function ($auction) use ($status) {
+                $index = $auction->status;
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'selling_user_id' => $auction->selling_user_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'statusId' => $index,
+                    'status' => $status[$index],
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                ];
+            }),
+            'userInfo' => [
+                'name' => $userInfo->name,
+                'avatar' => $userInfo->avatar,
+                'phone' => $userInfo->phone,
+                'email' => $userInfo->email,
+                'role' => $userInfo->role,
+                'address' => $userInfo->address ?? '--',
+            ],
+            'total' => $total
+        ];
+        
+        return [
+            'code' => 1000,
+            'message' => 'OK',
+            'data' => $data
+        ];
+    }
+
+    public function listAuctionOfCategory($statusId, Request $request)
     {
         $auctions = $this->auctionService->getListAuctionOfCategory($request->all());
-        $statusId = $request['status_id'];
         $categoryId = $request['category_id'];
         if ($statusId == 0) {
             $total = Auction::where('category_id', $categoryId)
@@ -550,6 +583,7 @@ class AuctionController extends ApiController
 
         $bids = Bid::with('users')
             ->where('auction_id', $auctionId)
+            ->orderBy('price', 'DESC')
             ->orderBy('created_at', 'DESC')
             ->forPage($page, $perPage)
             ->get();
@@ -714,6 +748,17 @@ class AuctionController extends ApiController
     public function accept($auctionId, Request $request)
     {
         Auction::findOrFail($auctionId);
+
+        $validator = $this->auctionService->sellingValidation($request->all());
+
+        if ($validator->fails()) {
+            $sellingInfo = $validator->errors()->first("selling_info");
+            return [
+                "code" => 1001,
+                "message" => $sellingInfo,
+                "data" => null,
+            ];
+        }
 
         $userSelling = Auction::where('selling_user_id', auth()->user()->user_id)
             ->where('auction_id', $auctionId)

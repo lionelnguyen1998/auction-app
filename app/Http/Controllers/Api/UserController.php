@@ -12,6 +12,7 @@ use App\Models\Favorite;
 use App\Models\Auction;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends ApiController
 {
@@ -56,21 +57,18 @@ class UserController extends ApiController
     //edit user
     public function edit(Request $request)
     {
-        $validator = $this->userService->signupValidation($request->all());
+        $validator = $this->userService->editValidation($request->all());
         
         if ($validator->fails()) {
             $name = $validator->errors()->first("name");
             $phone = $validator->errors()->first("phone");
             $address = $validator->errors()->first("address");
             $email = $validator->errors()->first("email");
-            $password = $validator->errors()->first("password");
-            $rePass = $validator->errors()->first("re_pass");
             $avatar = $validator->errors()->first("avatar");
             return [
                 "code" => 1001,
                 "message" => "name: " . $name . "&phone: " . $phone . "&address: " . $address .
-                    "&email: " . $email . "&password: " . $password . 
-                    "&re_pass: " . $rePass . " &avatar: " . $avatar,
+                    "&email: " . $email . " &avatar: " . $avatar,
                 "data" => null,
             ];
         }
@@ -107,6 +105,42 @@ class UserController extends ApiController
             'total_like' => $totalLike,
             'total_auctions' => $totalAuctions
         ];
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    //changePassword
+    public function changePassword(Request $request) {
+        $validator = $this->userService->changePassValidation($request->all());
+
+        $currentPassword = auth()->user()->password;
+        // $oldPass = $request->old_pass;
+
+        // if (! Hash::check($oldPass, $currentPassword)) {
+        //     return [
+        //         "code" => 9997,
+        //         "message" => "パスワードが正しくない。",
+        //         "data" => null,
+        //     ];
+        // }
+
+        if ($validator->fails()) {
+            $oldPass = $validator->errors()->first("old_pass");
+            $newPass = $validator->errors()->first("new_pass");
+            $rePass = $validator->errors()->first("re_pass");
+            return [
+                "code" => 1001,
+                "message" => "old_pass: " . $oldPass . "&new_pass: " . $newPass . 
+                    "&re_pass: " . $rePass,
+                "data" => null,
+            ];
+        }
+
+        $data = $this->userService->changePass($request->all());
+        
         return [
             "code" => 1000,
             "message" => "OK",

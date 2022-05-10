@@ -37,7 +37,7 @@ Route::group(['middleware' => 'api'], function(){
     Route::get('loginfailed', function () {
         return [
             "code" => 1004,
-            "message" => "Chưa đăng nhập",
+            "message" => "まだログインではありません",
             "data" => null,
         ];
     })->name('loginfailed');
@@ -53,8 +53,9 @@ Route::group(['middleware' => 'api'], function(){
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
         Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
         Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
-        Route::get('/listAuctionOfCategory', [AuctionController::class, 'listAuctionOfCategory']);
+        Route::get('/listAuctionOfCategory/{statusId}', [AuctionController::class, 'listAuctionOfCategory']);
         Route::get('/maxBid/{auctionId}', [AuctionController::class, 'maxBid']);
+        Route::get('/listAuctionsByUserK/{userId}/{statusId}', [AuctionController::class, 'listAuctionsByUserK']);
     });
 
     //total likes of auctions
@@ -89,6 +90,7 @@ Route::group(['middleware' => 'api'], function(){
         //Account
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('edit', [UserController::class, 'edit']);
+        Route::post('changepass', [UserController::class, 'changePassword']);
         Route::get('info', [UserController::class, 'info']);
 
         //auctions
@@ -104,6 +106,9 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('items')->group(function () {
             Route::post('/create/{auctionId}', [ItemController::class, 'create']);
             Route::post('/edit/{itemId}', [ItemController::class, 'edit']);
+            Route::get('/categories', [ItemController::class, 'listCategoryOfItem']);
+            Route::get('/listBuy/{categoryId}', [ItemController::class, 'listBuy']);
+            Route::get('/detail/{itemId}', [ItemController::class, 'detail']);
         });
 
         //Commnents
@@ -135,6 +140,7 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('notifications')->group(function () {
             Route::get('/', [NewController::class, 'notifications']);
             Route::get('read/{auctionDenyId}', [NewController::class, 'reason']);
+            Route::post('/delete/{auctionId}', [NewController::class, 'deleteNotification']);
         });
 
         //news

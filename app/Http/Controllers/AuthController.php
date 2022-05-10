@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Services\UserService;
 use App\Http\Controllers\Api\ApiResponse;
 use App\Http\Controllers\Api\ApiController;
+use Carbon\Carbon;
 
 class AuthController extends ApiController
 {
@@ -109,7 +110,8 @@ class AuthController extends ApiController
                 'user_id' => $this->guard()->user_id,
             ],
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 6000000
+            'expires_in' => auth()->factory()->getTTL() * 600,
+            'exp' => Carbon::now()->addDays(1)->timestamp,
         ];
         
         return [

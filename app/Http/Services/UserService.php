@@ -10,6 +10,7 @@ use App\Mail\SendMail;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Services\UploadService;
+use Illuminate\Http\Request;
 
 class UserService implements UserServiceInterface
 {
@@ -64,6 +65,55 @@ class UserService implements UserServiceInterface
             'email' => $this->messageErrorFormatEmail,
             'same' => 'パスワードが違いました。',
             'required_with' => $this->messageRequired,
+            'unique' => '既に使用されています。'
+        ];
+
+        $attribute = [
+            'email' => 'メール',
+            'password' => 'パスワード'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages, $attribute);
+
+        return $validated;
+    }
+
+    //edit validation
+    public function editValidation($request) 
+    {
+        $rules = [
+            'phone' => 'required|max:60',
+            'address' => 'max:255',
+            'name' => 'required|max:255',
+        ];
+
+        $allUserEmail = User::withTrashed()
+            ->get()
+            ->pluck('email')
+            ->toArray();
+
+        if (isset(auth()->user()->user_id)) {
+            $userId = auth()->user()->user_id;
+            $rules['email'] = "required|email|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
+        } else {
+            if (isset($request['email'])) {
+                foreach ($allUserEmail as $key => $value) {
+                    if ($request['email'] == $value) {
+                        $rules['email'] = "required|email|max:255|unique:users,email";
+                        break;
+                    } else {
+                        $rules['email'] = "required|email|max:255";
+                    }
+                }
+            } else {
+                $rules['email'] = "required|email|max:255";
+            }
+        }
+
+        $messages = [
+            'required' => $this->messageRequired,
+            'max' => sprintf($this->messageErrorMax, ':max'),
+            'email' => $this->messageErrorFormatEmail,
             'unique' => '既に使用されています。'
         ];
 
@@ -241,10 +291,8 @@ class UserService implements UserServiceInterface
     public function edit($request)
     {
         // if (isset($request['avatar'])) {
-        //     // $request['avatar'] = $this->uploadService->store($request['avatar']);
+        //     $request['avatar'] = $this->uploadService->store($request['avatar']);
         // }
-
-        $request['password'] = Hash::make($request['password']);
 
         $user = tap(User::where('user_id', auth()->user()->user_id))
             ->update($request)->firstOrFail();
@@ -253,7 +301,6 @@ class UserService implements UserServiceInterface
         auth()->user()->email = $user->email;
         auth()->user()->phone = $user->phone;
         auth()->user()->address = $user->address ?? null;
-        auth()->user()->password = Hash::make($user->password);
         auth()->user()->avatar = $user->avatar;
 
         $data = [
@@ -266,5 +313,39 @@ class UserService implements UserServiceInterface
         ];
 
         return $data;
+    }
+
+    public function changePassValidation($request) {
+        $oldPass = $request['old_pass'];
+        
+        $rules = [
+            'new_pass' => 'required|max:255',
+            're_pass' => 'required_with:new_pass|same:new_pass|max:255',
+        ];
+
+        if (! Hash::check($oldPass, auth()->user()->password)) {
+            $rules['old_pass'] = 'required|max:255|same:auth()->user()->password';
+        }
+        
+        $messages = [
+            'required' => $this->messageRequired,
+            'same' => 'パスワードが違いました。',
+            'required_with' => $this->messageRequired,
+        ];
+
+        $attribute = [
+            'new_pass' => 'パスワード'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages, $attribute);
+
+        return $validated;
+    }
+
+    public function changePass($request) {
+        $user = User::findOrFail(auth()->user()->user_id);
+        $user->password = Hash::make($request['new_pass']);
+        $user->save();
+        return '編集しました。';
     }
 }

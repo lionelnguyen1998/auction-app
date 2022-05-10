@@ -7,7 +7,11 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\ApiResponse;
 use App\Http\Services\ItemService;
 use App\Models\Auction;
+use App\Models\Category;
+use App\Models\Brand;
 use App\Models\User;
+use App\Models\Favorite;
+use App\Models\Bid;
 use App\Models\Item;
 use App\Http\Services\UploadService;
 
@@ -118,5 +122,140 @@ class ItemController extends ApiController
                 "data" => null,
             ];
         } 
+    }
+
+    public function listCategoryOfItem() {
+        $userId = auth()->user()->user_id;
+        $categoryId = Item::where('buying_user_id', $userId)
+            ->get()
+            ->pluck('category_id');
+
+        $categories = Category::whereIn('category_id', $categoryId)
+            ->select('name', 'image', 'category_id')
+            ->get();
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => [
+                'category' => $categories->map(function ($category) {
+                    return [
+                        'category_id' => $category->category_id,
+                        'name' => $category->name,
+                        'image' => $category->image
+                    ];
+                }),
+                'all' => $categories
+            ]
+        ];
+    }
+    //list item user dau gia thanh cong
+    public function listBuy($categoryId) {
+        $userId = auth()->user()->user_id;
+        $auctionId = Item::where('buying_user_id', $userId)
+            ->where('category_id', $categoryId)
+            ->get()
+            ->pluck('auction_id');
+
+        $auctions = Auction::with('items')
+            ->whereIn('auction_id', $auctionId)
+            ->get();
+
+        $itemId = Item::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('item_id');
+
+        $images = $this->itemService->getImageLists($itemId);
+
+        $total = Item::where('category_id', $categoryId)
+            ->where('buying_user_id', $userId)
+            ->count('category_id');
+
+        $data = [
+            'info' => $auctions->map(function ($auction) use ($images) {
+                return [
+                    'item' => [
+                        'item_id' => $auction['items']->item_id,
+                        'name' => $auction['items']->name,
+                        'mainImage' => $images[0],
+                    ]
+                ];
+            }),
+            'total' => $total
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+
+    }
+
+    public function detail($itemId) {
+        $auctionId = Item::findOrFail($itemId)->auction_id;
+        $brandId = Item::findOrFail($itemId)->brand_id;
+        $categoryId = Item::findOrFail($itemId)->category_id;
+        $images = $this->itemService->getImageLists($itemId);
+        //dd($images);
+        //dd($auctionId);
+        $auction = Auction::with('items', 'userSelling')
+            ->where('auction_id', $auctionId)
+            ->get()
+            ->first();
+
+        $like = Favorite::where('auction_id', $auctionId)
+            ->where('is_liked', 1)
+            ->where('user_id', auth()->user()->user_id)
+            ->get()
+            ->pluck('is_liked')
+            ->first();
+
+        $brand = Brand::where('brand_id', $brandId)
+            ->get()
+            ->pluck('name')
+            ->first();
+
+        $category = Category::where('category_id', $categoryId)
+            ->get()
+            ->pluck('name')
+            ->first();
+
+        $maxPrice = Bid::where('auction_id', $auctionId)
+            ->where('user_id', auth()->user()->user_id)
+            ->max('price');
+
+        $data = [
+            'auction' => [
+                'auction_id' => $auction->auction_id,
+                'title' => $auction->title,
+                'start_date' => $auction->start_date,
+                'end_date' => $auction->end_date,
+            ],
+            'item' => [
+                'item_id' => $auction['items']->item_id,
+                'name' => $auction['items']->name,
+                'series' => $auction['items']->series,
+                'description' => $auction['items']->description,
+                'starting_price' => $auction['items']->starting_price,
+                'selling_info' => $auction['items']->selling_info,
+                'images' => $images,
+                'brand' => $brand,
+                'category' => $category,
+                'max_price' => $maxPrice,
+                'like' => $like
+            ],
+            'selling_user' => [
+                'selling_user_id' => $auction['userSelling']['user_id'],
+                'selling_user_name' => $auction['userSelling']['name'],
+                'selling_user_avatar' => $auction['userSelling']['avatar']
+            ],
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 }
