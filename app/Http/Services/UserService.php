@@ -290,9 +290,9 @@ class UserService implements UserServiceInterface
 
     public function edit($request)
     {
-        // if (isset($request['avatar'])) {
-        //     $request['avatar'] = $this->uploadService->store($request['avatar']);
-        // }
+        if (isset($request['avatar'])) {
+            $request['avatar'] = $this->uploadService->store($request['avatar']);
+        }
 
         $user = tap(User::where('user_id', auth()->user()->user_id))
             ->update($request)->firstOrFail();

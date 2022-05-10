@@ -140,7 +140,6 @@ class ItemService implements ItemServiceInterface
             if (empty($images)) {
                 dd('ko chinh sua');
             } else {
-                //dd($itemId);
                 Image::where('item_id', '=', $itemId)->delete();
                 foreach ($images as $key => $value) {
                     $image->image = $value;

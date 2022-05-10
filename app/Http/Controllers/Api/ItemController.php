@@ -48,9 +48,9 @@ class ItemController extends ApiController
         $images = array();
         if ($request['images']) {
             foreach ($request['images'] as $key => $value) {
-                // $url = $this->uploadService->store($value);
-                // array_push($images, $url);
-                array_push($images, $value);
+                $url = $this->uploadService->store($value);
+                array_push($images, $url);
+                //array_push($images, $value);
             }
             $item = $request->except('images');
         } else {
@@ -197,8 +197,7 @@ class ItemController extends ApiController
         $brandId = Item::findOrFail($itemId)->brand_id;
         $categoryId = Item::findOrFail($itemId)->category_id;
         $images = $this->itemService->getImageLists($itemId);
-        //dd($images);
-        //dd($auctionId);
+ 
         $auction = Auction::with('items', 'userSelling')
             ->where('auction_id', $auctionId)
             ->get()
