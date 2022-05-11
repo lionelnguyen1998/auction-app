@@ -41,6 +41,10 @@ class ChatController extends ApiController
                             'user_id' => $c['userReceive']->user_id,
                             'name' => $c['userReceive']->name,
                             'avatar' => $c['userReceive']->avatar
+                        ],
+                        'members' => [
+                            0 => $c->user_send_id,
+                            1 => $c->user_receive_id,
                         ]
                     ];
                 } else {
@@ -52,6 +56,10 @@ class ChatController extends ApiController
                             'user_id' => $c['userSend']->user_id,
                             'name' => $c['userSend']->name,
                             'avatar' => $c['userSend']->avatar
+                        ],
+                        'members' => [
+                            0 => $c->user_send_id,
+                            1 => $c->user_receive_id,
                         ]
                     ];
                 }
@@ -80,26 +88,15 @@ class ChatController extends ApiController
     }
 
     //create conv of user login
-    public function conversation(Request $request) {
+    public function conversation($userReceiveId) {
         $userSendId = auth()->user()->user_id;
-        $userReceiveId = $request['user_receive_id'];
-        $validator = $this->chatValidation($request->all());
-
-        if ($validator->fails()) {
-            $userReceive = $validator->errors()->first("user_receive_id");
-            return [
-                "code" => 1001,
-                "message" => 'user_receive_id: ' . $userReceive,
-                "data" => null,
-            ];
-        }
 
         $chatId = Chat::where('user_receive_id', $userSendId)
             ->orWhere('user_send_id', $userSendId)
             ->get()
             ->pluck('chat_id');
 
-        $checkConversation = Chat::where('chat_id', $chatId)
+        $checkConversation = Chat::whereIn('chat_id', $chatId)
             ->where('user_receive_id', $userReceiveId)
             ->orWhere('user_send_id', $userReceiveId)
             ->get()
@@ -219,5 +216,57 @@ class ChatController extends ApiController
             "message" => "OK",
             "data" => $data,
         ];
+    }
+
+    public function info($chatId) {
+        $currentUser = auth()->user()->user_id;
+        $chatInfo = Chat::where('chat_id', $chatId)
+            ->select('user_send_id', 'user_receive_id')
+            ->get()
+            ->first();
+
+        if ($chatInfo->user_send_id === $currentUser) {
+            $userReceiveId = $chatInfo->user_receive_id;
+        } else {
+            $userReceiveId = $chatInfo->user_send_id;
+        }
+
+        $userReceiveInfo = User::where('user_id', $userReceiveId)
+            ->select('name', 'avatar', 'user_id')
+            ->get()
+            ->first();
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $userReceiveInfo,
+        ];
+    }
+
+    public function search(Request $request) {
+        $key = $request['key'];
+
+        $result = User::where('name', 'LIKE', '%'.$key.'%')
+            ->select('name')
+            ->get();
+
+        if (count($result) && $key) {
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => $result->map(function($result) {
+                    return [
+                        'id' => $result->user_id,
+                        'name' => $result->name,
+                    ];
+                }),
+            ];
+        } else {
+            return [
+                "code" => 9998,
+                "message" => "Khong tim thay",
+                "data" => null,
+            ];
+        }
     }
 }

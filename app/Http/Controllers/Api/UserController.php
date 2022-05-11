@@ -177,4 +177,16 @@ class UserController extends ApiController
         ];
     }
 
+    public function listUsers() {
+        $list = User::where('user_id', '<>', auth()->user()->user_id)
+            ->select('name', 'user_id', 'avatar')
+            ->get();
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $list,
+        ];
+    }
+
 }

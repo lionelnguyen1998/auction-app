@@ -153,10 +153,16 @@ Route::group(['middleware' => 'api'], function(){
         //Chat 
         Route::prefix('chat')->group(function () {
             Route::get('/', [ChatController::class, 'index']);
-            Route::post('/conversation', [ChatController::class, 'conversation']);
+            Route::post('/conversation/{userReceiveId}', [ChatController::class, 'conversation']);
             Route::post('/message', [ChatController::class, 'createMessage']);
             Route::get('/listMessages/{chatId}', [ChatController::class, 'listMessages']);
+            Route::get('/info/{chatId}', [ChatController::class, 'info']);
+            Route::get('/search', [ChatController::class, 'search']);
         });
 
+        //all user
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'listUsers']);
+        });
     });
 });
