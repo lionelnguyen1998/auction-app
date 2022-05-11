@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -147,6 +148,14 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('news')->group(function () {
             Route::get('/', [NewController::class, 'news']);
             Route::get('/read/{newId}', [NewController::class, 'read']);
+        });
+
+        //Chat 
+        Route::prefix('chat')->group(function () {
+            Route::get('/', [ChatController::class, 'index']);
+            Route::post('/conversation', [ChatController::class, 'conversation']);
+            Route::post('/message', [ChatController::class, 'createMessage']);
+            Route::get('/listMessages/{chatId}', [ChatController::class, 'listMessages']);
         });
 
     });
