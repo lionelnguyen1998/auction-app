@@ -273,7 +273,7 @@ class UserService implements UserServiceInterface
             'phone' => $request['phone'],
             'address' => $request['address'] ?? null,
             'avatar' => $request['avatar'] ?? $avatarDefault,
-            'role' => 2
+            'role' => 1
         ]);
 
         $userInfo = [
