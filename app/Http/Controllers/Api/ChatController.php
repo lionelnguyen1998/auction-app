@@ -40,7 +40,8 @@ class ChatController extends ApiController
                         'user_receive_info' => [
                             'user_id' => $c['userReceive']->user_id,
                             'name' => $c['userReceive']->name,
-                            'avatar' => $c['userReceive']->avatar
+                            'avatar' => $c['userReceive']->avatar,
+                            'role' => $c['userReceive']->role
                         ],
                         'members' => [
                             0 => $c->user_send_id,
@@ -55,7 +56,8 @@ class ChatController extends ApiController
                         'user_receive_info' => [
                             'user_id' => $c['userSend']->user_id,
                             'name' => $c['userSend']->name,
-                            'avatar' => $c['userSend']->avatar
+                            'avatar' => $c['userSend']->avatar,
+                            'role' => $c['userSend']->role
                         ],
                         'members' => [
                             0 => $c->user_send_id,
@@ -172,7 +174,7 @@ class ChatController extends ApiController
             ]);
 
             $userSendInfo = User::where('user_id', $userSendId)
-                ->select('name', 'avatar', 'user_id')
+                ->select('name', 'avatar', 'user_id', 'role')
                 ->get()
                 ->first();
 
@@ -199,7 +201,7 @@ class ChatController extends ApiController
         $data = $allMessages->map(function($message) {
             $userSendId = $message->user_send_id;
             $userSendInfo = User::where('user_id', $userSendId)
-                ->select('name', 'avatar', 'user_id')
+                ->select('name', 'avatar', 'user_id', 'role')
                 ->get()
                 ->first();
 
@@ -232,7 +234,7 @@ class ChatController extends ApiController
         }
 
         $userReceiveInfo = User::where('user_id', $userReceiveId)
-            ->select('name', 'avatar', 'user_id')
+            ->select('name', 'avatar', 'user_id', 'role')
             ->get()
             ->first();
 
@@ -241,32 +243,5 @@ class ChatController extends ApiController
             "message" => "OK",
             "data" => $userReceiveInfo,
         ];
-    }
-
-    public function search(Request $request) {
-        $key = $request['key'];
-
-        $result = User::where('name', 'LIKE', '%'.$key.'%')
-            ->select('name')
-            ->get();
-
-        if (count($result) && $key) {
-            return [
-                "code" => 1000,
-                "message" => "OK",
-                "data" => $result->map(function($result) {
-                    return [
-                        'id' => $result->user_id,
-                        'name' => $result->name,
-                    ];
-                }),
-            ];
-        } else {
-            return [
-                "code" => 9998,
-                "message" => "Khong tim thay",
-                "data" => null,
-            ];
-        }
     }
 }

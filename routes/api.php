@@ -157,7 +157,6 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/message', [ChatController::class, 'createMessage']);
             Route::get('/listMessages/{chatId}', [ChatController::class, 'listMessages']);
             Route::get('/info/{chatId}', [ChatController::class, 'info']);
-            Route::get('/search', [ChatController::class, 'search']);
         });
 
         //all user
