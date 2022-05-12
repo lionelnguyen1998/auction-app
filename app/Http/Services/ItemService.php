@@ -70,7 +70,7 @@ class ItemService implements ItemServiceInterface
     public function itemValidation($request)
     {
         $rules = [
-            'brand_id' => "required",
+            'brand_id' => "required|exists:brands,brand_id",
             'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
             'starting_price' => 'required|numeric',

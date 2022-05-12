@@ -258,7 +258,7 @@ class AuctionService implements AuctionServiceInterface
     public function auctionValidation($request)
     {
         $rules = [
-            'category_id' => "required",
+            'category_id' => "required|exists:categories,category_id",
             'title_ni' => "required|max:255|unique:auctions,title",
             'start_date' => "required|date|after_or_equal:tomorrow",
             'end_date' => "required|date|after:start_date",
@@ -271,7 +271,8 @@ class AuctionService implements AuctionServiceInterface
             'after_or_equal' => '始まる時間が明日か行かなければなりません',
             'after' => '始まる時間よりです。',
             'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'numeric' => '番号を入力してください。',
+            'exists' => '存在しない。'
         ];
 
         $attributes = [

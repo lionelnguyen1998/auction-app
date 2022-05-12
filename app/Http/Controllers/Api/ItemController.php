@@ -28,6 +28,30 @@ class ItemController extends ApiController
 
     public function create(Request $request, $auctionId)
     {
+        if (!Auction::find($auctionId)) {
+            return [
+                "code" => 9996,
+                "message" => "Id truyền vào không tồn tại",
+                "data" => null,
+            ];
+        }
+
+        $checkAuction = Auction::where('auction_id', $auctionId)
+            ->where('status', 4)
+            ->get()
+            ->first();
+
+        $countItem = Item::where('auction_id', $auctionId)
+            ->count('item_id');
+
+        if ((! $checkAuction) || ($countItem > 0)) {
+            return [
+                "code" => 9995,
+                "message" => "Không thể thêm item mới với phiên đấu giá này",
+                "data" => null,
+            ];
+        }
+    
         $validator = $this->itemService->itemValidation($request->all());
 
         if ($validator->fails()) {

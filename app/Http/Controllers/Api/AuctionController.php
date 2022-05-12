@@ -350,7 +350,7 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-
+        
         $data = $this->auctionService->create($request->all());
         
         return [
