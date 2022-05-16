@@ -100,7 +100,7 @@ class AuctionService implements AuctionServiceInterface
     }
 
     //get auction by categoryId and typeCategory
-    public function getListAuctionByType($typeId, $request)
+    public function getListAuctionByType($typeId, $statusId, $request)
     {
         $page = $request['index'];
         $perPage = $request['count'];
@@ -108,11 +108,21 @@ class AuctionService implements AuctionServiceInterface
             ->get()
             ->pluck('category_id');
 
-        $auction = Auction::with('category')
-            ->orderBy('created_at', 'DESC')
-            ->whereIn('category_id', $categoryId)
-            ->forPage($page, $perPage)
-            ->get();
+        if ($statusId == 0) {
+            $auction = Auction::with('category')
+                ->whereIn('auctions.status', [1, 2, 3])
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('category_id', $categoryId)
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $auction = Auction::with('category')
+                ->where('auctions.status', $statusId)
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('category_id', $categoryId)
+                ->forPage($page, $perPage)
+                ->get();
+        }
 
         return $auction;
     }
@@ -166,7 +176,7 @@ class AuctionService implements AuctionServiceInterface
         $perPage = $request['count'];
         if ($statusId == 0) {
             $auction = Auction::with('category')
-                ->where('status', '<>', 4)
+                ->whereIn('status', [1, 2, 3])
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
@@ -230,15 +240,14 @@ class AuctionService implements AuctionServiceInterface
      }
 
     //list auctions by category
-    public function getListAuctionOfCategory($request)
+    public function getListAuctionOfCategory($request, $categoryId, $statusId)
     {
-        $categoryId = $request['category_id'];
-        $statusId = $request['status_id'];
         $page = $request['index'];
         $perPage = $request['count'];
 
         if ($statusId == 0) {
             $list = Auction::with('category')
+                ->whereIn('auctions.status', [1, 2, 3])
                 ->where('category_id', $categoryId)
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)

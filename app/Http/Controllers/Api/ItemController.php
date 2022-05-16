@@ -273,6 +273,12 @@ class ItemController extends ApiController
                 'selling_user_name' => $auction['userSelling']['name'],
                 'selling_user_avatar' => $auction['userSelling']['avatar']
             ],
+            'buying_user' => [
+                'buying_user_id' => auth()->user()->user_id,
+                'buying_user_name' => auth()->user()->name,
+                'buying_user_phone' =>  auth()->user()->phone,
+                'buying_user_address' => auth()->user()->address,
+            ]
         ];
 
         return [

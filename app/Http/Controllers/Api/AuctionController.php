@@ -87,6 +87,13 @@ class AuctionController extends ApiController
             ->firstOrFail();
         $status = config('const.status');
         $index = $auction[0]['status'];
+        if (auth()->user()) {
+            $liked = Favorite::where('auction_id', $auctionId)
+                ->where('user_id', auth()->user()->user_id)
+                ->get()
+                ->pluck('is_liked')
+                ->first();
+        }
 
         $data = [
             'auctions' => [
@@ -96,7 +103,6 @@ class AuctionController extends ApiController
                 'end_date' => $auction[0]['end_date'],
                 'statusId' => $index,
                 'status' => $status[$index],
-                'like' => auth()->user() ? $auction[0]['like']['is_liked'] : null
             ],
             'category' => [
                 'name' => $auction[0]['category']['name'],
@@ -119,7 +125,8 @@ class AuctionController extends ApiController
                 'selling_user_name' => $auction[0]['user_selling']['name'],
                 'selling_user_avatar' => $auction[0]['user_selling']['avatar']
             ],
-            'max_bid' => $maxPrice
+            'max_bid' => $maxPrice,
+            'like' => auth()->user() ? $liked : null
         ];
 
         return [
@@ -157,35 +164,41 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listAuctionByType($typeId, Request $request)
+    public function listAuctionByType($typeId, $statusId, Request $request)
     {
-        $auctions = $this->auctionService->getListAuctionByType($typeId, $request->all());
+        $auctions = $this->auctionService->getListAuctionByType($typeId, $statusId, $request->all());
+
         $categoryId = Category::where('type', $typeId)
             ->get()
             ->pluck('category_id');
-            
-        $total = Auction::where('category_id', $categoryId)
-            ->count('auction_id');
+
+        if ($statusId == 0) {
+            $total = Auction::whereIn('category_id', $categoryId)
+                ->whereIn('status', [1, 2, 3])
+                ->count('auction_id');
+        } else {
+            $total = Auction::whereIn('category_id', $categoryId)
+                ->where('status', $statusId)
+                ->count('auction_id');
+        }
 
         $status = config('const.status');
+        $type = config('const.categories');
         $data = [
             'auctions' => $auctions->map(function ($auction) use ($status) {
                 $index = $auction->status;
                 return [
                     'auction_id' => $auction->auction_id,
-                    'selling_user_id' => $auction->selling_user_id,
                     'title' => $auction->title,
-                    'start_date' => $auction->start_date,
-                    'end_date' => $auction->end_date,
                     'statusId' => $index,
                     'status' => $status[$index],
                     'category' => [
                         'name' => $auction['category']['name'],
-                        'image' => $auction['category']['image'],
-                        'type' => $auction['category']['type'],
+                        'image' => $auction['category']['image']
                     ],
                 ];
             }),
+            'type' => $type[$typeId],
             'total' => $total
         ];
         
@@ -291,12 +304,17 @@ class AuctionController extends ApiController
         ];
     }
 
-    public function listAuctionOfCategory($statusId, Request $request)
+    public function listAuctionOfCategory($categoryId, $statusId, Request $request)
     {
-        $auctions = $this->auctionService->getListAuctionOfCategory($request->all());
-        $categoryId = $request['category_id'];
+        $categoryInfo = Category::where('category_id', $categoryId)
+            ->select('name','image', 'type')
+            ->get()
+            ->first();
+
+        $auctions = $this->auctionService->getListAuctionOfCategory($request->all(), $categoryId, $statusId);
         if ($statusId == 0) {
             $total = Auction::where('category_id', $categoryId)
+                ->whereIn('status', [1, 2, 3])
                 ->count('auction_id');
         } else {
             $total = Auction::where('status', $statusId)
@@ -310,10 +328,7 @@ class AuctionController extends ApiController
                 $index = $auction->status;
                 return [
                     'auction_id' => $auction->auction_id,
-                    'selling_user_id' => $auction->selling_user_id,
                     'title' => $auction->title,
-                    'start_date' => $auction->start_date,
-                    'end_date' => $auction->end_date,
                     'statusId' => $index,
                     'status' => $status[$index],
                     'category' => [
@@ -323,6 +338,9 @@ class AuctionController extends ApiController
                     ],
                 ];
             }),
+            'category' => [
+                'name' => $categoryInfo['name']
+            ],
             'total' => $total
         ];
         
@@ -350,7 +368,7 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-        
+
         $data = $this->auctionService->create($request->all());
         
         return [
@@ -525,6 +543,7 @@ class AuctionController extends ApiController
     public function deleteComment($commentId)
     {
         $comment = Comment::findOrFail($commentId);
+        $auctionId = Comment::findOrFail($commentId)->auction_id;
         $userId = auth()->user()->user_id;
         $userCommentId = Comment::where('comment_id', $commentId)
             ->get()
@@ -534,15 +553,20 @@ class AuctionController extends ApiController
         if ($userId != $userCommentId) {
             return [
                 "code" => 1006,
-                "message" => "Khong co quyen",
+                "message" => "削除できません。",
                 "data" => null,
             ];
         } else {
             $comment->delete();
+            $total = Comment::where('auction_id', $auctionId)
+                ->count('comment_id');
             return [
                 "code" => 1000,
                 "message" => "OK",
-                "data" => 'Đã xóa comment',
+                "data" => [
+                    'total' => $total,
+                    'message' => '削除しました。'
+                ],
             ];
         }
 
@@ -791,7 +815,7 @@ class AuctionController extends ApiController
     {
         $auctions = $this->auctionService->getListAuctionByStatus($statusId, $request->all());
         if ($statusId == 0) {
-            $total = Auction::where('status', '<>', 4)
+            $total = Auction::whereIn('status', [1, 2, 3])
                 ->count('auction_id');
         } else {
             $total = Auction::where('status', $statusId)

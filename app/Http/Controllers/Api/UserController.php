@@ -117,16 +117,7 @@ class UserController extends ApiController
         $validator = $this->userService->changePassValidation($request->all());
 
         $currentPassword = auth()->user()->password;
-        // $oldPass = $request->old_pass;
-
-        // if (! Hash::check($oldPass, $currentPassword)) {
-        //     return [
-        //         "code" => 9997,
-        //         "message" => "パスワードが正しくない。",
-        //         "data" => null,
-        //     ];
-        // }
-
+        
         if ($validator->fails()) {
             $oldPass = $validator->errors()->first("old_pass");
             $newPass = $validator->errors()->first("new_pass");

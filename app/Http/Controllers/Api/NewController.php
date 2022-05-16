@@ -95,12 +95,23 @@ class NewController extends ApiController
 
         $data = [
             'news' => $news->map(function ($new) {
+                $userCreate = User::findOrFail($new->user_id)->name;
+                if (auth()->user()) {
+                    $isRead = UserReadNews::where('new_id', $new->new_id)
+                        ->where('user_id', auth()->user()->user_id)
+                        ->where('is_read', 1)
+                        ->get()
+                        ->pluck('is_read')
+                        ->first();
+                }
+
                 return [
-                    'user_id' => $new->user_id,
+                    'user' => $userCreate,
+                    'new_id' => $new->new_id,
                     'title' => $new->title,
                     'content' => $new->content,
-                    'created_at' => $new->created_at->format('Y/m/d H:i'),
-                    'updated_at' => $new->updated_at->format('Y/m/d H:i')
+                    'updated_at' => $new->updated_at->format('Y/m/d H:i'),
+                    'is_read' => $isRead ?? null,
                 ];
             }),
             'total' => $total
@@ -127,12 +138,25 @@ class NewController extends ApiController
         $itemId = Item::withTrashed()
             ->where('auction_id', $auctionId)
             ->get()
-            ->pluck('item_id');
-
-        $itemInfo = Item::withTrashed()
-            ->where('auction_id', $auctionId)
-            ->get()
+            ->pluck('item_id')
             ->first();
+
+        if ($itemId) {
+            $itemInfo = Item::withTrashed()
+                ->where('auction_id', $auctionId)
+                ->get()
+                ->first();
+
+            $images = Image::withTrashed()
+                ->where('item_id', $itemId)
+                ->get()
+                ->pluck('image');
+
+            $brand = Brand::where('brand_id', $itemInfo['brand_id'])
+                ->get()
+                ->pluck('name')
+                ->first();
+        }
 
         $auction = Auction::withTrashed()
             ->with('category')
@@ -140,15 +164,7 @@ class NewController extends ApiController
             ->get()
             ->first();
             
-        $images = Image::withTrashed()
-            ->where('item_id', $itemId)
-            ->get()
-            ->pluck('image');
-
-        $brand = Brand::where('brand_id', $itemInfo['brand_id'])
-            ->get()
-            ->pluck('name')
-            ->first();
+        
         $status = config('const.status');
         $index = $auction['status'];
 
@@ -177,7 +193,9 @@ class NewController extends ApiController
                 'is_read' => true,
                 'user_id' => auth()->user()->user_id
             ]);
+        }
 
+        if ($itemId) {
             $data = [
                 'is_read' => 1,
                 'auction_id' => $auctionId,
@@ -221,15 +239,7 @@ class NewController extends ApiController
                 'category' => [
                     'name' => $auction['category']['name']
                 ],
-                'items' => [
-                    'name' => $itemInfo['name'],
-                    'brand' => $brand,
-                    'series' => $itemInfo['series'],
-                    'description' => $itemInfo['description'],
-                    'starting_price' => $itemInfo['starting_price'],
-                    'mainImage' => $images,
-                    'images' => $images,
-                ],
+                'items' => null,
                 'total_not_read' => $notRead,
                 'total' => $total
             ];
@@ -245,25 +255,52 @@ class NewController extends ApiController
     //read news
     public function read($newId)
     {
-        News::findOrFail($newId);
-        $is_read = UserReadNews::where('new_id', $newId)
-            ->get()
-            ->first();
+        $news = News::findOrFail($newId);
+        if (auth()->user()) {
+            $userId = auth()->user()->user_id;
+            $is_read = UserReadNews::where('new_id', $newId)
+                ->where('user_id', $userId)
+                ->get()
+                ->first();
+            $useName = User::findOrFail($news->user_id)->name;
 
-        if (empty($is_read)) {
-            UserReadNews::insert([
-                'is_read' => true,
-                'new_id' => $newId,
-            ]);
+            if (empty($is_read)) {
+                UserReadNews::insert([
+                    'is_read' => true,
+                    'new_id' => $newId,
+                    'user_id' => $userId
+                ]);
 
-            $data = [
-                'is_read' => 1,
-                'new_id' => $newId,
-            ];
+                $data = [
+                    'is_read' => 1,
+                    'new_id' => $newId,
+                    'content' => $news->content,
+                    'user_id' => $userId,
+                    'title' => $news->title,
+                    'updated_at' => $news->updated_at,
+                    'user_create_name' => $useName
+                ];
+            } else {
+                $data = [
+                    'is_read' => $is_read->is_read,
+                    'new_id' => $is_read->new_id,
+                    'content' => $news->content,
+                    'user_id' => $userId,
+                    'title' => $news->title,
+                    'updated_at' => $news->updated_at->format('Y/m/d'),
+                    'user_create_name' => $useName
+                ];
+            }
         } else {
+            $useName = User::findOrFail($news->user_id)->name;
             $data = [
-                'is_read' => $is_read->is_read,
-                'new_id' => $is_read->new_id,
+                'is_read' => null,
+                'new_id' => $news->new_id,
+                'content' => $news->content,
+                'user_id' => null,
+                'title' => $news->title,
+                'updated_at' => $news->updated_at->format('Y/m/d'),
+                'user_create_name' => $useName
             ];
         }
     

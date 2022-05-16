@@ -100,6 +100,7 @@ class Auction extends Model
         $perPage = $request['count'];
         if ($isNotRead) {
             $auctionId = UserReadNews::where('user_id', $userId)
+                ->where('auction_id', '<>', null)
                 ->get()
                 ->pluck('auction_id');
             $auctionDeny = Auction::withTrashed()

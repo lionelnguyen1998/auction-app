@@ -50,11 +50,11 @@ Route::group(['middleware' => 'api'], function(){
     Route::prefix('auctions')->group(function () {
         Route::get('/', [AuctionController::class, 'index']);
         Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
-        Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType']);
+        Route::get('/listAuctions/{typeId}/{statusId}', [AuctionController::class, 'listAuctionByType']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
         Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
         Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
-        Route::get('/listAuctionOfCategory/{statusId}', [AuctionController::class, 'listAuctionOfCategory']);
+        Route::get('/listAuctionOfCategory/{categoryId}/{statusId}', [AuctionController::class, 'listAuctionOfCategory']);
         Route::get('/maxBid/{auctionId}', [AuctionController::class, 'maxBid']);
         Route::get('/listAuctionsByUserK/{userId}/{statusId}', [AuctionController::class, 'listAuctionsByUserK']);
     });
@@ -86,6 +86,12 @@ Route::group(['middleware' => 'api'], function(){
 
     //search
     Route::get('/search', [SearchController::class, 'search']);
+
+    //news
+    Route::prefix('news')->group(function () {
+        Route::get('/', [NewController::class, 'news']);
+        Route::get('/read/{newId}', [NewController::class, 'read']);
+    });
     
     Route::middleware(['auth'])->group(function () { 
         //Account
@@ -144,11 +150,7 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/delete/{auctionId}', [NewController::class, 'deleteNotification']);
         });
 
-        //news
-        Route::prefix('news')->group(function () {
-            Route::get('/', [NewController::class, 'news']);
-            Route::get('/read/{newId}', [NewController::class, 'read']);
-        });
+        
 
         //Chat 
         Route::prefix('chat')->group(function () {
