@@ -176,7 +176,7 @@ class AuctionService implements AuctionServiceInterface
         $perPage = $request['count'];
         if ($statusId == 0) {
             $auction = Auction::with('category')
-                ->whereIn('status', [1, 2, 3])
+                ->whereIn('status', [1, 2, 3, 6])
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
@@ -376,6 +376,20 @@ class AuctionService implements AuctionServiceInterface
             ->get();
     }
 
+    public function commentValidation($request) {
+        $rules = [
+            'content' => "required",
+        ];
+
+        $messages = [
+            'required' => '必須項目が未入力です。',
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
+    }
+
     public function comments($auctionId, $request)
     {
         $status = Auction::findOrFail($auctionId)->status;
@@ -407,6 +421,7 @@ class AuctionService implements AuctionServiceInterface
                     'total' => $total
                 ];
             } else {
+
                 $comments = Comment::where('auction_id', $auctionId)
                     ->where('comment_id', '>', $lastId)
                     ->orderBy('created_at', 'DESC')
@@ -419,9 +434,10 @@ class AuctionService implements AuctionServiceInterface
                             'user_id' => $comment->user_id,
                             'content' => $comment->content,
                             'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
-                            'total' => $total
+                            
                         ];
                     }),
+                    'total' => $total
                 ];
             }
 

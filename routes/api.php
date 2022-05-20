@@ -104,6 +104,7 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('auctions')->group(function () {
             Route::get('/listAuctionsByUser/{statusId}', [AuctionController::class, 'listAuctionsByUser']);
             Route::post('/create', [AuctionController::class, 'create']);
+            Route::get('/info/{auctionId}', [AuctionController::class, 'info']);
             Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete']);
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
             

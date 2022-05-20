@@ -106,7 +106,7 @@ class Auction extends Model
             $auctionDeny = Auction::withTrashed()
                 ->where('selling_user_id', $userId)
                 ->where('status', '=', 5)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->whereNotIn('auction_id', $auctionId)
                 ->forPage($page, $perPage)
                 ->get();
@@ -114,7 +114,7 @@ class Auction extends Model
             $auctionDeny = Auction::withTrashed()
                 ->where('selling_user_id', $userId)
                 ->where('status', '=', 5)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
         }
