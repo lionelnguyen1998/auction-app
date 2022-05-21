@@ -49,14 +49,14 @@ Route::group(['middleware' => 'api'], function(){
     //Auction
     Route::prefix('auctions')->group(function () {
         Route::get('/{statusId}', [AuctionController::class, 'index']);
-        Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
-        Route::get('/listAuctions/{typeId}/{statusId}', [AuctionController::class, 'listAuctionByType']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
         Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
         Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
-        Route::get('/listAuctionOfCategory/{categoryId}/{statusId}', [AuctionController::class, 'listAuctionOfCategory']);
         Route::get('/maxBid/{auctionId}', [AuctionController::class, 'maxBid']);
         Route::get('/listAuctionsByUserK/{userId}/{statusId}', [AuctionController::class, 'listAuctionsByUserK']);
+        Route::get('/listAuctionOfCategory/{categoryId}/{statusId}', [AuctionController::class, 'listAuctionOfCategory']);
+        Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
+        Route::get('/listAuctions/{typeId}/{statusId}', [AuctionController::class, 'listAuctionByType']);
     });
 
     //total likes of auctions
