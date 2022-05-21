@@ -48,7 +48,7 @@ Route::group(['middleware' => 'api'], function(){
     
     //Auction
     Route::prefix('auctions')->group(function () {
-        Route::get('/', [AuctionController::class, 'index']);
+        Route::get('/{statusId}', [AuctionController::class, 'index']);
         Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
         Route::get('/listAuctions/{typeId}/{statusId}', [AuctionController::class, 'listAuctionByType']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);

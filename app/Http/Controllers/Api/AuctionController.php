@@ -32,42 +32,42 @@ class AuctionController extends ApiController
     }
 
     //all auction in home page
-    public function index(Request $request)
-    {
-        $auctions = $this->auctionService->getListAuction($request->all());
+    // public function index(Request $request)
+    // {
+    //     $auctions = $this->auctionService->getListAuction($request->all());
 
-        $total = Auction::where('status', '<>', 4)
-            ->count('auction_id');
+    //     $total = Auction::where('status', '<>', 4)
+    //         ->count('auction_id');
 
-        $status = config('const.status');
-        $data = [
-            'auctions' => $auctions->map(function ($auction) use ($status) {
-                $index = $auction->status;
-                return [
-                    'auction_id' => $auction->auction_id,
-                    'selling_user_id' => $auction->selling_user_id,
-                    'title' => $auction->title,
-                    'start_date' => $auction->start_date,
-                    'end_date' => $auction->end_date,
-                    'statusId' => $index,
-                    'status' => $status[$index],
-                    'category' => [
-                        'name' => $auction['category']['name'],
-                        'image' => $auction['category']['image'],
-                        'type' => $auction['category']['type'],
-                    ],
+    //     $status = config('const.status');
+    //     $data = [
+    //         'auctions' => $auctions->map(function ($auction) use ($status) {
+    //             $index = $auction->status;
+    //             return [
+    //                 'auction_id' => $auction->auction_id,
+    //                 'selling_user_id' => $auction->selling_user_id,
+    //                 'title' => $auction->title,
+    //                 'start_date' => $auction->start_date,
+    //                 'end_date' => $auction->end_date,
+    //                 'statusId' => $index,
+    //                 'status' => $status[$index],
+    //                 'category' => [
+    //                     'name' => $auction['category']['name'],
+    //                     'image' => $auction['category']['image'],
+    //                     'type' => $auction['category']['type'],
+    //                 ],
                     
-                ];
-            }),
-            'total' => $total
-        ];
+    //             ];
+    //         }),
+    //         'total' => $total
+    //     ];
         
-        return [
-            "code" => 1000,
-            "message" => "OK",
-            "data" => $data,
-        ];
-    }
+    //     return [
+    //         "code" => 1000,
+    //         "message" => "OK",
+    //         "data" => $data,
+    //     ];
+    // }
 
     //detail auctions
     public function detail($auctionId)
@@ -875,6 +875,133 @@ class AuctionController extends ApiController
                 ];
             }),
             'total' => $total
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function index($statusId, Request $request) {
+        if ($request['type']) {
+            $typeId = $request['type'];
+            $auctions = $this->auctionService->getListAuctionByType($typeId, $statusId, $request->all());
+
+            $categoryId = Category::where('type', $typeId)
+                ->get()
+                ->pluck('category_id');
+
+            if ($statusId == 0) {
+                $total = Auction::whereIn('category_id', $categoryId)
+                    ->whereIn('status', [1, 2, 3])
+                    ->count('auction_id');
+            } else {
+                $total = Auction::whereIn('category_id', $categoryId)
+                    ->where('status', $statusId)
+                    ->count('auction_id');
+            }
+            
+        } elseif ($request['category_id']) {
+            $categoryId = $request['category_id'];
+            $categoryInfo = Category::where('category_id', $categoryId)
+                ->select('name','image', 'type')
+                ->get()
+                ->first();
+
+            $auctions = $this->auctionService->getListAuctionOfCategory($request->all(), $categoryId, $statusId);
+            if ($statusId == 0) {
+                $total = Auction::where('category_id', $categoryId)
+                    ->whereIn('status', [1, 2, 3])
+                    ->count('auction_id');
+            } else {
+                $total = Auction::where('status', $statusId)
+                    ->where('category_id', $categoryId)
+                    ->count('auction_id');
+            }
+
+            $categoryName = $categoryInfo['name'];
+        } elseif ($request['user_id'] && ($request['user_id'] != auth()->user()->user_id)) {
+            $userId = $request['user_id'];
+            $auctions = $this->auctionService->getListAuctionsByUserK($userId, $statusId, $request->all());
+            if ($statusId == 0) {
+                $total = Auction::where('selling_user_id', $userId)
+                    ->where('status', '<>', 4)
+                    ->count('auction_id');
+            } else {
+                $total = Auction::where('selling_user_id', $userId)
+                    ->where('status', $statusId)
+                    ->count('auction_id');
+            }
+
+            $userInfo = User::where('user_id', $userId)
+                ->get()
+                ->first();
+
+            $info = [
+                'name' => $userInfo->name,
+                'avatar' => $userInfo->avatar,
+                'phone' => $userInfo->phone,
+                'email' => $userInfo->email,
+                'role' => $userInfo->role,
+                'address' => $userInfo->address ?? '--',
+            ];
+        } elseif ($request['user_id'] && ($request['user_id'] == auth()->user()->user_id)) {
+            $userId = auth()->user()->user_id;
+            $auctions = $this->auctionService->getListAuctionsByUser($userId, $statusId, $request->all());
+            if ($statusId == 0) {
+                $total = Auction::where('selling_user_id', $userId)
+                    ->count('auction_id');
+            } else {
+                $total = Auction::where('selling_user_id', $userId)
+                    ->where('status', $statusId)
+                    ->count('auction_id');
+            }
+            $info = [
+                'name' => auth()->user()->name,
+                'avatar' => auth()->user()->avatar,
+                'phone' => auth()->user()->phone,
+                'email' => auth()->user()->email,
+                'role' => auth()->user()->role,
+                'address' => auth()->user()->address ?? '--',
+            ];
+        } else {
+            $auctions = $this->auctionService->getListAuctionByStatus($statusId, $request->all());
+            if ($statusId == 0) {
+                $total = Auction::whereIn('status', [1, 2, 3, 6])
+                    ->count('auction_id');
+            } else {
+                $total = Auction::where('status', $statusId)
+                    ->count('auction_id');
+            }
+        }
+
+        $status = config('const.status');
+        $type = config('const.categories');
+
+        $data = [
+            'auctions' => $auctions->map(function ($auction) use ($status) {
+                $index = $auction->status;
+                return [
+                    'auction_id' => $auction->auction_id,
+                    'selling_user_id' => $auction->selling_user_id,
+                    'title' => $auction->title,
+                    'start_date' => $auction->start_date,
+                    'end_date' => $auction->end_date,
+                    'statusId' => $index,
+                    'status' => $status[$index],
+                    'category' => [
+                        'name' => $auction['category']['name'],
+                        'image' => $auction['category']['image'],
+                        'type' => $auction['category']['type'],
+                    ],
+                ];
+            }),
+            'user_info' => $request['user_id'] ? $info : null,
+            'type' => $request['type'] ? $type[$typeId] : null,
+            'category' => $request['category_id'] ? $categoryName : null,
+            'total' => $total,
         ];
 
         return [
