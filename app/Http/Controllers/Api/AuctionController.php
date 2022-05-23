@@ -472,6 +472,46 @@ class AuctionController extends ApiController
         return $this->response->withData($message);
     }
 
+    public function deleteAuction($auctionId)
+    {
+        $auction = Auction::findOrFail($auctionId);
+        $status = $auction->status;
+        $sellingUserId = $auction->selling_user_id;
+
+        if ($sellingUserId != auth()->user()->user_id) {
+            return [
+                "code" => 1006,
+                "message" => "Không có quyền",
+                "data" => null,
+            ];
+        } else {
+            if ($status == 4) {
+                $itemId = Item::where('auction_id', '=', $auctionId)
+                    ->get()
+                    ->pluck('item_id')
+                    ->toArray();
+        
+                if (isset($itemId[0])) {
+                    Item::where('item_id', '=', $itemId[0])->forceDelete();
+                    Image::where('item_id', '=', $itemId[0])->forceDelete();
+                }
+                Auction::find($auctionId)->forceDelete();
+    
+                return [
+                    "code" => 1000,
+                    "message" => "OK",
+                    "data" => null,
+                ];
+            } else {
+                return [
+                    "code" => 9994,
+                    "message" => "Không thể xóa",
+                    "data" => null,
+                ];
+            }
+        }
+    }
+
     //edit auction when auctions đang chờ duyệt
     public function edit(Request $request, $auctionId)
     {
@@ -495,6 +535,7 @@ class AuctionController extends ApiController
             }
 
             $data = $this->auctionService->edit($auctionId, $request->all());
+
             return [
                 "code" => 1000,
                 "message" => "OK",

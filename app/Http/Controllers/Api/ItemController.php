@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\User;
 use App\Models\Favorite;
+use App\Models\Image;
 use App\Models\Bid;
 use App\Models\Item;
 use App\Http\Services\UploadService;
@@ -100,11 +101,16 @@ class ItemController extends ApiController
 
     public function edit(Request $request, $itemId)
     {
-        $auctionId = Item::findOrFail($itemId)->auction_id;
+        $itemInfo = Item::findOrFail($itemId);
+        $auctionId = $itemInfo->auction_id;
         $status = Auction::findOrFail($auctionId)->status;
+        $imageItem = Image::where('item_id', $itemId)
+            ->get()
+            ->pluck('image', 'image_id')
+            ->toArray();
 
         if ($status == 4) {
-            $validator = $this->itemService->itemValidation($request->all());
+            $validator = $this->itemService->itemValidationEdit($request->all(), $itemId);
     
             if ($validator->fails()) {
                 $brand = $validator->errors()->first("brand_id");
@@ -126,12 +132,12 @@ class ItemController extends ApiController
                 foreach ($request['images'] as $key => $value) {
                     $url = $this->uploadService->store($value);
                     array_push($images, $url);
+                    //array_push($images, $value);
                 }
                 $item = $request->except('images');
             } else {
                 $item = $request->all();
             }
-            
             $data = $this->itemService->edit($item, $itemId, $images);
 
             return [
@@ -279,6 +285,24 @@ class ItemController extends ApiController
                 'buying_user_phone' =>  auth()->user()->phone,
                 'buying_user_address' => auth()->user()->address,
             ]
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+    public function info($itemId) {
+        $item = Item::findOrFail($itemId);
+        $images = $this->itemService->getImageLists($itemId);
+        $data = [
+            'name' => $item->name,
+            'series' => $item->series,
+            'description' => $item->description,
+            'starting_price' => $item->starting_price,
+            'brand_id' => $item->brand_id,
+            'images' => $images
         ];
 
         return [

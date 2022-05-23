@@ -106,13 +106,14 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/create', [AuctionController::class, 'create']);
             Route::get('/info/{auctionId}', [AuctionController::class, 'info']);
             Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete']);
-            Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
-            
+            Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);  
+            Route::post('/deleteAuction/{auctionId}', [AuctionController::class, 'deleteAuction']);
         });
 
         //items
         Route::prefix('items')->group(function () {
             Route::post('/create/{auctionId}', [ItemController::class, 'create']);
+            Route::get('/info/{itemId}', [ItemController::class, 'info']);
             Route::post('/edit/{itemId}', [ItemController::class, 'edit']);
             Route::get('/categories', [ItemController::class, 'listCategoryOfItem']);
             Route::get('/listBuy/{categoryId}', [ItemController::class, 'listBuy']);

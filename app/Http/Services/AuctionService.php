@@ -268,11 +268,27 @@ class AuctionService implements AuctionServiceInterface
     {
         $rules = [
             'category_id' => "required|exists:categories,category_id",
-            'title_ni' => "required|max:255|unique:auctions,title",
             'start_date' => "required|date|after_or_equal:tomorrow",
             'end_date' => "required|date|after:start_date",
         ];
-        
+
+        $allAuctions = Auction::get()
+            ->pluck('title')
+            ->toArray();
+
+        if (isset($request['title_ni'])) {
+            foreach ($allAuctions as $key => $value) {
+                if ($request['title_ni'] == $value) {
+                    $rules['title_ni'] = "required|max:255|unique:auctions,title";
+                    break;
+                } else {
+                    $rules['title_ni'] = "required|max:255";
+                }
+            }
+        } else {
+            $rules['title_ni'] = "required|max:255";
+        }
+
         $messages = [
             'required' => '必須項目が未入力です。',
             'max' => ':max文字以下入力してください。 ',
@@ -358,8 +374,8 @@ class AuctionService implements AuctionServiceInterface
 
         if ($auction) {
             $auction->category_id = $request['category_id'];
-            $auction->start_date = $request['start_date'];
-            $auction->end_date = $request['end_date'];
+            $auction->start_date = date('Y/m/d H:i', strtotime($request['start_date']));
+            $auction->end_date = date('Y/m/d H:i', strtotime($request['end_date']));
             $auction->title = $request['title_ni'];
             $auction->update();
         }

@@ -36,8 +36,7 @@ class UserService implements UserServiceInterface
             'name' => 'required|max:255',
         ];
 
-        $allUserEmail = User::withTrashed()
-            ->get()
+        $allUserEmail = User::get()
             ->pluck('email')
             ->toArray();
 
