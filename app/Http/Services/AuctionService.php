@@ -176,7 +176,7 @@ class AuctionService implements AuctionServiceInterface
         $perPage = $request['count'];
         if ($statusId == 0) {
             $auction = Auction::with('category')
-                ->whereIn('status', [1, 2, 3, 6])
+                ->whereIn('status', [1, 2, 3, 6, 7, 8])
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
@@ -289,15 +289,26 @@ class AuctionService implements AuctionServiceInterface
             $rules['title_ni'] = "required|max:255";
         }
 
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => ':max文字以下入力してください。 ',
+        //     'date' => 'データのフォーマットが正しくありません',
+        //     'after_or_equal' => '始まる時間が明日か行かなければなりません',
+        //     'after' => '始まる時間よりです。',
+        //     'unique' => '既に使用されています。',
+        //     'numeric' => '番号を入力してください。',
+        //     'exists' => '存在しない。'
+        // ];
+
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'date' => 'データのフォーマットが正しくありません',
-            'after_or_equal' => '始まる時間が明日か行かなければなりません',
-            'after' => '始まる時間よりです。',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。',
-            'exists' => '存在しない。'
+            'required' => 7000,
+            'max' => 7001,
+            'date' => 7008,
+            'after_or_equal' => 7009,
+            'after' => 7010,
+            'unique' => 7005,
+            'numeric' => 7006,
+            'exists' => 7007
         ];
 
         $attributes = [
@@ -321,14 +332,25 @@ class AuctionService implements AuctionServiceInterface
             'end_date' => "required|date|after:start_date",
         ];
 
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => ':max文字以下入力してください。 ',
+        //     'date' => 'データのフォーマットが正しくありません',
+        //     'after_or_equal' => '始まる時間が明日か行かなければなりません',
+        //     'after' => '始まる時間よりです。',
+        //     'unique' => '既に使用されています。',
+        //     'numeric' => '番号を入力してください。'
+        // ];
+
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'date' => 'データのフォーマットが正しくありません',
-            'after_or_equal' => '始まる時間が明日か行かなければなりません',
-            'after' => '始まる時間よりです。',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'required' => 7000,
+            'max' => 7001,
+            'date' => 7008,
+            'after_or_equal' => 7009,
+            'after' => 7010,
+            'unique' => 7005,
+            'numeric' => 7006,
+            'exists' => 7007
         ];
 
         $attributes = [
@@ -481,10 +503,16 @@ class AuctionService implements AuctionServiceInterface
             $rules['price'] = 'max:0';
         }
 
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => '値段が今より高くなければなりません。',
+        //     'numeric' => '番号を入力してください',
+        // ];
+
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => '値段が今より高くなければなりません。',
-            'numeric' => '番号を入力してください',
+            'required' => 7000,
+            'price.max' => 7014,
+            'numeric' => 7006,
         ];
 
         $validated = Validator::make($request, $rules, $messages);

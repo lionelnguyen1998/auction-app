@@ -58,13 +58,23 @@ class UserService implements UserServiceInterface
             }
         }
 
+        // $messages = [
+        //     'required' => $this->messageRequired,
+        //     'max' => sprintf($this->messageErrorMax, ':max'),
+        //     'email' => $this->messageErrorFormatEmail,
+        //     'same' => 'パスワードが違いました。',
+        //     'required_with' => $this->messageRequired,
+        //     'unique' => '既に使用されています。'
+        // ];
+
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail,
-            'same' => 'パスワードが違いました。',
-            'required_with' => $this->messageRequired,
-            'unique' => '既に使用されています。'
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002,
+            'same' => 7003,
+            'required_with' => 7000,
+            'unique' => 7004,
+            'phone.max' => 7013
         ];
 
         $attribute = [
@@ -110,10 +120,11 @@ class UserService implements UserServiceInterface
         }
 
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail,
-            'unique' => '既に使用されています。'
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002,
+            'unique' => 7004,
+            'phone.max' => 7013
         ];
 
         $attribute = [
@@ -187,11 +198,18 @@ class UserService implements UserServiceInterface
             'password' => 'required|max:255'
         ];
 
+        // $messages = [
+        //     'required' => $this->messageRequired,
+        //     'max' => sprintf($this->messageErrorMax, ':max'),
+        //     'email' => $this->messageErrorFormatEmail
+        // ];
+
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002
         ];
+
 
         $attribute = [
             'email' => 'メール',
@@ -215,9 +233,10 @@ class UserService implements UserServiceInterface
         ];
 
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail,
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002,
+            'phone' => 7013
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -229,7 +248,7 @@ class UserService implements UserServiceInterface
     //api
     public function sendEmail($request)
     {
-        $request['file'] = $this->uploadService->store($request['file'] ?? null);
+        //$request['file'] = $this->uploadService->store($request['file'] ?? null);
         $newContact = Contact::create([
             'email' => $request['email'],
             'phone' => $request['phone'],
@@ -261,9 +280,9 @@ class UserService implements UserServiceInterface
     {
         $avatarDefault = "https://res.cloudinary.com/daqvhmyif/image/upload/v1650429693/wtatjbj7jhpueicdrg6n.jpg";
 
-        if (isset($request['avatar'])) {
-            $request['avatar'] = $this->uploadService->store($request['avatar']);
-        }
+        // if (isset($request['avatar'])) {
+        //     $request['avatar'] = $this->uploadService->store($request['avatar']);
+        // }
 
         $user = User::create([
             'name' => $request['name'],
@@ -289,9 +308,9 @@ class UserService implements UserServiceInterface
 
     public function edit($request)
     {
-        if (isset($request['avatar'])) {
-            $request['avatar'] = $this->uploadService->store($request['avatar']);
-        }
+        // if (isset($request['avatar'])) {
+        //     $request['avatar'] = $this->uploadService->store($request['avatar']);
+        // }
 
         $user = tap(User::where('user_id', auth()->user()->user_id))
             ->update($request)->firstOrFail();
@@ -326,10 +345,17 @@ class UserService implements UserServiceInterface
             $rules['old_pass'] = 'required|max:255|same:auth()->user()->password';
         }
         
+        // $messages = [
+        //     'required' => $this->messageRequired,
+        //     'same' => 'パスワードが違いました。',
+        //     'required_with' => $this->messageRequired,
+        // ];
+
         $messages = [
-            'required' => $this->messageRequired,
-            'same' => 'パスワードが違いました。',
-            'required_with' => $this->messageRequired,
+            'required' => 7000,
+            'same' => 7003,
+            'required_with' => 7000,
+            'max' => 7001
         ];
 
         $attribute = [

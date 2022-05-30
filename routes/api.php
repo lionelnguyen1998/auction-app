@@ -108,6 +108,7 @@ Route::group(['middleware' => 'api'], function(){
             Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete']);
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);  
             Route::post('/deleteAuction/{auctionId}', [AuctionController::class, 'deleteAuction']);
+            Route::post('/updateDelivery/{auctionId}', [AuctionController::class, 'updateDelivery']);
         });
 
         //items
@@ -118,6 +119,7 @@ Route::group(['middleware' => 'api'], function(){
             Route::get('/categories', [ItemController::class, 'listCategoryOfItem']);
             Route::get('/listBuy/{categoryId}', [ItemController::class, 'listBuy']);
             Route::get('/detail/{itemId}', [ItemController::class, 'detail']);
+           
         });
 
         //Commnents

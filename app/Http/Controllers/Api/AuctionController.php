@@ -99,7 +99,7 @@ class AuctionController extends ApiController
                 ->first();
         }
 
-        if ($index === 6) {
+        if ($index === 6 || $index === 7 || $index === 8) {
             $buyingUserId = Item::where('item_id', $itemId)
                 ->get()
                 ->pluck('buying_user_id')
@@ -408,7 +408,7 @@ class AuctionController extends ApiController
             ->get();
         foreach ($auctions as $key => $value) {
             $auction = Auction::findOrFail($value->auction_id);
-            if ($auction && ($value->status != 4) && ($value->status != 6)) {
+            if ($auction && ($value->status != 4) && ($value->status != 6) && ($value->status != 7) && ($value->status != 8)) {
                 if ($value->start_date <= now() && $value->end_date > now()) {
                     $auction->status = 1;
                     $auction->update();
@@ -1010,7 +1010,7 @@ class AuctionController extends ApiController
         } else {
             $auctions = $this->auctionService->getListAuctionByStatus($statusId, $request->all());
             if ($statusId == 0) {
-                $total = Auction::whereIn('status', [1, 2, 3, 6])
+                $total = Auction::where('status', '<>', 4)
                     ->count('auction_id');
             } else {
                 $total = Auction::where('status', $statusId)
@@ -1066,5 +1066,28 @@ class AuctionController extends ApiController
             "message" => "OK",
             "data" => $data,
         ];
+    }
+
+    public function updateDelivery($auctionId) {
+        $auction = Auction::findOrFail($auctionId);
+        $status = $auction->status;
+        if ($status === 6) {
+            $auction->status = 7;
+            $auction->update();
+            return [
+                "code" => 1000,
+                "message" => "Đã giao",
+                "data" => null,
+            ];
+        }
+        if ($status === 7) {
+            $auction->status = 8;
+            $auction->update();
+            return [
+                "code" => 1000,
+                "message" => "Đã giao thành công",
+                "data" => null,
+            ];
+        }
     }
 }

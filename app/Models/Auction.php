@@ -67,7 +67,7 @@ class Auction extends Model
         
         foreach ($auctions as $key => $value) {
             $auction = Auction::findOrFail($value->auction_id);
-            if ($auction && ($value->status != 4) && ($value->status != 6)) {
+            if ($auction && ($value->status != 4) && ($value->status != 6) && ($value->status != 7) && ($value->status != 8)) {
                 if ($value->start_date <= now() && $value->end_date > now()) {
                     $auction->status = 1;
                     $auction->update();

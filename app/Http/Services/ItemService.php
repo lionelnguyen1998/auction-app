@@ -78,10 +78,11 @@ class ItemService implements ItemServiceInterface
         ];
 
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'required' => 7000,
+            'max' => 7001,
+            'series.max' => 7011,
+            'unique' => 7004,
+            'numeric' => 7006
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -98,11 +99,18 @@ class ItemService implements ItemServiceInterface
             'description' => 'required'
         ];
 
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => ':max文字以下入力してください。 ',
+        //     'unique' => '既に使用されています。',
+        //     'numeric' => '番号を入力してください。'
+        // ];
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'required' => 7000,
+            'max' => 7001,
+            'series.max' => 7011,
+            'unique' => 7004,
+            'numeric' => 7006
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -168,7 +176,7 @@ class ItemService implements ItemServiceInterface
                             $value->update();
                         }
                     } else {
-                        break;
+                       $value->delete();
                     }
                 }
                 if (count($images) > count($image)) {
@@ -181,11 +189,19 @@ class ItemService implements ItemServiceInterface
                         }
                     }
                 }
-            } else {
-                Image::whereIn('image_id', $imageId)->delete();
-            }
+            } 
             unset($request['images']);
             $item = DB::table('items')->where('item_id', $itemId)->update($request);
         DB::commit();
+
+        $imagesInfo = Image::where('item_id', $itemId)
+            ->get()
+            ->pluck('image');
+        $itemInfo = Item::findOrFail($itemId);
+        $data = [
+            'name' => $itemInfo->name,
+            'images' => $imagesInfo
+        ];
+        return $data;
     }
 }
