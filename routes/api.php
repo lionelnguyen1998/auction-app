@@ -71,6 +71,9 @@ Route::group(['middleware' => 'api'], function(){
     //list bids
     Route::get('/bids/{auctionId}', [AuctionController::class, 'listBids']);
 
+    //list rates
+    Route::get('/rates/{auctionId}', [AuctionController::class, 'listRates']);
+
     //category
     Route::prefix('categories')->group(function () {
         Route::get('/', [CategoryController::class, 'index']);
@@ -109,6 +112,9 @@ Route::group(['middleware' => 'api'], function(){
             Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);  
             Route::post('/deleteAuction/{auctionId}', [AuctionController::class, 'deleteAuction']);
             Route::post('/updateDelivery/{auctionId}', [AuctionController::class, 'updateDelivery']);
+            Route::post('/rate/{auctionId}', [AuctionController::class, 'rate']);
+            Route::get('/rate/info/{auctionId}', [AuctionController::class, 'rateInfo']);
+            Route::post('/rate/edit/{rateId}', [AuctionController::class, 'rateEdit']);
         });
 
         //items
@@ -119,7 +125,6 @@ Route::group(['middleware' => 'api'], function(){
             Route::get('/categories', [ItemController::class, 'listCategoryOfItem']);
             Route::get('/listBuy/{categoryId}', [ItemController::class, 'listBuy']);
             Route::get('/detail/{itemId}', [ItemController::class, 'detail']);
-           
         });
 
         //Commnents

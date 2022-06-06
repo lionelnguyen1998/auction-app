@@ -16,6 +16,7 @@ use App\Models\Item;
 use App\Models\Brand;
 use App\Models\Favorite;
 use App\Models\Comment;
+use App\Models\Rate;
 use App\Models\Category;
 use App\Models\Image;
 
@@ -705,6 +706,41 @@ class AuctionController extends ApiController
         ];
     }
 
+    public function listRates($auctionId, Request $request) {
+        $page = $request->index;
+        $perPage = $request->count;
+
+        $auction = Auction::findOrFail($auctionId);
+        $total = Rate::where('auction_id', $auctionId)
+            ->count('auction_id');
+
+        $rates = Rate::with('users')
+            ->where('auction_id', $auctionId)
+            ->orderBy('created_at', 'DESC')
+            ->forPage($page, $perPage)
+            ->get();
+
+        $data = [
+            'rates' => $rates->map(function($rate) {
+                return [
+                    'user_name' => $rate['users']['name'],
+                    'user_avatar' => $rate['users']['avatar'],
+                    'content' => $rate->content,
+                    'star' => $rate->star,
+                    'image' => $rate->image,
+                    'updated_at' => $rate->updated_at->format('Y/m/d H:i:s'),
+                ];
+            }),
+            'total' => $total
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
     public function maxBid($auctionId)
     {
         $maxPrice = $this->auctionService->getMaxPrice($auctionId);
@@ -1070,8 +1106,14 @@ class AuctionController extends ApiController
 
     public function updateDelivery($auctionId) {
         $auction = Auction::findOrFail($auctionId);
+        $sellingUserId = $auction->selling_user_id;
+        $buyingUserId = Item::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('buying_user_id')
+            ->first();
+        $userId = auth()->user()->user_id;
         $status = $auction->status;
-        if ($status === 6) {
+        if (($status === 6) && ($sellingUserId === $userId)) {
             $auction->status = 7;
             $auction->update();
             return [
@@ -1079,8 +1121,15 @@ class AuctionController extends ApiController
                 "message" => "Đã giao",
                 "data" => null,
             ];
+        } else {
+            return [
+                "code" => 1006,
+                "message" => "Bạn không có quyền",
+                "data" => null,
+            ];
         }
-        if ($status === 7) {
+        
+        if (($status === 7) && ($buyingUserId === $userId)) {
             $auction->status = 8;
             $auction->update();
             return [
@@ -1088,6 +1137,97 @@ class AuctionController extends ApiController
                 "message" => "Đã giao thành công",
                 "data" => null,
             ];
+        } else {
+            return [
+                "code" => 1006,
+                "message" => "Bạn không có quyền",
+                "data" => null,
+            ];
         }
+    }
+
+    public function rate(Request $request, $auctionId) {
+        $userId = auth()->user()->user_id;
+        $buyingUserId = Item::where('auction_id', $auctionId)->get()->pluck('buying_user_id')->first();
+
+        if ($userId != $buyingUserId) {
+            return [
+                "code" => 1006,
+                "message" => "Bạn không có quyền đánh giá",
+                "data" => null,
+            ];
+        }
+
+        $validator = $this->auctionService->rateValidation($request->all());
+    
+        if ($validator->fails()) {
+            $star = $validator->errors()->first("star");
+            $content = $validator->errors()->first("content");
+            return [
+                "code" => 1001,
+                "message" => "star: " . $star . "&content: " . $content,
+                "data" => null,
+            ];
+        }
+
+        $data = $this->auctionService->rate($request->all(), $auctionId);
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function rateEdit(Request $request, $rateId) {
+        $userId = auth()->user()->user_id;
+        $buyingUserId = Rate::findOrFail($rateId)->buying_user_id;
+
+        if ($userId != $buyingUserId) {
+            return [
+                "code" => 1006,
+                "message" => "Bạn không có quyền chỉnh sửa đánh giá",
+                "data" => null,
+            ];
+        }
+
+        $validator = $this->auctionService->rateValidation($request->all());
+    
+        if ($validator->fails()) {
+            $star = $validator->errors()->first("star");
+            $content = $validator->errors()->first("content");
+            return [
+                "code" => 1001,
+                "message" => "star: " . $star . "&content: " . $content,
+                "data" => null,
+            ];
+        }
+
+        $data = $this->auctionService->rateEdit($request->all(), $rateId);
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
+    }
+
+    public function rateInfo($auctionId) {
+        $rate = Rate::where('auction_id', $auctionId)
+            ->get()
+            ->first();
+
+        $data = [
+            'content' => $rate->content,
+            'star' => $rate->star,
+            'image' => $rate->image,
+            'updated_at' => $rate->updated_at->format('Y/m/d H:i:s'),
+        ];
+
+        return [
+            "code" => 1000,
+            "message" => "OK",
+            "data" => $data,
+        ];
     }
 }

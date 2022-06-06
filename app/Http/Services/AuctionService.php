@@ -10,7 +10,9 @@ use App\Models\Image;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Rate;
 use App\Models\Favorite;
+use App\Http\Controllers\Api\AuctionController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -180,6 +182,12 @@ class AuctionService implements AuctionServiceInterface
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
+        } else if ($statusId == 6) {
+            $auction = Auction::with('category')
+                ->whereIn('status', [6, 7, 8])
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
         } else {
             $auction = Auction::with('category')
                 ->where('status', $statusId)
@@ -198,6 +206,13 @@ class AuctionService implements AuctionServiceInterface
         $perPage = $request['count'];
         if ($statusId == 0) {
             $list = Auction::with('category')
+                ->where('selling_user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        } else if ($statusId == 6) {
+            $list = Auction::with('category')
+                ->whereIn('status', [6,7,8])
                 ->where('selling_user_id', $userId)
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
@@ -226,6 +241,13 @@ class AuctionService implements AuctionServiceInterface
                  ->where('status', '<>', 4)
                  ->forPage($page, $perPage)
                  ->get();
+         } else if ($statusId == 6) {
+            $list = Auction::with('category')
+                ->where('selling_user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('status', [6,7,8])
+                ->forPage($page, $perPage)
+                ->get();
          } else {
              $list = Auction::with('category')
                  ->where('status', $statusId)
@@ -797,5 +819,72 @@ class AuctionService implements AuctionServiceInterface
             ->pluck('item_id');
 
         return $itemInfor;
+    }
+
+    public function rateValidation($request) {
+        $rules = [
+            'star' => "required",
+            'content' => "required"
+        ];
+
+        $messages = [
+            'required' => 7000,
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
+    }
+
+    public function rate($request, $auctionId) {
+        $rateId = Rate::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('rate_id')
+            ->first();
+
+        if ($rateId) {
+            $rate = Rate::findOrFail($rateId);
+        } else {
+            $rate = Rate::create([
+                'star' => $request['star'],
+                'content' => $request['content'],
+                'auction_id' => $auctionId,
+                'buying_user_id' => auth()->user()->user_id,
+                'image' => $request['image'] ?? null
+            ]);
+            AuctionController::updateDelivery($auctionId);
+        }
+
+        $data = [
+            'star' => $rate->star,
+            'content' => $rate->content,
+            'auction_id' => $rate->auction_id,
+            'buying_user_id' => $rate->buying_user_id,
+            'image' => $rate->image ?? null
+        ];
+
+        return $data;
+    }
+
+    public function rateEdit($request, $rateId) {
+        $rate = Rate::findOrFail($rateId);
+        if ($rate) {
+            $rate->star = $request['star'];
+            $rate->content = $request['content'];
+            $rate->image = $request['image'] ?? null;
+            $rate->update();
+        }
+
+        $update = Rate::findOrFail($rateId);
+
+        $data = [
+            'star' => $update->star,
+            'content' => $update->content,
+            'auctin_id' => $update->auction_id,
+            'buying_user_id' => $update->buying_user_id,
+            'image' => $update->image ?? null
+        ];
+
+        return $data;
     }
 }
