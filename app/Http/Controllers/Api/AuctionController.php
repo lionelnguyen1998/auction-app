@@ -32,44 +32,6 @@ class AuctionController extends ApiController
         parent::__construct($request, $response);
     }
 
-    //all auction in home page
-    // public function index(Request $request)
-    // {
-    //     $auctions = $this->auctionService->getListAuction($request->all());
-
-    //     $total = Auction::where('status', '<>', 4)
-    //         ->count('auction_id');
-
-    //     $status = config('const.status');
-    //     $data = [
-    //         'auctions' => $auctions->map(function ($auction) use ($status) {
-    //             $index = $auction->status;
-    //             return [
-    //                 'auction_id' => $auction->auction_id,
-    //                 'selling_user_id' => $auction->selling_user_id,
-    //                 'title' => $auction->title,
-    //                 'start_date' => $auction->start_date,
-    //                 'end_date' => $auction->end_date,
-    //                 'statusId' => $index,
-    //                 'status' => $status[$index],
-    //                 'category' => [
-    //                     'name' => $auction['category']['name'],
-    //                     'image' => $auction['category']['image'],
-    //                     'type' => $auction['category']['type'],
-    //                 ],
-                    
-    //             ];
-    //         }),
-    //         'total' => $total
-    //     ];
-        
-    //     return [
-    //         "code" => 1000,
-    //         "message" => "OK",
-    //         "data" => $data,
-    //     ];
-    // }
-
     //detail auctions
     public function detail($auctionId)
     {
@@ -1128,7 +1090,7 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-        
+
         if (($status === 7) && ($buyingUserId === $userId)) {
             $auction->status = 8;
             $auction->update();
