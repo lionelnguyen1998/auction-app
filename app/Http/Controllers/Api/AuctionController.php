@@ -1067,45 +1067,7 @@ class AuctionController extends ApiController
     }
 
     public function updateDelivery($auctionId) {
-        $auction = Auction::findOrFail($auctionId);
-        $sellingUserId = $auction->selling_user_id;
-        $buyingUserId = Item::where('auction_id', $auctionId)
-            ->get()
-            ->pluck('buying_user_id')
-            ->first();
-        $userId = auth()->user()->user_id;
-        $status = $auction->status;
-        if (($status === 6) && ($sellingUserId === $userId)) {
-            $auction->status = 7;
-            $auction->update();
-            return [
-                "code" => 1000,
-                "message" => "Đã giao",
-                "data" => null,
-            ];
-        } else {
-            return [
-                "code" => 1006,
-                "message" => "Bạn không có quyền",
-                "data" => null,
-            ];
-        }
-
-        if (($status === 7) && ($buyingUserId === $userId)) {
-            $auction->status = 8;
-            $auction->update();
-            return [
-                "code" => 1000,
-                "message" => "Đã giao thành công",
-                "data" => null,
-            ];
-        } else {
-            return [
-                "code" => 1006,
-                "message" => "Bạn không có quyền",
-                "data" => null,
-            ];
-        }
+        return $this->auctionService->updateDelivery($auctionId);
     }
 
     public function rate(Request $request, $auctionId) {
