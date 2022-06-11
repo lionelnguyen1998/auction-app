@@ -821,6 +821,53 @@ class AuctionService implements AuctionServiceInterface
         return $itemInfor;
     }
 
+    public function updateDelivery($auctionId) {
+        $auction = Auction::findOrFail($auctionId);
+     
+        $sellingUserId = $auction->selling_user_id;
+        $buyingUserId = Item::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('buying_user_id')
+            ->first();
+
+        $userId = auth()->user()->user_id;
+       
+        $status = $auction->status;
+        if (($status === 6) && ($sellingUserId === $userId)) {
+            $auction->status = 7;
+            $auction->update();
+            return [
+                "code" => 1000,
+                "message" => "Đã giao",
+                "data" => null,
+            ];
+        }
+        if (($status === 6) && ($sellingUserId !== $userId)) {
+            return [
+                "code" => 1006,
+                "message" => "Bạn không có quyền",
+                "data" => null,
+            ];
+        }
+        
+        if (($status === 7) && ($buyingUserId === $userId)) {
+            $auction->status = 8;
+            $auction->update();
+            return [
+                "code" => 1000,
+                "message" => "Đã giao thành công",
+                "data" => null,
+            ];
+        } 
+        if (($status === 7) && ($buyingUserId !== $userId)) {
+            return [
+                "code" => 1006,
+                "message" => "Bạn không có quyền",
+                "data" => null,
+            ];
+        }
+    }
+
     public function rateValidation($request) {
         $rules = [
             'star' => "required",
@@ -845,6 +892,7 @@ class AuctionService implements AuctionServiceInterface
         if ($rateId) {
             $rate = Rate::findOrFail($rateId);
         } else {
+            $this->updateDelivery($auctionId);
             $rate = Rate::create([
                 'star' => $request['star'],
                 'content' => $request['content'],
@@ -852,7 +900,6 @@ class AuctionService implements AuctionServiceInterface
                 'buying_user_id' => auth()->user()->user_id,
                 'image' => $request['image'] ?? null
             ]);
-            AuctionController::updateDelivery($auctionId);
         }
 
         $data = [
