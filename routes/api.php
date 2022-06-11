@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +38,7 @@ Route::group(['middleware' => 'api'], function(){
     Route::get('loginfailed', function () {
         return [
             "code" => 1004,
-            "message" => "Chưa đăng nhập",
+            "message" => "まだログインではありません",
             "data" => null,
         ];
     })->name('loginfailed');
@@ -47,14 +48,15 @@ Route::group(['middleware' => 'api'], function(){
     
     //Auction
     Route::prefix('auctions')->group(function () {
-        Route::get('/', [AuctionController::class, 'index']);
-        Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
-        Route::get('/listAuctions/{typeId}', [AuctionController::class, 'listAuctionByType']);
+        Route::get('/{statusId}', [AuctionController::class, 'index']);
         Route::get('/detail/{auctionId}', [AuctionController::class, 'detail']);
         Route::get('/update/status', [AuctionController::class, 'uploadStatus']);
         Route::get('/detail1/{auctionId}', [AuctionController::class, 'detail1']);
-        Route::get('/listAuctionOfCategory', [AuctionController::class, 'listAuctionOfCategory']);
         Route::get('/maxBid/{auctionId}', [AuctionController::class, 'maxBid']);
+        Route::get('/listAuctionsByUserK/{userId}/{statusId}', [AuctionController::class, 'listAuctionsByUserK']);
+        Route::get('/listAuctionOfCategory/{categoryId}/{statusId}', [AuctionController::class, 'listAuctionOfCategory']);
+        Route::get('/listAuctionsByStatus/{statusId}', [AuctionController::class, 'listAuctionByStatus']);
+        Route::get('/listAuctions/{typeId}/{statusId}', [AuctionController::class, 'listAuctionByType']);
     });
 
     //total likes of auctions
@@ -68,6 +70,9 @@ Route::group(['middleware' => 'api'], function(){
 
     //list bids
     Route::get('/bids/{auctionId}', [AuctionController::class, 'listBids']);
+
+    //list rates
+    Route::get('/rates/{auctionId}', [AuctionController::class, 'listRates']);
 
     //category
     Route::prefix('categories')->group(function () {
@@ -84,26 +89,42 @@ Route::group(['middleware' => 'api'], function(){
 
     //search
     Route::get('/search', [SearchController::class, 'search']);
+
+    //news
+    Route::prefix('news')->group(function () {
+        Route::get('/', [NewController::class, 'news']);
+        Route::get('/read/{newId}', [NewController::class, 'read']);
+    });
     
     Route::middleware(['auth'])->group(function () { 
         //Account
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('edit', [UserController::class, 'edit']);
+        Route::post('changepass', [UserController::class, 'changePassword']);
         Route::get('info', [UserController::class, 'info']);
 
         //auctions
         Route::prefix('auctions')->group(function () {
             Route::get('/listAuctionsByUser/{statusId}', [AuctionController::class, 'listAuctionsByUser']);
             Route::post('/create', [AuctionController::class, 'create']);
+            Route::get('/info/{auctionId}', [AuctionController::class, 'info']);
             Route::delete('/delete/{auctionId}', [AuctionController::class, 'delete']);
-            Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);
-            
+            Route::post('/edit/{auctionId}', [AuctionController::class, 'edit']);  
+            Route::post('/deleteAuction/{auctionId}', [AuctionController::class, 'deleteAuction']);
+            Route::post('/updateDelivery/{auctionId}', [AuctionController::class, 'updateDelivery']);
+            Route::post('/rate/{auctionId}', [AuctionController::class, 'rate']);
+            Route::get('/rate/info/{auctionId}', [AuctionController::class, 'rateInfo']);
+            Route::post('/rate/edit/{rateId}', [AuctionController::class, 'rateEdit']);
         });
 
         //items
         Route::prefix('items')->group(function () {
             Route::post('/create/{auctionId}', [ItemController::class, 'create']);
+            Route::get('/info/{itemId}', [ItemController::class, 'info']);
             Route::post('/edit/{itemId}', [ItemController::class, 'edit']);
+            Route::get('/categories', [ItemController::class, 'listCategoryOfItem']);
+            Route::get('/listBuy/{categoryId}', [ItemController::class, 'listBuy']);
+            Route::get('/detail/{itemId}', [ItemController::class, 'detail']);
         });
 
         //Commnents
@@ -135,13 +156,23 @@ Route::group(['middleware' => 'api'], function(){
         Route::prefix('notifications')->group(function () {
             Route::get('/', [NewController::class, 'notifications']);
             Route::get('read/{auctionDenyId}', [NewController::class, 'reason']);
+            Route::post('/delete/{auctionId}', [NewController::class, 'deleteNotification']);
         });
 
-        //news
-        Route::prefix('news')->group(function () {
-            Route::get('/', [NewController::class, 'news']);
-            Route::get('/read/{newId}', [NewController::class, 'read']);
+        
+
+        //Chat 
+        Route::prefix('chat')->group(function () {
+            Route::get('/', [ChatController::class, 'index']);
+            Route::post('/conversation/{userReceiveId}', [ChatController::class, 'conversation']);
+            Route::post('/message', [ChatController::class, 'createMessage']);
+            Route::get('/listMessages/{chatId}', [ChatController::class, 'listMessages']);
+            Route::get('/info/{chatId}', [ChatController::class, 'info']);
         });
 
+        //all user
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'listUsers']);
+        });
     });
 });

@@ -67,7 +67,7 @@ class Auction extends Model
         
         foreach ($auctions as $key => $value) {
             $auction = Auction::findOrFail($value->auction_id);
-            if ($auction && ($value->status != 4) && ($value->status != 6)) {
+            if ($auction && ($value->status != 4) && ($value->status != 6) && ($value->status != 7) && ($value->status != 8)) {
                 if ($value->start_date <= now() && $value->end_date > now()) {
                     $auction->status = 1;
                     $auction->update();
@@ -100,12 +100,13 @@ class Auction extends Model
         $perPage = $request['count'];
         if ($isNotRead) {
             $auctionId = UserReadNews::where('user_id', $userId)
+                ->where('auction_id', '<>', null)
                 ->get()
                 ->pluck('auction_id');
             $auctionDeny = Auction::withTrashed()
                 ->where('selling_user_id', $userId)
                 ->where('status', '=', 5)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->whereNotIn('auction_id', $auctionId)
                 ->forPage($page, $perPage)
                 ->get();
@@ -113,7 +114,7 @@ class Auction extends Model
             $auctionDeny = Auction::withTrashed()
                 ->where('selling_user_id', $userId)
                 ->where('status', '=', 5)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
         }

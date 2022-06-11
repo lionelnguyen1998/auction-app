@@ -10,7 +10,9 @@ use App\Models\Image;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Rate;
 use App\Models\Favorite;
+use App\Http\Controllers\Api\AuctionController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -100,7 +102,7 @@ class AuctionService implements AuctionServiceInterface
     }
 
     //get auction by categoryId and typeCategory
-    public function getListAuctionByType($typeId, $request)
+    public function getListAuctionByType($typeId, $statusId, $request)
     {
         $page = $request['index'];
         $perPage = $request['count'];
@@ -108,11 +110,21 @@ class AuctionService implements AuctionServiceInterface
             ->get()
             ->pluck('category_id');
 
-        $auction = Auction::with('category')
-            ->orderBy('created_at', 'DESC')
-            ->whereIn('category_id', $categoryId)
-            ->forPage($page, $perPage)
-            ->get();
+        if ($statusId == 0) {
+            $auction = Auction::with('category')
+                ->whereIn('auctions.status', [1, 2, 3])
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('category_id', $categoryId)
+                ->forPage($page, $perPage)
+                ->get();
+        } else {
+            $auction = Auction::with('category')
+                ->where('auctions.status', $statusId)
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('category_id', $categoryId)
+                ->forPage($page, $perPage)
+                ->get();
+        }
 
         return $auction;
     }
@@ -166,7 +178,13 @@ class AuctionService implements AuctionServiceInterface
         $perPage = $request['count'];
         if ($statusId == 0) {
             $auction = Auction::with('category')
-                ->where('status', '<>', 4)
+                ->whereIn('status', [1, 2, 3, 6, 7, 8])
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
+        } else if ($statusId == 6) {
+            $auction = Auction::with('category')
+                ->whereIn('status', [6, 7, 8])
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
@@ -192,6 +210,13 @@ class AuctionService implements AuctionServiceInterface
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
                 ->get();
+        } else if ($statusId == 6) {
+            $list = Auction::with('category')
+                ->whereIn('status', [6,7,8])
+                ->where('selling_user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->forPage($page, $perPage)
+                ->get();
         } else {
             $list = Auction::with('category')
                 ->where('status', $statusId)
@@ -204,16 +229,47 @@ class AuctionService implements AuctionServiceInterface
         return $list;
     }
 
+     //get list auctions by user id
+     public function getListAuctionsByUserK($userId, $statusId, $request)
+     {
+         $page = $request['index'];
+         $perPage = $request['count'];
+         if ($statusId == 0) {
+             $list = Auction::with('category')
+                 ->where('selling_user_id', $userId)
+                 ->orderBy('created_at', 'DESC')
+                 ->where('status', '<>', 4)
+                 ->forPage($page, $perPage)
+                 ->get();
+         } else if ($statusId == 6) {
+            $list = Auction::with('category')
+                ->where('selling_user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->whereIn('status', [6,7,8])
+                ->forPage($page, $perPage)
+                ->get();
+         } else {
+             $list = Auction::with('category')
+                 ->where('status', $statusId)
+                 ->where('selling_user_id', $userId)
+                 ->orderBy('created_at', 'DESC')
+                 ->where('status', '<>', 4)
+                 ->forPage($page, $perPage)
+                 ->get();
+         }
+ 
+         return $list;
+     }
+
     //list auctions by category
-    public function getListAuctionOfCategory($request)
+    public function getListAuctionOfCategory($request, $categoryId, $statusId)
     {
-        $categoryId = $request['category_id'];
-        $statusId = $request['status_id'];
         $page = $request['index'];
         $perPage = $request['count'];
 
         if ($statusId == 0) {
             $list = Auction::with('category')
+                ->whereIn('auctions.status', [1, 2, 3])
                 ->where('category_id', $categoryId)
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)
@@ -233,20 +289,48 @@ class AuctionService implements AuctionServiceInterface
     public function auctionValidation($request)
     {
         $rules = [
-            'category_id' => "required",
-            'title_ni' => "required|max:255|unique:auctions,title",
+            'category_id' => "required|exists:categories,category_id",
             'start_date' => "required|date|after_or_equal:tomorrow",
             'end_date' => "required|date|after:start_date",
         ];
-        
+
+        $allAuctions = Auction::get()
+            ->pluck('title')
+            ->toArray();
+
+        if (isset($request['title_ni'])) {
+            foreach ($allAuctions as $key => $value) {
+                if ($request['title_ni'] == $value) {
+                    $rules['title_ni'] = "required|max:255|unique:auctions,title";
+                    break;
+                } else {
+                    $rules['title_ni'] = "required|max:255";
+                }
+            }
+        } else {
+            $rules['title_ni'] = "required|max:255";
+        }
+
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => ':max文字以下入力してください。 ',
+        //     'date' => 'データのフォーマットが正しくありません',
+        //     'after_or_equal' => '始まる時間が明日か行かなければなりません',
+        //     'after' => '始まる時間よりです。',
+        //     'unique' => '既に使用されています。',
+        //     'numeric' => '番号を入力してください。',
+        //     'exists' => '存在しない。'
+        // ];
+
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'date' => 'データのフォーマットが正しくありません',
-            'after_or_equal' => '始まる時間が明日か行かなければなりません',
-            'after' => '始まる時間よりです。',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'required' => 7000,
+            'max' => 7001,
+            'date' => 7008,
+            'after_or_equal' => 7009,
+            'after' => 7010,
+            'unique' => 7005,
+            'numeric' => 7006,
+            'exists' => 7007
         ];
 
         $attributes = [
@@ -270,14 +354,25 @@ class AuctionService implements AuctionServiceInterface
             'end_date' => "required|date|after:start_date",
         ];
 
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => ':max文字以下入力してください。 ',
+        //     'date' => 'データのフォーマットが正しくありません',
+        //     'after_or_equal' => '始まる時間が明日か行かなければなりません',
+        //     'after' => '始まる時間よりです。',
+        //     'unique' => '既に使用されています。',
+        //     'numeric' => '番号を入力してください。'
+        // ];
+
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'date' => 'データのフォーマットが正しくありません',
-            'after_or_equal' => '始まる時間が明日か行かなければなりません',
-            'after' => '始まる時間よりです。',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'required' => 7000,
+            'max' => 7001,
+            'date' => 7008,
+            'after_or_equal' => 7009,
+            'after' => 7010,
+            'unique' => 7005,
+            'numeric' => 7006,
+            'exists' => 7007
         ];
 
         $attributes = [
@@ -323,8 +418,8 @@ class AuctionService implements AuctionServiceInterface
 
         if ($auction) {
             $auction->category_id = $request['category_id'];
-            $auction->start_date = $request['start_date'];
-            $auction->end_date = $request['end_date'];
+            $auction->start_date = date('Y/m/d H:i', strtotime($request['start_date']));
+            $auction->end_date = date('Y/m/d H:i', strtotime($request['end_date']));
             $auction->title = $request['title_ni'];
             $auction->update();
         }
@@ -339,6 +434,20 @@ class AuctionService implements AuctionServiceInterface
             })
             ->limit(self::LIMIT)
             ->get();
+    }
+
+    public function commentValidation($request) {
+        $rules = [
+            'content' => "required",
+        ];
+
+        $messages = [
+            'required' => '必須項目が未入力です。',
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
     }
 
     public function comments($auctionId, $request)
@@ -372,6 +481,7 @@ class AuctionService implements AuctionServiceInterface
                     'total' => $total
                 ];
             } else {
+
                 $comments = Comment::where('auction_id', $auctionId)
                     ->where('comment_id', '>', $lastId)
                     ->orderBy('created_at', 'DESC')
@@ -384,9 +494,10 @@ class AuctionService implements AuctionServiceInterface
                             'user_id' => $comment->user_id,
                             'content' => $comment->content,
                             'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
-                            'total' => $total
+                            
                         ];
                     }),
+                    'total' => $total
                 ];
             }
 
@@ -414,10 +525,16 @@ class AuctionService implements AuctionServiceInterface
             $rules['price'] = 'max:0';
         }
 
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => '値段が今より高くなければなりません。',
+        //     'numeric' => '番号を入力してください',
+        // ];
+
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => '値段が今より高くなければなりません。',
-            'numeric' => '番号を入力してください',
+            'required' => 7000,
+            'price.max' => 7014,
+            'numeric' => 7006,
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -512,7 +629,7 @@ class AuctionService implements AuctionServiceInterface
 
         $auctionInfo = Auction::findOrFail($auctionId)
             ->where('auction_id', $auctionId)
-            ->select('title', 'start_date', 'end_date')
+            ->select('title', 'start_date', 'end_date', 'auction_id')
             ->get();
 
         $itemInfo = Item::with('userBuying')
@@ -549,6 +666,21 @@ class AuctionService implements AuctionServiceInterface
             ],
             'auction_info' => $auctionInfo
         ];
+    }
+
+    public function sellingValidation($request)
+    {
+        $rules = [
+            'selling_info' => 'required',
+        ];
+
+        $messages = [
+            'required' => '必須項目が未入力です。'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
     }
 
     //accept bid
@@ -687,5 +819,72 @@ class AuctionService implements AuctionServiceInterface
             ->pluck('item_id');
 
         return $itemInfor;
+    }
+
+    public function rateValidation($request) {
+        $rules = [
+            'star' => "required",
+            'content' => "required"
+        ];
+
+        $messages = [
+            'required' => 7000,
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
+    }
+
+    public function rate($request, $auctionId) {
+        $rateId = Rate::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('rate_id')
+            ->first();
+
+        if ($rateId) {
+            $rate = Rate::findOrFail($rateId);
+        } else {
+            $rate = Rate::create([
+                'star' => $request['star'],
+                'content' => $request['content'],
+                'auction_id' => $auctionId,
+                'buying_user_id' => auth()->user()->user_id,
+                'image' => $request['image'] ?? null
+            ]);
+            AuctionController::updateDelivery($auctionId);
+        }
+
+        $data = [
+            'star' => $rate->star,
+            'content' => $rate->content,
+            'auction_id' => $rate->auction_id,
+            'buying_user_id' => $rate->buying_user_id,
+            'image' => $rate->image ?? null
+        ];
+
+        return $data;
+    }
+
+    public function rateEdit($request, $rateId) {
+        $rate = Rate::findOrFail($rateId);
+        if ($rate) {
+            $rate->star = $request['star'];
+            $rate->content = $request['content'];
+            $rate->image = $request['image'] ?? null;
+            $rate->update();
+        }
+
+        $update = Rate::findOrFail($rateId);
+
+        $data = [
+            'star' => $update->star,
+            'content' => $update->content,
+            'auctin_id' => $update->auction_id,
+            'buying_user_id' => $update->buying_user_id,
+            'image' => $update->image ?? null
+        ];
+
+        return $data;
     }
 }

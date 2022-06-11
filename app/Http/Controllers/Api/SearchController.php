@@ -29,6 +29,7 @@ class SearchController extends ApiController
         //theo gia khoi diem
         if ($type == 1) {
             $result = Item::join('auctions', 'auctions.auction_id', '=', 'items.auction_id')
+                ->where('status', '<>', 4)
                 ->where('items.starting_price', 'LIKE', '%'.$key.'%')
                 ->select('items.auction_id', 'items.name', 'items.starting_price')
                 ->get();
@@ -55,6 +56,7 @@ class SearchController extends ApiController
         } else if ($type == 2) {
             //thoi gian bat dau
             $result = Auction::where('start_date', 'LIKE', '%'.$key.'%')
+                ->where('status', '<>', 4)
                 ->select('auction_id', 'title', 'start_date')
                 ->get();
 
@@ -80,6 +82,7 @@ class SearchController extends ApiController
         } else if ($type == 3) {
             //thoi gian ket thuc
             $result = Auction::where('end_date', 'LIKE', '%'.$key.'%')
+                ->where('status', '<>', 4)
                 ->select('auction_id', 'title', 'end_date')
                 ->get();
 
@@ -105,6 +108,7 @@ class SearchController extends ApiController
         } else {
             //ten auctions
             $result = Auction::where('title', 'LIKE', '%'.$key.'%')
+                ->where('status', '<>', 4)
                 ->select('auction_id', 'title')
                 ->get();
 
@@ -123,7 +127,7 @@ class SearchController extends ApiController
             } else {
                 return [
                     "code" => 9998,
-                    "message" => "Khong tim thay",
+                    "message" => "検索できません",
                     "data" => null,
                 ];
             }

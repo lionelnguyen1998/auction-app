@@ -10,6 +10,7 @@ use App\Mail\SendMail;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Services\UploadService;
+use Illuminate\Http\Request;
 
 class UserService implements UserServiceInterface
 {
@@ -30,6 +31,66 @@ class UserService implements UserServiceInterface
         $rules = [
             'password' => 'required|max:255',
             're_pass' => 'required_with:password|same:password|max:255',
+            'phone' => 'required|max:60',
+            'address' => 'max:255',
+            'name' => 'required|max:255',
+        ];
+
+        $allUserEmail = User::get()
+            ->pluck('email')
+            ->toArray();
+
+        if (isset(auth()->user()->user_id)) {
+            $userId = auth()->user()->user_id;
+            $rules['email'] = "required|email|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
+        } else {
+            if (isset($request['email'])) {
+                foreach ($allUserEmail as $key => $value) {
+                    if ($request['email'] == $value) {
+                        $rules['email'] = "required|email|max:255|unique:users,email";
+                        break;
+                    } else {
+                        $rules['email'] = "required|email|max:255";
+                    }
+                }
+            } else {
+                $rules['email'] = "required|email|max:255";
+            }
+        }
+
+        // $messages = [
+        //     'required' => $this->messageRequired,
+        //     'max' => sprintf($this->messageErrorMax, ':max'),
+        //     'email' => $this->messageErrorFormatEmail,
+        //     'same' => 'パスワードが違いました。',
+        //     'required_with' => $this->messageRequired,
+        //     'unique' => '既に使用されています。'
+        // ];
+
+        $messages = [
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002,
+            'same' => 7003,
+            'required_with' => 7000,
+            'unique' => 7004,
+            'phone.max' => 7013
+        ];
+
+        $attribute = [
+            'email' => 'メール',
+            'password' => 'パスワード'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages, $attribute);
+
+        return $validated;
+    }
+
+    //edit validation
+    public function editValidation($request) 
+    {
+        $rules = [
             'phone' => 'required|max:60',
             'address' => 'max:255',
             'name' => 'required|max:255',
@@ -59,12 +120,11 @@ class UserService implements UserServiceInterface
         }
 
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail,
-            'same' => 'パスワードが違いました。',
-            'required_with' => $this->messageRequired,
-            'unique' => '既に使用されています。'
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002,
+            'unique' => 7004,
+            'phone.max' => 7013
         ];
 
         $attribute = [
@@ -138,11 +198,18 @@ class UserService implements UserServiceInterface
             'password' => 'required|max:255'
         ];
 
+        // $messages = [
+        //     'required' => $this->messageRequired,
+        //     'max' => sprintf($this->messageErrorMax, ':max'),
+        //     'email' => $this->messageErrorFormatEmail
+        // ];
+
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002
         ];
+
 
         $attribute = [
             'email' => 'メール',
@@ -162,13 +229,14 @@ class UserService implements UserServiceInterface
             'name' => 'required|max:255',
             'email' => 'required|max:255|email',
             'content' => 'required',
-            'report_type' => 'required|in:' . config('const.type.error') . ',' .config('const.type.dif'),
+            'report_type' => 'required|in:' . config('const.type.error') . ',' .config('const.type.use'). ',' .config('const.type.dif'),
         ];
 
         $messages = [
-            'required' => $this->messageRequired,
-            'max' => sprintf($this->messageErrorMax, ':max'),
-            'email' => $this->messageErrorFormatEmail,
+            'required' => 7000,
+            'max' => 7001,
+            'email' => 7002,
+            'phone' => 7013
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -241,10 +309,8 @@ class UserService implements UserServiceInterface
     public function edit($request)
     {
         // if (isset($request['avatar'])) {
-        //     // $request['avatar'] = $this->uploadService->store($request['avatar']);
+        //     $request['avatar'] = $this->uploadService->store($request['avatar']);
         // }
-
-        $request['password'] = Hash::make($request['password']);
 
         $user = tap(User::where('user_id', auth()->user()->user_id))
             ->update($request)->firstOrFail();
@@ -253,7 +319,6 @@ class UserService implements UserServiceInterface
         auth()->user()->email = $user->email;
         auth()->user()->phone = $user->phone;
         auth()->user()->address = $user->address ?? null;
-        auth()->user()->password = Hash::make($user->password);
         auth()->user()->avatar = $user->avatar;
 
         $data = [
@@ -266,5 +331,46 @@ class UserService implements UserServiceInterface
         ];
 
         return $data;
+    }
+
+    public function changePassValidation($request) {
+        $oldPass = $request['old_pass'];
+        
+        $rules = [
+            'new_pass' => 'required|max:255',
+            're_pass' => 'required_with:new_pass|same:new_pass|max:255',
+        ];
+
+        if (! Hash::check($oldPass, auth()->user()->password)) {
+            $rules['old_pass'] = 'required|max:255|same:auth()->user()->password';
+        }
+        
+        // $messages = [
+        //     'required' => $this->messageRequired,
+        //     'same' => 'パスワードが違いました。',
+        //     'required_with' => $this->messageRequired,
+        // ];
+
+        $messages = [
+            'required' => 7000,
+            'same' => 7003,
+            'required_with' => 7000,
+            'max' => 7001
+        ];
+
+        $attribute = [
+            'new_pass' => 'パスワード'
+        ];
+
+        $validated = Validator::make($request, $rules, $messages, $attribute);
+
+        return $validated;
+    }
+
+    public function changePass($request) {
+        $user = User::findOrFail(auth()->user()->user_id);
+        $user->password = Hash::make($request['new_pass']);
+        $user->save();
+        return '編集しました。';
     }
 }

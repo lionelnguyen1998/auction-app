@@ -44,7 +44,7 @@ class UploadService implements UploadServiceInterface
 
                 // $result = $request->file('file')->storeOnCloudinary();
                 // $url = $result->getPath();
-                return $url;
+                // return $url;
             } catch (\Exception $error) {
                 return false;
             }

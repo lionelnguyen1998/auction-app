@@ -70,7 +70,7 @@ class ItemService implements ItemServiceInterface
     public function itemValidation($request)
     {
         $rules = [
-            'brand_id' => "required",
+            'brand_id' => "required|exists:brands,brand_id",
             'series' => "max:10|unique:items,series",
             'name' => "required|max:255",
             'starting_price' => 'required|numeric',
@@ -78,10 +78,11 @@ class ItemService implements ItemServiceInterface
         ];
 
         $messages = [
-            'required' => '必須項目が未入力です。',
-            'max' => ':max文字以下入力してください。 ',
-            'unique' => '既に使用されています。',
-            'numeric' => '番号を入力してください。'
+            'required' => 7000,
+            'max' => 7001,
+            'series.max' => 7011,
+            'unique' => 7004,
+            'numeric' => 7006
         ];
 
         $validated = Validator::make($request, $rules, $messages);
@@ -89,6 +90,34 @@ class ItemService implements ItemServiceInterface
         return $validated;
     }
 
+    public function itemValidationEdit($request, $itemId) {
+        $rules = [
+            'brand_id' => "required",
+            'series' => "max:10|unique:items,series,$itemId,item_id,deleted_at,NULL",
+            'name' => "required|max:255",
+            'starting_price' => 'required|numeric',
+            'description' => 'required'
+        ];
+
+        // $messages = [
+        //     'required' => '必須項目が未入力です。',
+        //     'max' => ':max文字以下入力してください。 ',
+        //     'unique' => '既に使用されています。',
+        //     'numeric' => '番号を入力してください。'
+        // ];
+        $messages = [
+            'required' => 7000,
+            'max' => 7001,
+            'series.max' => 7011,
+            'unique' => 7004,
+            'numeric' => 7006
+        ];
+
+        $validated = Validator::make($request, $rules, $messages);
+
+        return $validated;
+    }
+    
     //creat new item
     public function create($request, $auctionId, $images)
     {
@@ -131,27 +160,48 @@ class ItemService implements ItemServiceInterface
     {
         DB::beginTransaction();
             $item = Item::findOrFail($itemId);
-            $imageId = Image::where('item_id', $itemId)
+            $imageId = Image::withTrashed()->where('item_id', $itemId)
                 ->get()
                 ->pluck('image_id');
-
-            $image = Image::findOrFail($imageId);
-            
-            if (empty($images)) {
-                dd('ko chinh sua');
-            } else {
-                //dd($itemId);
-                Image::where('item_id', '=', $itemId)->delete();
-                foreach ($images as $key => $value) {
-                    $image->image = $value;
-                    $image->item_id = $itemId;
-                    $image->update();
+            $image = Image::withTrashed()->findOrFail($imageId);
+            $countImagesAdd = count($images);
+            if ($images) {
+                foreach ($image as $key => $value) {
+                    if (isset($images[$key])) {
+                        if ($value->deleted_at !== null) {
+                            $value->image = $images[$key];
+                            $value->restore();
+                        } else {
+                            $value->image = $images[$key];
+                            $value->update();
+                        }
+                    } else {
+                       $value->delete();
+                    }
                 }
-            }
-            dd($images);
-
-            unset($request['values']);
+                if (count($images) > count($image)) {
+                    foreach ($images as $key => $value) {
+                        if (($key + 1) > count($image)) {
+                            Image::create([
+                                'item_id' => $itemId,
+                                'image' => $value
+                            ]);
+                        }
+                    }
+                }
+            } 
+            unset($request['images']);
             $item = DB::table('items')->where('item_id', $itemId)->update($request);
         DB::commit();
+
+        $imagesInfo = Image::where('item_id', $itemId)
+            ->get()
+            ->pluck('image');
+        $itemInfo = Item::findOrFail($itemId);
+        $data = [
+            'name' => $itemInfo->name,
+            'images' => $imagesInfo
+        ];
+        return $data;
     }
 }
