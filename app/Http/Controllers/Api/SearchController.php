@@ -42,7 +42,7 @@ class SearchController extends ApiController
                         return [
                             'id' => $result->auction_id,
                             'name' => $result->name,
-                            'key' => number_format($result->starting_price) . ' 円',
+                            'key' => number_format($result->starting_price) . ' $',
                         ];
                     }),
                 ];
