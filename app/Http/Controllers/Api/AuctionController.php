@@ -612,7 +612,12 @@ class AuctionController extends ApiController
     //create bids
     public function bids($auctionId, Request $request)
     {
-        $validator = $this->auctionService->bidValidation($request->all(), $auctionId);
+        $startPrice = Item::where('auction_id', $auctionId)
+            ->get()
+            ->pluck('starting_price')
+            ->first();
+
+        $validator = $this->auctionService->bidValidation($request->all(), $auctionId, $startPrice);
 
         if ($validator->fails()) {
             $price = $validator->errors()->first("price");
@@ -645,7 +650,7 @@ class AuctionController extends ApiController
         $bids = Bid::with('users')
             ->where('auction_id', $auctionId)
             ->orderBy('price', 'DESC')
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('updated_at', 'DESC')
             ->forPage($page, $perPage)
             ->get();
 
