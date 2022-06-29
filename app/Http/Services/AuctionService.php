@@ -512,7 +512,7 @@ class AuctionService implements AuctionServiceInterface
     }
 
     //bid validation
-    public function bidValidation($request, $auctionId)
+    public function bidValidation($request, $auctionId, $startPrice)
     {
         $maxBid = Bid::where('auction_id', $auctionId)
             ->max('price');
@@ -521,7 +521,7 @@ class AuctionService implements AuctionServiceInterface
             'price' => 'required|numeric'
         ];
 
-        if (isset($request['price']) && $request['price'] <= $maxBid) {
+        if (isset($request['price']) && ($request['price'] <= ($maxBid + 5) || $request['price'] < $startPrice)) {
             $rules['price'] = 'max:0';
         }
 
@@ -579,6 +579,7 @@ class AuctionService implements AuctionServiceInterface
             } else {
                 $bids = Bid::where('auction_id', $auctionId)
                     ->where('bid_id', '>', $lastId)
+                    ->orderBy('price', 'DESC')
                     ->orderBy('created_at', 'DESC')
                     ->get();
 
