@@ -28,10 +28,14 @@ class UserService implements UserServiceInterface
     //signup validation
     public function signupValidation($request) 
     {
+        $repass = $request['re_pass'] ?? null;
+        $pass = $request['password'] ?? null;
+        trim($repass);
+        trim($pass);
         $rules = [
             'password' => 'required|max:255',
             're_pass' => 'required_with:password|same:password|max:255',
-            'phone' => 'required|max:60',
+            'phone' => 'required|regex:/^[0-9]+$/|max:60',
             'address' => 'max:255',
             'name' => 'required|max:255',
         ];
@@ -42,22 +46,21 @@ class UserService implements UserServiceInterface
 
         if (isset(auth()->user()->user_id)) {
             $userId = auth()->user()->user_id;
-            $rules['email'] = "required|email|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
+            $rules['email'] = "required|email:rfc,dns|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
         } else {
             if (isset($request['email'])) {
                 foreach ($allUserEmail as $key => $value) {
                     if ($request['email'] == $value) {
-                        $rules['email'] = "required|email|max:255|unique:users,email";
+                        $rules['email'] = "required|email:rfc,dns|max:255|unique:users,email";
                         break;
                     } else {
-                        $rules['email'] = "required|email|max:255";
+                        $rules['email'] = "required|email:rfc,dns|max:255";
                     }
                 }
             } else {
-                $rules['email'] = "required|email|max:255";
+                $rules['email'] = "required|email:rfc,dns|max:255";
             }
         }
-
         // $messages = [
         //     'required' => $this->messageRequired,
         //     'max' => sprintf($this->messageErrorMax, ':max'),
@@ -91,7 +94,7 @@ class UserService implements UserServiceInterface
     public function editValidation($request) 
     {
         $rules = [
-            'phone' => 'required|max:60',
+            'phone' => 'required|regex:/^[0-9]+$/|max:60',
             'address' => 'max:255',
             'name' => 'required|max:255',
         ];
@@ -103,19 +106,19 @@ class UserService implements UserServiceInterface
 
         if (isset(auth()->user()->user_id)) {
             $userId = auth()->user()->user_id;
-            $rules['email'] = "required|email|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
+            $rules['email'] = "required|email:rfc,dns|max:255|unique:users,email,$userId,user_id,deleted_at,NULL";
         } else {
             if (isset($request['email'])) {
                 foreach ($allUserEmail as $key => $value) {
                     if ($request['email'] == $value) {
-                        $rules['email'] = "required|email|max:255|unique:users,email";
+                        $rules['email'] = "required|email:rfc,dns|max:255|unique:users,email";
                         break;
                     } else {
-                        $rules['email'] = "required|email|max:255";
+                        $rules['email'] = "required|email:rfc,dns|max:255";
                     }
                 }
             } else {
-                $rules['email'] = "required|email|max:255";
+                $rules['email'] = "required|email:rfc,dns|max:255";
             }
         }
 
@@ -194,7 +197,7 @@ class UserService implements UserServiceInterface
     public function loginValidation($request) 
     {
         $rules = [
-            'email' => 'required|email:filter|max:255',
+            'email' => 'required|email:rfc,dns|max:255',
             'password' => 'required|max:255'
         ];
 
@@ -334,8 +337,12 @@ class UserService implements UserServiceInterface
     }
 
     public function changePassValidation($request) {
-        $oldPass = $request['old_pass'];
-        
+        $oldPass = $request['old_pass'] ?? null;
+        $repass = $request['re_pass'] ?? null;
+        $new_pass = $request['new_pass'] ?? null;
+        trim($oldPass);
+        trim($repass);
+        trim($new_pass);
         $rules = [
             'new_pass' => 'required|max:255',
             're_pass' => 'required_with:new_pass|same:new_pass|max:255',
