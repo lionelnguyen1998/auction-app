@@ -531,13 +531,23 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-        $data = $this->auctionService->comments($auctionId, $request->all());
-        return [
-            "code" => 1000,
-            "message" => "OK",
-            "data" => $data,
-        ];
-        
+
+        $status = Auction::findOrFail($auctionId)->status;
+
+        if ($status != 4) {
+            $data = $this->auctionService->comments($auctionId, $status, $request->all());
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => $data,
+            ];
+        } else {
+            return [
+                "code" => 1008,
+                "message" => "Không thể bình luận",
+                "data" => null,
+            ];
+        }
     }
 
     //list comment
@@ -628,13 +638,21 @@ class AuctionController extends ApiController
             ];
         }
 
-        $data = $this->auctionService->bids($auctionId, $request->all());
-
-        return [
-            "code" => 1000,
-            "message" => "OK",
-            "data" => $data,
-        ];
+        $status = Auction::findOrFail($auctionId)->status;
+        if ($status == 1) {
+            $data = $this->auctionService->bids($auctionId, $status, $request->all());
+            return [
+                "code" => 1000,
+                "message" => "OK",
+                "data" => $data,
+            ];
+        } else {
+            return [
+                "code" => 1008,
+                "message" => "Không thể trả giá",
+                "data" => null,
+            ];
+        }
     }
 
     //list bids
