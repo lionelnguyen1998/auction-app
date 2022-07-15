@@ -228,7 +228,7 @@ class UserService implements UserServiceInterface
     public function contactValidation($request) 
     {
         $rules = [
-            'phone' => 'required|max:60',
+            'phone' => 'required|regex:/^[0-9]+$/|max:60',
             'name' => 'required|max:255',
             'email' => 'required|max:255|email',
             'content' => 'required',
