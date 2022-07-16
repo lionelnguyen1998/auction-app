@@ -127,10 +127,17 @@ class NewController extends ApiController
     //read report reject and selling_info auction
     public function reason($auctionId)
     {
-        Auction::withTrashed()
+        $checkAuction = Auction::withTrashed()
             ->where('status', 5)
-            ->where('selling_user_id', auth()->user()->user_id)
             ->findOrFail($auctionId);
+      
+        if (auth()->user()->user_id != $checkAuction->selling_user_id) {
+            return [
+                "code" => 1006,
+                "message" => "Không có quyền",
+                "data" => null,
+            ];
+        }
         
         $is_read = UserReadNews::where('auction_id', $auctionId)
             ->where('user_id', auth()->user()->user_id)
