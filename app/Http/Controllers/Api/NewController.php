@@ -128,6 +128,8 @@ class NewController extends ApiController
     public function reason($auctionId)
     {
         Auction::withTrashed()
+            ->where('status', 5)
+            ->where('selling_user_id', auth()->user()->user_id)
             ->findOrFail($auctionId);
         
         $is_read = UserReadNews::where('auction_id', $auctionId)
