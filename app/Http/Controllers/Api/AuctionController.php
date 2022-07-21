@@ -622,6 +622,17 @@ class AuctionController extends ApiController
     //create bids
     public function bids($auctionId, Request $request)
     {
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $status = Auction::find($auctionId)->status;
+
         $startPrice = Item::where('auction_id', $auctionId)
             ->get()
             ->pluck('starting_price')
@@ -637,8 +648,7 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-
-        $status = Auction::findOrFail($auctionId)->status;
+        
         if ($status == 1) {
             $data = $this->auctionService->bids($auctionId, $status, $request->all());
             return [

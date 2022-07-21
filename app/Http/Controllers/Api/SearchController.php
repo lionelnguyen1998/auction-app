@@ -49,7 +49,7 @@ class SearchController extends ApiController
             } else {
                 return [
                     "code" => 9998,
-                    "message" => "Khong tim thay",
+                    "message" => "Không tìm thấy",
                     "data" => null,
                 ];
             }
@@ -75,7 +75,7 @@ class SearchController extends ApiController
             } else {
                 return [
                     "code" => 9998,
-                    "message" => "Khong tim thay",
+                    "message" => "Không tìm thấy",
                     "data" => null,
                 ];
             }
@@ -101,7 +101,7 @@ class SearchController extends ApiController
             } else {
                 return [
                     "code" => 9998,
-                    "message" => "Khong tim thay",
+                    "message" => "Không tìm thấy",
                     "data" => null,
                 ];
             }
@@ -127,7 +127,7 @@ class SearchController extends ApiController
             } else {
                 return [
                     "code" => 9998,
-                    "message" => "検索できません",
+                    "message" => "Không tìm thấy",
                     "data" => null,
                 ];
             }
