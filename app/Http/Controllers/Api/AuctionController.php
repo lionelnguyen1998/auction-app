@@ -35,6 +35,15 @@ class AuctionController extends ApiController
     //detail auctions
     public function detail($auctionId)
     {
+        $checkAuctionID = Auction::find($auctionId);
+        if (!$checkAuctionID) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+
         $itemId = Item::where('auction_id', $auctionId)
             ->get()
             ->pluck('item_id')
@@ -412,7 +421,16 @@ class AuctionController extends ApiController
     //delete auctions
     public function delete($auctionId)
     {
-        $status = Auction::findOrFail($auctionId)->status;
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $status = Auction::find($auctionId)->status;
 
         if ($status == 3) {
             $itemId = Item::where('auction_id', '=', $auctionId)
@@ -437,9 +455,17 @@ class AuctionController extends ApiController
 
     public function deleteAuction($auctionId)
     {
-        $auction = Auction::findOrFail($auctionId);
-        $status = $auction->status;
-        $sellingUserId = $auction->selling_user_id;
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $status = Auction::find($auctionId)->status;
+        $sellingUserId = Auction::find($auctionId)->selling_user_id;
 
         if ($sellingUserId != auth()->user()->user_id) {
             return [
@@ -478,8 +504,17 @@ class AuctionController extends ApiController
     //edit auction when auctions đang chờ duyệt
     public function edit(Request $request, $auctionId)
     {
-        $status = Auction::findOrFail($auctionId)->status;
-        $userSellingId = Auction::findOrFail($auctionId)->selling_user_id;
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $status = Auction::find($auctionId)->status;
+        $userSellingId = Auction::find($auctionId)->selling_user_id;
 
         if ((auth()->user()->user_id == $userSellingId) && $status == 4) {
             $validator = $this->auctionService->auctionValidationEdit($request->all(), $auctionId);
@@ -532,7 +567,16 @@ class AuctionController extends ApiController
             ];
         }
 
-        $status = Auction::findOrFail($auctionId)->status;
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $status = Auction::find($auctionId)->status;
 
         if ($status != 4) {
             $data = $this->auctionService->comments($auctionId, $status, $request->all());
@@ -556,7 +600,14 @@ class AuctionController extends ApiController
         $page = $request->index;
         $perPage = $request->count;
 
-        $auction = Auction::findOrFail($auctionId);
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
 
         $comments = Comment::with('users')
             ->where('auction_id', $auctionId)
@@ -671,7 +722,15 @@ class AuctionController extends ApiController
         $page = $request->index;
         $perPage = $request->count;
 
-        $auction = Auction::findOrFail($auctionId);
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
         $total = Bid::where('auction_id', $auctionId)
             ->count('bid_id');
 
@@ -705,7 +764,15 @@ class AuctionController extends ApiController
         $page = $request->index;
         $perPage = $request->count;
 
-        $auction = Auction::findOrFail($auctionId);
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
         $total = Rate::where('auction_id', $auctionId)
             ->count('auction_id');
 
@@ -838,7 +905,15 @@ class AuctionController extends ApiController
 
     public function totalLikes($auctionId) 
     {
-        Auction::findOrFail($auctionId);
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
         $total = Favorite::where('auction_id', $auctionId)
             ->where('is_liked', 1)
             ->count('auction_id');
@@ -876,7 +951,14 @@ class AuctionController extends ApiController
     //accept bid
     public function accept($auctionId, Request $request)
     {
-        Auction::findOrFail($auctionId);
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
 
         $validator = $this->auctionService->sellingValidation($request->all());
 
@@ -1084,7 +1166,16 @@ class AuctionController extends ApiController
     }
 
     public function info($auctionId) {
-        $auction = Auction::findOrFail($auctionId);
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $auction = Auction::find($auctionId);
         $data = [
             'title' => $auction->title,
             'category_id' => $auction->category_id,
@@ -1138,7 +1229,16 @@ class AuctionController extends ApiController
 
     public function rateEdit(Request $request, $rateId) {
         $userId = auth()->user()->user_id;
-        $buyingUserId = Rate::findOrFail($rateId)->buying_user_id;
+        $checkBuyingUserId = Rate::find($rateId);
+        if (!$checkBuyingUserId) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+
+        $buyingUserId = Rate::find($rateId)->buying_user_id;
 
         if ($userId != $buyingUserId) {
             return [
