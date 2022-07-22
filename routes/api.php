@@ -38,7 +38,7 @@ Route::group(['middleware' => 'api'], function(){
     Route::get('loginfailed', function () {
         return [
             "code" => 1004,
-            "message" => "まだログインではありません",
+            "message" => "Chưa đăng nhập",
             "data" => null,
         ];
     })->name('loginfailed');

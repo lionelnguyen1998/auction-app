@@ -450,9 +450,8 @@ class AuctionService implements AuctionServiceInterface
         return $validated;
     }
 
-    public function comments($auctionId, $request)
+    public function comments($auctionId, $status, $request)
     {
-        $status = Auction::findOrFail($auctionId)->status;
         $lastIdComment = Comment::orderBy('updated_at', 'DESC')
             ->get()
             ->pluck('comment_id')
@@ -460,55 +459,47 @@ class AuctionService implements AuctionServiceInterface
 
         $lastId = $request['comment_last_id'] ?? $lastIdComment;
 
-        if($status != 4) {
-            $comment = Comment::create([
-                'auction_id' => $auctionId, 
-                'user_id' => auth()->user()->user_id,
-                'content' => $request['content']
-            ]);
+        $comment = Comment::create([
+            'auction_id' => $auctionId, 
+            'user_id' => auth()->user()->user_id,
+            'content' => $request['content']
+        ]);
 
-            $total = Comment::where('auction_id', $auctionId)
-                ->count('comment_id');
+        $total = Comment::where('auction_id', $auctionId)
+            ->count('comment_id');
 
-            $currentId = $comment->comment_id;
+        $currentId = $comment->comment_id;
 
-            if ($currentId == ($lastId + 1)) {
-                $data = [
-                    'auction_id' => $comment->auction_id,
-                    'user_id' => $comment->user_id,
-                    'content' => $comment->content,
-                    'update_date' => $comment->updated_at->format('Y/m/d H:i:s'),
-                    'total' => $total
-                ];
-            } else {
-
-                $comments = Comment::where('auction_id', $auctionId)
-                    ->where('comment_id', '>', $lastId)
-                    ->orderBy('created_at', 'DESC')
-                    ->get();
-
-                $data = [
-                    'comments' => $comments->map(function($comment) {
-                        return [
-                            'auction_id' => $comment->auction_id,
-                            'user_id' => $comment->user_id,
-                            'content' => $comment->content,
-                            'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
-                            
-                        ];
-                    }),
-                    'total' => $total
-                ];
-            }
-
-            return $data;
+        if ($currentId == ($lastId + 1)) {
+            $data = [
+                'auction_id' => $comment->auction_id,
+                'user_id' => $comment->user_id,
+                'content' => $comment->content,
+                'update_date' => $comment->updated_at->format('Y/m/d H:i:s'),
+                'total' => $total
+            ];
         } else {
-            return [
-                "code" => 1008,
-                "message" => "Không thể bình luận",
-                "data" => null,
+
+            $comments = Comment::where('auction_id', $auctionId)
+                ->where('comment_id', '>', $lastId)
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
+            $data = [
+                'comments' => $comments->map(function($comment) {
+                    return [
+                        'auction_id' => $comment->auction_id,
+                        'user_id' => $comment->user_id,
+                        'content' => $comment->content,
+                        'updated_at' => $comment->updated_at->format('Y/m/d H:i:s'),
+                        
+                    ];
+                }),
+                'total' => $total
             ];
         }
+
+        return $data;
     }
 
     //bid validation
@@ -543,66 +534,58 @@ class AuctionService implements AuctionServiceInterface
     }
 
     //create bids
-    public function bids($auctionId, $request)
+    public function bids($auctionId, $status, $request)
     {
-        $status = Auction::findOrFail($auctionId)->status;
-
         $lastIdBid = Bid::orderBy('updated_at', 'DESC')
         ->get()
         ->pluck('bid_id')
         ->first();
-
         $lastId = $request['bid_last_id'] ?? $lastIdBid;
 
-        if($status == 1 || $status == 2) {
-            $bid = Bid::create([
-                'auction_id' => $auctionId, 
-                'user_id' => auth()->user()->user_id,
-                'price' => $request['price'],
-                'phone' => $request['phone'] ?? null,
-            ]);
+        $bid = Bid::create([
+            'auction_id' => $auctionId, 
+            'user_id' => auth()->user()->user_id,
+            'price' => $request['price'],
+            'phone' => $request['phone'] ?? null,
+        ]);
 
-            $total = Bid::where('auction_id', $auctionId)
-                ->count('bid_id');
+        $total = Bid::where('auction_id', $auctionId)
+            ->count('bid_id');
 
-            $currentId = $bid->bid_id;
+        $currentId = $bid->bid_id;
 
-            if ($currentId == ($lastId + 1)) {
-                $data = [
-                    'auction_id' => $bid->auction_id,
-                    'user_id' => $bid->user_id,
-                    'price' => $bid->price,
-                    'phone' => $bid->phone,
-                    'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
-                    'total' => $total
-                ];
-            } else {
-                $bids = Bid::where('auction_id', $auctionId)
-                    ->where('bid_id', '>', $lastId)
-                    ->orderBy('price', 'DESC')
-                    ->orderBy('created_at', 'DESC')
-                    ->get();
-
-                $data = [
-                    'bids' => $bids->map(function($bid) {
-                        return [
-                            'auction_id' => $bid->auction_id,
-                            'user_id' => $bid->user_id,
-                            'price' => $bid->price,
-                            'phone' => $bid->phone,
-                            'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
-                            'total' => $total
-                        ];
-                    }),
-                ];
-            }
-
-            return $data;
+        if ($currentId == ($lastId + 1)) {
+            $data = [
+                'auction_id' => $bid->auction_id,
+                'user_id' => $bid->user_id,
+                'price' => $bid->price,
+                'phone' => $bid->phone,
+                'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                'total' => $total
+            ];
         } else {
-            return [
-                'message' => 'Không thể nhập bid',
+            $bids = Bid::where('auction_id', $auctionId)
+                ->where('bid_id', '>', $lastId)
+                ->orderBy('price', 'DESC')
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
+            $data = [
+                'bids' => $bids->map(function($bid) {
+                    return [
+                        'auction_id' => $bid->auction_id,
+                        'user_id' => $bid->user_id,
+                        'price' => $bid->price,
+                        'phone' => $bid->phone,
+                        'updated_at' => $bid->updated_at->format('Y/m/d H:i:s'),
+                        'total' => $total
+                    ];
+                }),
             ];
         }
+
+        return $data;
+       
     }
 
     public function likeValidation($request)
