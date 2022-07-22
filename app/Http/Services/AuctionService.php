@@ -414,7 +414,14 @@ class AuctionService implements AuctionServiceInterface
     //edit auctions
     public function edit($auctionId, $request)
     {
-        $auction = Auction::findOrFail($auctionId);
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
 
         if ($auction) {
             $auction->category_id = $request['category_id'];
@@ -606,6 +613,15 @@ class AuctionService implements AuctionServiceInterface
 
     public function sellingInfo($auctionId)
     {
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+
         $maxPrice = $this->getMaxPrice($auctionId);
         $item = Item::where('auction_id', $auctionId)
             ->get()
@@ -670,7 +686,15 @@ class AuctionService implements AuctionServiceInterface
     //accept bid
     public function accept($request, $auctionId)
     {
-        $status = Auction::findOrFail($auctionId)->status;
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        $status = Auction::find($auctionId)->status;
 
         $checkAuction = Auction::findOrFail($auctionId)
             ->where('auction_id', $auctionId)
@@ -713,7 +737,14 @@ class AuctionService implements AuctionServiceInterface
                 ->pluck('user_id')
                 ->firstOrFail();
     
-            $auction = Auction::findOrFail($auctionId);
+            $auction = Auction::find($auctionId);
+            if (!$auction) {
+                return [
+                    "code" => 9993,
+                    "message" => "ID không hợp lệ",
+                    "data" => null,
+                ];
+            }
     
             $item = Item::where('auction_id', $auctionId)
                 ->get()
@@ -795,7 +826,15 @@ class AuctionService implements AuctionServiceInterface
 
     public function getInfor($auctionId)
     {
-        $categoryId = Auction::findOrFail($auctionId)->category_id;
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        $categoryId = Auction::find($auctionId)->category_id;
 
         $itemId = Item::where('auction_id', $auctionId)
             ->where('category_id', $categoryId)
@@ -806,7 +845,14 @@ class AuctionService implements AuctionServiceInterface
     }
 
     public function updateDelivery($auctionId) {
-        $auction = Auction::findOrFail($auctionId);
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
      
         $sellingUserId = $auction->selling_user_id;
         $buyingUserId = Item::where('auction_id', $auctionId)
@@ -874,7 +920,14 @@ class AuctionService implements AuctionServiceInterface
             ->first();
 
         if ($rateId) {
-            $rate = Rate::findOrFail($rateId);
+            $rate = Rate::find($rateId);
+            if (!$rate) {
+                return [
+                    "code" => 9993,
+                    "message" => "ID không hợp lệ",
+                    "data" => null,
+                ];
+            }
         } else {
             $this->updateDelivery($auctionId);
             $rate = Rate::create([
@@ -898,7 +951,14 @@ class AuctionService implements AuctionServiceInterface
     }
 
     public function rateEdit($request, $rateId) {
-        $rate = Rate::findOrFail($rateId);
+        $rate = Rate::find($rateId);
+        if (!$rate) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
         if ($rate) {
             $rate->star = $request['star'];
             $rate->content = $request['content'];
@@ -906,8 +966,15 @@ class AuctionService implements AuctionServiceInterface
             $rate->update();
         }
 
-        $update = Rate::findOrFail($rateId);
-
+        $update = Rate::find($rateId);
+        if (!$update) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
         $data = [
             'star' => $update->star,
             'content' => $update->content,

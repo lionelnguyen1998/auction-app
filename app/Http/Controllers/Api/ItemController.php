@@ -101,9 +101,24 @@ class ItemController extends ApiController
 
     public function edit(Request $request, $itemId)
     {
-        $itemInfo = Item::findOrFail($itemId);
+        $itemInfo = Item::find($itemId);
+        if (!$itemInfo) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
         $auctionId = $itemInfo->auction_id;
-        $status = Auction::findOrFail($auctionId)->status;
+        $checkAuction = Auction::find($auctionId);
+        if (!$checkAuction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        $status = Auction::find($auctionId)->status;
         $imageItem = Image::where('item_id', $itemId)
             ->get()
             ->pluck('image', 'image_id')
@@ -223,9 +238,17 @@ class ItemController extends ApiController
     }
 
     public function detail($itemId) {
-        $auctionId = Item::findOrFail($itemId)->auction_id;
-        $brandId = Item::findOrFail($itemId)->brand_id;
-        $categoryId = Item::findOrFail($itemId)->category_id;
+        $checkItem = Item::find($itemId);
+        if (!$checkItem) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        $auctionId = Item::find($itemId)->auction_id;
+        $brandId = Item::find($itemId)->brand_id;
+        $categoryId = Item::find($itemId)->category_id;
         $images = $this->itemService->getImageLists($itemId);
  
         $auction = Auction::with('items', 'userSelling')
@@ -295,7 +318,14 @@ class ItemController extends ApiController
         ];
     }
     public function info($itemId) {
-        $item = Item::findOrFail($itemId);
+        $item = Item::find($itemId);
+        if (!$item) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
         $images = $this->itemService->getImageLists($itemId);
         $data = [
             'name' => $item->name,

@@ -121,7 +121,14 @@ class ItemService implements ItemServiceInterface
     //creat new item
     public function create($request, $auctionId, $images)
     {
-        $auction = Auction::findOrFail($auctionId);
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
 
         $item = Item::create([
             'category_id' => $auction->category_id,
@@ -159,7 +166,15 @@ class ItemService implements ItemServiceInterface
     public function edit($request, $itemId, $images)
     {
         DB::beginTransaction();
-            $item = Item::findOrFail($itemId);
+            $item = Item::find($itemId);
+            if (!$item) {
+                return [
+                    "code" => 9993,
+                    "message" => "ID không hợp lệ",
+                    "data" => null,
+                ];
+            }
+
             $imageId = Image::withTrashed()->where('item_id', $itemId)
                 ->get()
                 ->pluck('image_id');
@@ -197,7 +212,15 @@ class ItemService implements ItemServiceInterface
         $imagesInfo = Image::where('item_id', $itemId)
             ->get()
             ->pluck('image');
-        $itemInfo = Item::findOrFail($itemId);
+
+        $itemInfo = Item::find($itemId);
+        if (!$itemInfo) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
         $data = [
             'name' => $itemInfo->name,
             'images' => $imagesInfo

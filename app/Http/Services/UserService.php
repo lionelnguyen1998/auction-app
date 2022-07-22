@@ -177,7 +177,14 @@ class UserService implements UserServiceInterface
 
         $avatarDefault = "http://admin.localhost:443/storage/uploads/2022/03/12/avatar_Default.jpg";
 
-        $user = User::findOrFail(auth()->user()->user_id);
+        $user = User::find(auth()->user()->user_id);
+        if (!$user) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
 
         if ($user) {
             $user->name = $request['name'];
@@ -375,7 +382,14 @@ class UserService implements UserServiceInterface
     }
 
     public function changePass($request) {
-        $user = User::findOrFail(auth()->user()->user_id);
+        $user = User::find(auth()->user()->user_id);
+        if (!$user) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
         $user->password = Hash::make($request['new_pass']);
         $user->save();
         return '編集しました。';

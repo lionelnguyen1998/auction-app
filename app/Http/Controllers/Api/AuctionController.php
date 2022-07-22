@@ -35,15 +35,14 @@ class AuctionController extends ApiController
     //detail auctions
     public function detail($auctionId)
     {
-        $checkAuctionID = Auction::find($auctionId);
-        if (!$checkAuctionID) {
+        $checkAuctionExist = Auction::find($auctionId);
+        if (!$checkAuctionExist) {
             return [
                 "code" => 9993,
                 "message" => "ID không hợp lệ",
                 "data" => null,
             ];
         }
-
         $itemId = Item::where('auction_id', $auctionId)
             ->get()
             ->pluck('item_id')
@@ -76,7 +75,17 @@ class AuctionController extends ApiController
                 ->get()
                 ->pluck('buying_user_id')
                 ->first();
-            $buyingUser = User::findOrFail($buyingUserId);
+            
+            $checkBuyingUser = User::find($buyingUserId);
+            if (!$checkBuyingUser) {
+                return [
+                    "code" => 9993,
+                    "message" => "ID không hợp lệ",
+                    "data" => null,
+                ];
+            }
+                
+            $buyingUser = User::find($buyingUserId);
         }
 
         $data = [
@@ -379,7 +388,14 @@ class AuctionController extends ApiController
         $auctions = Auction::where('status', '<>', 3)
             ->get();
         foreach ($auctions as $key => $value) {
-            $auction = Auction::findOrFail($value->auction_id);
+            $auction = Auction::find($value->auction_id);
+            if (!$auction) {
+                return [
+                    "code" => 9993,
+                    "message" => "ID không hợp lệ",
+                    "data" => null,
+                ];
+            }
             if ($auction && ($value->status != 4) && ($value->status != 6) && ($value->status != 7) && ($value->status != 8)) {
                 if ($value->start_date <= now() && $value->end_date > now()) {
                     $auction->status = 1;
@@ -465,7 +481,7 @@ class AuctionController extends ApiController
         }
         
         $status = Auction::find($auctionId)->status;
-        $sellingUserId = Auction::find($auctionId)->selling_user_id;
+        $sellingUserId = $auction->selling_user_id;
 
         if ($sellingUserId != auth()->user()->user_id) {
             return [
@@ -640,8 +656,17 @@ class AuctionController extends ApiController
 
     public function deleteComment($commentId)
     {
-        $comment = Comment::findOrFail($commentId);
-        $auctionId = Comment::findOrFail($commentId)->auction_id;
+        $checkComment = Comment::find($commentId);
+        if (!$checkComment) {
+            return [
+                "code" => 9993,
+                "message" => "ID không hợp lệ",
+                "data" => null,
+            ];
+        }
+        
+        $auctionId = Comment::find($commentId)->auction_id;
+        $comment = Comment::find($commentId);
         $userId = auth()->user()->user_id;
         $userCommentId = Comment::where('comment_id', $commentId)
             ->get()
@@ -730,7 +755,7 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-        
+
         $total = Bid::where('auction_id', $auctionId)
             ->count('bid_id');
 
@@ -1166,16 +1191,15 @@ class AuctionController extends ApiController
     }
 
     public function info($auctionId) {
-        $checkAuctionExist = Auction::find($auctionId);
-        if (!$checkAuctionExist) {
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
             return [
                 "code" => 9993,
                 "message" => "ID không hợp lệ",
                 "data" => null,
             ];
         }
-        
-        $auction = Auction::find($auctionId);
+
         $data = [
             'title' => $auction->title,
             'category_id' => $auction->category_id,
@@ -1237,7 +1261,7 @@ class AuctionController extends ApiController
                 "data" => null,
             ];
         }
-
+        
         $buyingUserId = Rate::find($rateId)->buying_user_id;
 
         if ($userId != $buyingUserId) {
