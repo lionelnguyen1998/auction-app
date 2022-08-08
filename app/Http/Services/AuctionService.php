@@ -112,7 +112,7 @@ class AuctionService implements AuctionServiceInterface
 
         if ($statusId == 0) {
             $auction = Auction::with('category')
-                ->whereIn('auctions.status', [1, 2, 3])
+                ->whereIn('auctions.status', [1, 2, 3, 6, 7, 8])
                 ->orderBy('created_at', 'DESC')
                 ->whereIn('category_id', $categoryId)
                 ->forPage($page, $perPage)
@@ -269,7 +269,7 @@ class AuctionService implements AuctionServiceInterface
 
         if ($statusId == 0) {
             $list = Auction::with('category')
-                ->whereIn('auctions.status', [1, 2, 3])
+                ->whereIn('auctions.status', [1, 2, 3, 6, 7, 8])
                 ->where('category_id', $categoryId)
                 ->orderBy('created_at', 'DESC')
                 ->forPage($page, $perPage)

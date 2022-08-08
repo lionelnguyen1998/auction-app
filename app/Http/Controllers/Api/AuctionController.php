@@ -1074,7 +1074,7 @@ class AuctionController extends ApiController
 
             if ($statusId == 0) {
                 $total = Auction::whereIn('category_id', $categoryId)
-                    ->whereIn('status', [1, 2, 3])
+                    ->whereIn('status', [1, 2, 3, 6, 7, 8])
                     ->count('auction_id');
             } else {
                 $total = Auction::whereIn('category_id', $categoryId)
@@ -1092,7 +1092,7 @@ class AuctionController extends ApiController
             $auctions = $this->auctionService->getListAuctionOfCategory($request->all(), $categoryId, $statusId);
             if ($statusId == 0) {
                 $total = Auction::where('category_id', $categoryId)
-                    ->whereIn('status', [1, 2, 3])
+                    ->whereIn('status', [1, 2, 3, 6, 7, 8])
                     ->count('auction_id');
             } else {
                 $total = Auction::where('status', $statusId)
